@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BADIA</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    <meta name="description" content="بادية - شريكك الموثوق في الاستشارات التجارية والإدارة التشغيلية ودراسات الجدوى والخدمات المحاسبية في الكويت.">
+    <meta name="keywords" content="استشارات أعمال, دراسة جدوى, إدارة تشغيلية, محاسبة, الكويت, بادية">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Schema.org Local Business Markup -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "BADIA - بادية",
+        "description": "شركة استشارات أعمال متكاملة في الكويت",
+        "url": "https://badia-kw.com",
+        "telephone": "+96550897501",
+        "email": "info@kbs-kuwait.com",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "الكويت",
+            "addressRegion": "الشرق",
+            "addressCountry": "KW"
+        },
+        "serviceType": ["Business Consulting", "Feasibility Studies", "Operational Management", "Accounting Services"]
+    }
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <img src="assets/logo.png" alt="بادية" class="logo-img">
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#about">من نحن</a></li>
+                <li><a href="#services">الخدمات</a></li>
+                <li><a href="#portfolio">الأعمال</a></li>
+                <li><a href="#blog">المدونة</a></li>
+                <li><a href="#contact">تواصل معنا</a></li>
+            </ul>
+            <button class="mobile-toggle" id="mobileToggle" aria-label="القائمة">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <img src="assets/yen-vu-OEt8lStU-wA-unsplash.jpg" alt="workspace">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">حوّل فكرتك إلى واقع مربح</h1>
+            <p class="hero-subtitle">استشارات شاملة وإدارة عمليات متقدمة لنجاح عملك في الكويت</p>
+            <button class="btn btn-primary" onclick="scrollToSection('contact')">اطلب استشارة مجانية</button>
+        </div>
+    </section>
+
+    <!-- Statistics Bar -->
+    <section class="stats-bar">
+        <div class="container">
+            <div class="stat-item">
+                <h3 data-target="450">0</h3>
+                <p>مشروع منجز</p>
+            </div>
+            <div class="stat-item">
+                <h3 data-target="12">0</h3>
+                <p>سنة خبرة</p>
+            </div>
+            <div class="stat-item">
+                <h3 data-target="250">0</h3>
+                <p>عميل راضي</p>
+            </div>
+            <div class="stat-item">
+                <h3 data-target="98" data-suffix="%">0</h3>
+                <p>معدل النجاح</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-content">
+                <h2>من نحن</h2>
+                <p class="section-desc">نحن شركة بادية، متخصصة في تطوير وإدارة المشاريع التجارية بكفاءة عالية. مع أكثر من 12 سنة من الخبرة في السوق الكويتي، قمنا بمساعدة مئات رجال الأعمال والشركات على تحقيق أهدافهم المالية.</p>
+                <div class="about-grid">
+                    <div class="about-card">
+                        <div class="about-icon">🎯</div>
+                        <h3>رؤيتنا</h3>
+                        <p>أن نكون الشريك الموثوق للمؤسسات والأفراد في تحقيق النمو المستدام</p>
+                    </div>
+                    <div class="about-card">
+                        <div class="about-icon">💼</div>
+                        <h3>رسالتنا</h3>
+                        <p>تقديم استشارات احترافية وحلول عملية تضمن عائداً مالياً محققاً</p>
+                    </div>
+                    <div class="about-card">
+                        <div class="about-icon">✨</div>
+                        <h3>قيمنا</h3>
+                        <p>الشفافية والمهنية والالتزام بنتائج قابلة للقياس</p>
+                    </div>
+                </div>
+
+                <!-- Why Choose Us USP -->
+                <div class="usp-section">
+                    <h3>لماذا تختارنا؟</h3>
+                    <div class="usp-grid">
+                        <div class="usp-item">
+                            <div class="usp-number">01</div>
+                            <h4>خبرة محلية عميقة</h4>
+                            <p>فهم شامل للسوق الكويتي واللوائح التنظيمية</p>
+                        </div>
+                        <div class="usp-item">
+                            <div class="usp-number">02</div>
+                            <h4>نتائج مضمونة</h4>
+                            <p>نعمل بنظام مشاركة الأرباح لضمان التزامنا بنجاحك</p>
+                        </div>
+                        <div class="usp-item">
+                            <div class="usp-number">03</div>
+                            <h4>حلول متكاملة</h4>
+                            <p>من الدراسة إلى التنفيذ إلى الإدارة في مكان واحد</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <h2>خدماتنا الرئيسية</h2>
+            <p class="section-desc">نقدم مجموعة متكاملة من الخدمات الاستشارية لضمان نجاح مشروعك من الفكرة إلى التنفيذ</p>
+
+            <!-- Service 1: Operational Partnership -->
+            <div class="service-block" id="service-operations">
+                <div class="service-header">
+                    <div class="service-icon-large">⚙️</div>
+                    <div>
+                        <h3>الشراكة التشغيلية</h3>
+                        <p class="service-tagline">إدارة احترافية مقابل مشاركة الأرباح</p>
+                    </div>
+                </div>
+                <p class="service-desc">نتولى إدارة عملياتك اليومية بالكامل مقابل حصة من الأرباح، مما يضمن التزامنا الكامل بنجاح مشروعك.</p>
+
+                <!-- Process Timeline -->
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker">1</div>
+                        <div class="timeline-content">
+                            <h4>التقييم</h4>
+                            <p>تحليل شامل للعمليات الحالية وتحديد فرص التحسين</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">2</div>
+                        <div class="timeline-content">
+                            <h4>الاتفاقية</h4>
+                            <p>وضع شروط الشراكة ونسب المشاركة بشفافية كاملة</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">3</div>
+                        <div class="timeline-content">
+                            <h4>التشغيل</h4>
+                            <p>إدارة يومية احترافية مع تقارير أداء دورية</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">4</div>
+                        <div class="timeline-content">
+                            <h4>مشاركة الأرباح</h4>
+                            <p>توزيع الأرباح وفق الاتفاقية مع مراجعة النتائج</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service 2: Feasibility Studies -->
+            <div class="service-block" id="service-feasibility">
+                <div class="service-header">
+                    <div class="service-icon-large">📊</div>
+                    <div>
+                        <h3>دراسات الجدوى</h3>
+                        <p class="service-tagline">تحليل شامل لضمان نجاح استثمارك</p>
+                    </div>
+                </div>
+
+                <!-- Service Tabs -->
+                <div class="service-tabs">
+                    <button class="tab-btn active" data-tab="study-only">دراسة فقط</button>
+                    <button class="tab-btn" data-tab="study-exec">دراسة + تنفيذ</button>
+                </div>
+
+                <div class="tab-content active" id="study-only">
+                    <p>نقدم دراسة جدوى شاملة تغطي جميع الجوانب لمساعدتك على اتخاذ القرار الصحيح.</p>
+                    <ul class="checklist">
+                        <li>تحليل السوق المفصّل</li>
+                        <li>الدراسة المالية (IRR / NPV)</li>
+                        <li>تقييم المخاطر والفرص</li>
+                        <li>تحليل المنافسين</li>
+                        <li>خطة التسويق المبدئية</li>
+                    </ul>
+                </div>
+                <div class="tab-content" id="study-exec">
+                    <p>كل ما في الدراسة بالإضافة إلى تنفيذ المشروع والإشراف عليه حتى مرحلة التشغيل.</p>
+                    <ul class="checklist">
+                        <li>جميع مخرجات الدراسة الكاملة</li>
+                        <li>خطة تنفيذ مفصّلة</li>
+                        <li>إشراف على التنفيذ والتأسيس</li>
+                        <li>تدريب فريق العمل</li>
+                        <li>متابعة ما بعد الإطلاق (3 أشهر)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Service 3: Accounting -->
+            <div class="service-block" id="service-accounting">
+                <div class="service-header">
+                    <div class="service-icon-large">📈</div>
+                    <div>
+                        <h3>الخدمات المحاسبية</h3>
+                        <p class="service-tagline">حلول محاسبية متكاملة لأعمالك</p>
+                    </div>
+                </div>
+
+                <!-- Pricing Grid -->
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-badge">شهري</div>
+                        <h4>الباقة الشهرية</h4>
+                        <div class="pricing-price">150 <span>د.ك / شهر</span></div>
+                        <ul class="pricing-features">
+                            <li>مسك الدفاتر المحاسبية</li>
+                            <li>إعداد التقارير الشهرية</li>
+                            <li>متابعة الذمم المدينة</li>
+                            <li>دعم فني عبر الهاتف</li>
+                        </ul>
+                        <button class="btn btn-outline" onclick="scrollToSection('contact')">اشترك الآن</button>
+                    </div>
+                    <div class="pricing-card featured">
+                        <div class="pricing-badge">سنوي</div>
+                        <h4>الباقة السنوية</h4>
+                        <div class="pricing-price">1,500 <span>د.ك / سنة</span></div>
+                        <p class="pricing-save">وفّر 300 د.ك</p>
+                        <ul class="pricing-features">
+                            <li>جميع مزايا الباقة الشهرية</li>
+                            <li>إعداد الإقرارات الضريبية</li>
+                            <li>تحليل مالي ربع سنوي</li>
+                            <li>استشارات ضريبية غير محدودة</li>
+                            <li>تدريب على البرامج المحاسبية</li>
+                        </ul>
+                        <button class="btn btn-primary" onclick="scrollToSection('contact')">اشترك الآن</button>
+                    </div>
+                </div>
+
+                <!-- Compatible Software -->
+                <div class="software-section">
+                    <h4>البرامج المتوافقة</h4>
+                    <div class="software-grid">
+                        <div class="software-item">
+                            <div class="software-icon">Z</div>
+                            <span>Zoho</span>
+                        </div>
+                        <div class="software-item">
+                            <div class="software-icon">Q</div>
+                            <span>QuickBooks</span>
+                        </div>
+                        <div class="software-item">
+                            <div class="software-icon">O</div>
+                            <span>Odoo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio" id="portfolio">
+        <div class="container">
+            <h2>أحدث أعمالنا</h2>
+            <p class="section-desc">نماذج من مشاريعنا الناجحة في مختلف القطاعات</p>
+
+            <!-- Filter Buttons -->
+            <div class="portfolio-filters">
+                <button class="filter-btn active" data-filter="all">الكل</button>
+                <button class="filter-btn" data-filter="restaurants">مطاعم</button>
+                <button class="filter-btn" data-filter="retail">تجزئة</button>
+                <button class="filter-btn" data-filter="services">خدمات</button>
+            </div>
+
+            <div class="portfolio-grid">
+                <div class="portfolio-item" data-category="restaurants">
+                    <div class="portfolio-image"><div class="portfolio-placeholder">🍽️</div></div>
+                    <div class="portfolio-info">
+                        <h3>مطعم فاخر</h3>
+                        <p>إعادة هيكلة وزيادة الأرباح بنسبة 45%</p>
+                        <span class="portfolio-tag">مطاعم</span>
+                    </div>
+                </div>
+                <div class="portfolio-item" data-category="retail">
+                    <div class="portfolio-image"><div class="portfolio-placeholder">🏪</div></div>
+                    <div class="portfolio-info">
+                        <h3>محل تجزئة</h3>
+                        <p>استشارة عملية وتطوير نموذج العمل</p>
+                        <span class="portfolio-tag">تجزئة</span>
+                    </div>
+                </div>
+                <div class="portfolio-item" data-category="services">
+                    <div class="portfolio-image"><div class="portfolio-placeholder">🏗️</div></div>
+                    <div class="portfolio-info">
+                        <h3>مقاول بناء</h3>
+                        <p>دراسة جدوى شاملة وتمويل ناجح</p>
+                        <span class="portfolio-tag">خدمات</span>
+                    </div>
+                </div>
+                <div class="portfolio-item" data-category="services">
+                    <div class="portfolio-image"><div class="portfolio-placeholder">📋</div></div>
+                    <div class="portfolio-info">
+                        <h3>خدمات استشارية</h3>
+                        <p>تحسين الربحية والتوسع الإقليمي</p>
+                        <span class="portfolio-tag">خدمات</span>
+                    </div>
+                </div>
+                <div class="portfolio-item" data-category="retail">
+                    <div class="portfolio-image"><div class="portfolio-placeholder">🛒</div></div>
+                    <div class="portfolio-info">
+                        <h3>متجر إلكتروني</h3>
+                        <p>بناء نموذج تسويقي فعال ونمو سريع</p>
+                        <span class="portfolio-tag">تجزئة</span>
+                    </div>
+                </div>
+                <div class="portfolio-item" data-category="restaurants">
+                    <div class="portfolio-image"><div class="portfolio-placeholder">☕</div></div>
+                    <div class="portfolio-info">
+                        <h3>سلسلة مقاهي</h3>
+                        <p>تحسين العمليات والأتمتة المحاسبية</p>
+                        <span class="portfolio-tag">مطاعم</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <h2>آراء عملائنا</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"تعاملنا مع الفريق في ثلاث مشاريع مختلفة وفي كل مرة أسلموا النتائج بجودة عالية وفي المواعيد المحددة"</p>
+                    <div class="testimonial-author">
+                        <h4>أحمد العبدالعزيز</h4>
+                        <p class="role">مالك مطعم فاخر</p>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"الدراسة التي قدموها لي ساعدتني على اتخاذ قرار استثماري صحيح وتجنب خسائر كبيرة"</p>
+                    <div class="testimonial-author">
+                        <h4>محمد السعيد</h4>
+                        <p class="role">مستثمر</p>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"فريق احترافي جداً، يفهمون احتياجات السوق الكويتي بشكل عميق ويقدمون حلول عملية"</p>
+                    <div class="testimonial-author">
+                        <h4>فاطمة المحمد</h4>
+                        <p class="role">مديرة شركة خدمات</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section (Placeholder for SEO) -->
+    <section class="blog" id="blog">
+        <div class="container">
+            <h2>المدونة</h2>
+            <p class="section-desc">مقالات ونصائح لرواد الأعمال في الكويت</p>
+            <div class="blog-grid">
+                <article class="blog-card">
+                    <div class="blog-image"><div class="blog-placeholder">📝</div></div>
+                    <div class="blog-body">
+                        <span class="blog-date">قريباً</span>
+                        <h3>كيف تبدأ مشروعك الأول في الكويت</h3>
+                        <p>دليل شامل لرواد الأعمال المبتدئين حول الخطوات الأساسية لتأسيس مشروع ناجح.</p>
+                    </div>
+                </article>
+                <article class="blog-card">
+                    <div class="blog-image"><div class="blog-placeholder">📊</div></div>
+                    <div class="blog-body">
+                        <span class="blog-date">قريباً</span>
+                        <h3>أهمية دراسة الجدوى قبل الاستثمار</h3>
+                        <p>لماذا تعتبر دراسة الجدوى الخطوة الأهم قبل ضخ أموالك في أي مشروع جديد.</p>
+                    </div>
+                </article>
+                <article class="blog-card">
+                    <div class="blog-image"><div class="blog-placeholder">💡</div></div>
+                    <div class="blog-body">
+                        <span class="blog-date">قريباً</span>
+                        <h3>5 أخطاء شائعة في إدارة المطاعم</h3>
+                        <p>تعرف على الأخطاء التي يقع فيها أصحاب المطاعم وكيفية تجنبها لتحقيق النجاح.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <h2>تواصل معنا</h2>
+            <div class="contact-wrapper">
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <input type="text" id="contactName" placeholder="اسمك الكامل" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="contactEmail" placeholder="بريدك الإلكتروني" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="contactPhone" placeholder="رقم الهاتف" required>
+                    </div>
+                    <div class="form-group">
+                        <select id="contactService">
+                            <option value="">اختر الخدمة المطلوبة</option>
+                            <option value="feasibility">دراسة جدوى</option>
+                            <option value="operations">شراكة تشغيلية</option>
+                            <option value="accounting">خدمات محاسبية</option>
+                            <option value="other">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="contactMessage" placeholder="رسالتك" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">أرسل الرسالة</button>
+                </form>
+
+                <div class="contact-info">
+                    <h3>معلومات التواصل</h3>
+                    <div class="info-item">
+                        <span class="icon">📍</span>
+                        <div>
+                            <h4>العنوان</h4>
+                            <p>الكويت، منطقة الشرق</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">📞</span>
+                        <div>
+                            <h4>الهاتف</h4>
+                            <p>+96550897501</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">✉️</span>
+                        <div>
+                            <h4>البريد</h4>
+                            <p>info@kbs-kuwait.com</p>
+                        </div>
+                    </div>
+                    <div class="social-links">
+                        <a href="#" class="social-btn">LinkedIn</a>
+                        <a href="#" class="social-btn">Instagram</a>
+                        <a href="https://wa.me/96597639999?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D8%A8%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9" class="social-btn whatsapp">WhatsApp</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating WhatsApp Button with pre-filled text -->
+    <a href="https://wa.me/96597639999?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D8%A8%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20%D8%AE%D8%AF%D9%85%D8%A7%D8%AA%D9%83%D9%85" class="whatsapp-float" title="تواصل عبر واتس آب" target="_blank" rel="noopener">
+        <span>💬</span>
+    </a>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="بادية" class="footer-logo">
+                    <p>شريكك الموثوق في عالم الأعمال</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#about">من نحن</a>
+                    <a href="#services">الخدمات</a>
+                    <a href="#portfolio">الأعمال</a>
+                    <a href="#contact">تواصل معنا</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 بادية - BADIA. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
