@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول | BADIA</title>
+    <title>Sign In | BADIA</title>
     <link rel="icon" type="image/png" href="assets/logo.png">
     <link rel="apple-touch-icon" href="assets/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #0a0a0b;
@@ -30,13 +30,14 @@
         html, body { height: 100%; }
 
         body {
-            font-family: 'Tajawal', sans-serif;
+            font-family: 'Inter', 'Tajawal', sans-serif;
             background: var(--gray-50);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+        html[lang="ar"] body { font-family: 'Tajawal', sans-serif; }
 
         .auth-container {
             width: 100%;
@@ -53,10 +54,11 @@
         .auth-container::before {
             content: '';
             position: absolute;
-            top: 0; right: 0;
+            top: 0; left: 0;
             width: 4px; height: 100%;
             background: linear-gradient(to bottom, var(--accent), transparent 60%);
         }
+        html[lang="ar"] .auth-container::before { left: auto; right: 0; }
 
         .form-header { text-align: center; margin-bottom: 2.5rem; }
 
@@ -83,6 +85,18 @@
 
         .form-header h2 { font-size: 2rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem; }
         .form-header p { font-size: 1rem; color: var(--gray-500); }
+
+        /* Lang toggle in auth page */
+        .auth-lang-toggle {
+            position: absolute; top: 1.5rem; right: 1.5rem;
+            padding: 0.4rem 1rem; border: 2px solid var(--accent);
+            border-radius: 50px; background: transparent;
+            color: var(--accent); font-family: inherit;
+            font-size: 0.8rem; font-weight: 700;
+            cursor: pointer; transition: var(--transition);
+        }
+        html[lang="ar"] .auth-lang-toggle { right: auto; left: 1.5rem; }
+        .auth-lang-toggle:hover { background: var(--accent); color: var(--primary); }
 
         .auth-tabs {
             display: flex;
@@ -112,6 +126,7 @@
             position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
             color: var(--gray-400); font-size: 1.1rem; pointer-events: none;
         }
+        html[lang="ar"] .input-wrap .input-icon { left: auto; right: 1rem; }
 
         .form-group input,
         .form-group select {
@@ -123,6 +138,8 @@
             background: var(--white); transition: var(--transition);
             outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
+        html[lang="ar"] .form-group input,
+        html[lang="ar"] .form-group select { padding: 0.9rem 3rem 0.9rem 1rem; }
         .form-group input:focus,
         .form-group select:focus {
             border-color: var(--accent); background: var(--white);
@@ -137,10 +154,11 @@
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
         .toggle-pass {
-            position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+            position: absolute; left: auto; right: 1rem; top: 50%; transform: translateY(-50%);
             background: none; border: none; cursor: pointer;
             color: var(--gray-400); font-size: 0.9rem; padding: 0; transition: var(--transition);
         }
+        html[lang="ar"] .toggle-pass { right: auto; left: 1rem; }
         .toggle-pass:hover { color: var(--primary); }
 
         .form-options {
@@ -176,6 +194,7 @@
         .btn-submit:hover::after { transform: scaleX(1); }
         .btn-submit span { position: relative; z-index: 1; }
         .btn-submit:hover span { color: var(--primary); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; }
         .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
@@ -207,11 +226,12 @@
         .terms-note a { color: var(--accent); text-decoration: none; font-weight: 600; }
 
         .notification {
-            position: fixed; top: 1.5rem; left: 1.5rem;
+            position: fixed; top: 1.5rem; right: 1.5rem;
             padding: 1rem 1.5rem; border-radius: 8px;
             font-size: 0.95rem; font-weight: 600; z-index: 9999;
             animation: slideNotif 0.3s ease-out; max-width: 350px;
         }
+        html[lang="ar"] .notification { right: auto; left: 1.5rem; }
         @keyframes slideNotif {
             from { transform: translateY(-20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -234,61 +254,63 @@
 <body>
 
     <div class="auth-container">
+        <button class="auth-lang-toggle" id="authLangToggle" onclick="toggleAuthLang()">عربي</button>
+
         <div class="form-header">
             <div class="deco-logo">
                 <img src="assets/logo.png" alt="BADIA">
             </div>
-            <a href="main.html" class="back-link">&#8594; العودة للموقع</a>
-            <h2>الدخول إلى حسابك</h2>
-            <p>إدارة اشتراكك وخدماتك من مكان واحد</p>
+            <a href="main.html" class="back-link" data-en="← Back to Website" data-ar="→ العودة للموقع">← Back to Website</a>
+            <h2 data-en="Access Your Account" data-ar="الدخول إلى حسابك">Access Your Account</h2>
+            <p data-en="Manage your subscription and services from one place" data-ar="إدارة اشتراكك وخدماتك من مكان واحد">Manage your subscription and services from one place</p>
         </div>
 
         <!-- Tabs -->
         <div class="auth-tabs">
-            <button class="auth-tab active" onclick="switchTab('login')">تسجيل الدخول</button>
-            <button class="auth-tab" onclick="switchTab('register')">إنشاء حساب</button>
+            <button class="auth-tab active" onclick="switchTab('login')" data-en="Sign In" data-ar="تسجيل الدخول">Sign In</button>
+            <button class="auth-tab" onclick="switchTab('register')" data-en="Create Account" data-ar="إنشاء حساب">Create Account</button>
         </div>
 
         <!-- LOGIN Panel -->
         <div class="tab-panel active" id="panel-login">
             <form id="loginForm" novalidate>
                 <div class="form-group">
-                    <label for="loginEmail">البريد الإلكتروني</label>
+                    <label for="loginEmail" data-en="Email Address" data-ar="البريد الإلكتروني">Email Address</label>
                     <div class="input-wrap">
                         <span class="input-icon">✉</span>
                         <input type="email" id="loginEmail" placeholder="example@company.com">
                     </div>
-                    <div class="form-error" id="loginEmailErr">أدخل بريداً إلكترونياً صحيحاً</div>
+                    <div class="form-error" id="loginEmailErr" data-en="Enter a valid email address" data-ar="أدخل بريداً إلكترونياً صحيحاً">Enter a valid email address</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="loginPass">كلمة المرور</label>
+                    <label for="loginPass" data-en="Password" data-ar="كلمة المرور">Password</label>
                     <div class="input-wrap">
                         <span class="input-icon">🔑</span>
                         <input type="password" id="loginPass" placeholder="••••••••">
                         <button type="button" class="toggle-pass" onclick="togglePass('loginPass', this)">👁</button>
                     </div>
-                    <div class="form-error" id="loginPassErr">كلمة المرور مطلوبة</div>
+                    <div class="form-error" id="loginPassErr" data-en="Password is required" data-ar="كلمة المرور مطلوبة">Password is required</div>
                 </div>
 
                 <div class="form-options">
                     <label class="checkbox-wrap">
                         <input type="checkbox" id="rememberMe">
-                        <span>تذكرني</span>
+                        <span data-en="Remember me" data-ar="تذكرني">Remember me</span>
                     </label>
-                    <a href="#" class="forgot-link">نسيت كلمة المرور؟</a>
+                    <a href="#" class="forgot-link" data-en="Forgot password?" data-ar="نسيت كلمة المرور؟" onclick="showForgotPassword(event)">Forgot password?</a>
                 </div>
 
-                <button type="submit" class="btn-submit"><span>دخول إلى الحساب →</span></button>
+                <button type="submit" class="btn-submit"><span data-en="Sign In →" data-ar="دخول إلى الحساب →">Sign In →</span></button>
 
-                <div class="divider"><span>أو</span></div>
+                <div class="divider"><span data-en="or" data-ar="أو">or</span></div>
 
-                <button type="button" class="btn-social">
+                <button type="button" class="btn-social" id="googleLoginBtn">
                     <span class="google-icon"></span>
-                    المتابعة بحساب Google
+                    <span data-en="Continue with Google" data-ar="المتابعة بحساب Google">Continue with Google</span>
                 </button>
 
-                <p class="terms-note">بالدخول، أنت توافق على <a href="#">شروط الاستخدام</a> و <a href="#">سياسة الخصوصية</a></p>
+                <p class="terms-note" data-en="By signing in, you agree to our <a href='#'>Terms of Use</a> and <a href='#'>Privacy Policy</a>" data-ar="بالدخول، أنت توافق على <a href='#'>شروط الاستخدام</a> و <a href='#'>سياسة الخصوصية</a>">By signing in, you agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a></p>
             </form>
         </div>
 
@@ -297,32 +319,40 @@
             <form id="registerForm" novalidate>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="regFirst">الاسم الأول</label>
+                        <label for="regFirst" data-en="First Name" data-ar="الاسم الأول">First Name</label>
                         <div class="input-wrap">
                             <span class="input-icon">👤</span>
-                            <input type="text" id="regFirst" placeholder="أحمد">
+                            <input type="text" id="regFirst" data-placeholder-en="John" data-placeholder-ar="أحمد" placeholder="John">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="regLast">اسم الشركة / العائلة</label>
+                        <label for="regLast" data-en="Last Name" data-ar="اسم العائلة">Last Name</label>
                         <div class="input-wrap">
-                            <span class="input-icon">🏢</span>
-                            <input type="text" id="regLast" placeholder="العنزي">
+                            <span class="input-icon">👤</span>
+                            <input type="text" id="regLast" data-placeholder-en="Doe" data-placeholder-ar="العنزي" placeholder="Doe">
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="regEmail">البريد الإلكتروني</label>
+                    <label for="regCompany" data-en="Company Name" data-ar="اسم الشركة">Company Name</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🏢</span>
+                        <input type="text" id="regCompany" data-placeholder-en="Acme Corp" data-placeholder-ar="شركة بادية" placeholder="Acme Corp">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regEmail" data-en="Email Address" data-ar="البريد الإلكتروني">Email Address</label>
                     <div class="input-wrap">
                         <span class="input-icon">✉</span>
                         <input type="email" id="regEmail" placeholder="example@company.com">
                     </div>
-                    <div class="form-error" id="regEmailErr">أدخل بريداً إلكترونياً صحيحاً</div>
+                    <div class="form-error" id="regEmailErr" data-en="Enter a valid email address" data-ar="أدخل بريداً إلكترونياً صحيحاً">Enter a valid email address</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="regPhone">رقم الجوال</label>
+                    <label for="regPhone" data-en="Phone Number" data-ar="رقم الجوال">Phone Number</label>
                     <div class="input-wrap">
                         <span class="input-icon">📱</span>
                         <input type="tel" id="regPhone" placeholder="+965 XXXX XXXX">
@@ -330,24 +360,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="regPlan">الباقة المطلوبة</label>
-                    <div class="input-wrap">
-                        <span class="input-icon">⭐</span>
-                        <select id="regPlan" style="padding-right:1rem;">
-                            <option value="">اختر الباقة...</option>
-                            <option value="starter">⭐ Starter — 49.9 KWD/شهر</option>
-                            <option value="business">🔷 Business — 89.9 KWD/شهر</option>
-                            <option value="pro">💎 Pro — 149.9 KWD/شهر</option>
-                            <option value="enterprise">🏢 Enterprise — تواصل معنا</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="regPass">كلمة المرور</label>
+                    <label for="regPass" data-en="Password" data-ar="كلمة المرور">Password</label>
                     <div class="input-wrap">
                         <span class="input-icon">🔑</span>
-                        <input type="password" id="regPass" placeholder="8 أحرف على الأقل" oninput="checkStrength(this.value)">
+                        <input type="password" id="regPass" data-placeholder-en="At least 8 characters" data-placeholder-ar="8 أحرف على الأقل" placeholder="At least 8 characters" oninput="checkStrength(this.value)">
                         <button type="button" class="toggle-pass" onclick="togglePass('regPass', this)">👁</button>
                     </div>
                     <div class="strength-meter" id="strengthMeter">
@@ -362,23 +378,106 @@
                 <div class="form-group">
                     <label class="checkbox-wrap" style="margin-top:0.5rem;">
                         <input type="checkbox" id="agreeTerms">
-                        <span>أوافق على <a href="#" style="color:var(--accent);font-weight:600;">شروط الاستخدام</a> وسياسة الخصوصية</span>
+                        <span data-en="I agree to the <a href='#' style='color:var(--accent);font-weight:600;'>Terms of Use</a> and Privacy Policy" data-ar="أوافق على <a href='#' style='color:var(--accent);font-weight:600;'>شروط الاستخدام</a> وسياسة الخصوصية">I agree to the <a href="#" style="color:var(--accent);font-weight:600;">Terms of Use</a> and Privacy Policy</span>
                     </label>
                 </div>
 
-                <button type="submit" class="btn-submit"><span>إنشاء الحساب →</span></button>
+                <button type="submit" class="btn-submit"><span data-en="Create Account →" data-ar="إنشاء الحساب →">Create Account →</span></button>
 
-                <div class="divider"><span>أو</span></div>
+                <div class="divider"><span data-en="or" data-ar="أو">or</span></div>
 
-                <button type="button" class="btn-social">
+                <button type="button" class="btn-social" id="googleRegBtn">
                     <span class="google-icon"></span>
-                    التسجيل بحساب Google
+                    <span data-en="Sign up with Google" data-ar="التسجيل بحساب Google">Sign up with Google</span>
                 </button>
             </form>
         </div>
+
+        <!-- FORGOT PASSWORD Panel (hidden by default) -->
+        <div class="tab-panel" id="panel-forgot">
+            <form id="forgotForm" novalidate>
+                <div class="form-group">
+                    <label for="forgotEmail" data-en="Email Address" data-ar="البريد الإلكتروني">Email Address</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">✉</span>
+                        <input type="email" id="forgotEmail" placeholder="example@company.com">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit"><span data-en="Send Reset Link →" data-ar="إرسال رابط إعادة التعيين →">Send Reset Link →</span></button>
+                <div style="text-align:center;margin-top:1.5rem;">
+                    <a href="#" class="forgot-link" data-en="Have a reset token? Reset here" data-ar="لديك رمز إعادة تعيين؟ أعد التعيين هنا" onclick="showResetWithToken(event)">Have a reset token? Reset here</a>
+                </div>
+                <div style="text-align:center;margin-top:1rem;">
+                    <a href="#" class="forgot-link" data-en="← Back to Sign In" data-ar="→ العودة لتسجيل الدخول" onclick="backToLogin(event)">← Back to Sign In</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- RESET PASSWORD WITH TOKEN Panel (hidden by default) -->
+        <div class="tab-panel" id="panel-reset-token">
+            <form id="resetTokenForm" novalidate>
+                <div class="form-group">
+                    <label for="resetToken" data-en="Reset Token" data-ar="رمز إعادة التعيين">Reset Token</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔑</span>
+                        <input type="text" id="resetToken" data-placeholder-en="Paste the token from your email" data-placeholder-ar="الصق الرمز من بريدك الإلكتروني" placeholder="Paste the token from your email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="resetNewPass" data-en="New Password" data-ar="كلمة المرور الجديدة">New Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔑</span>
+                        <input type="password" id="resetNewPass" data-placeholder-en="At least 8 characters" data-placeholder-ar="8 أحرف على الأقل" placeholder="At least 8 characters">
+                        <button type="button" class="toggle-pass" onclick="togglePass('resetNewPass', this)">👁</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit"><span data-en="Reset Password →" data-ar="إعادة تعيين كلمة المرور →">Reset Password →</span></button>
+                <div style="text-align:center;margin-top:1.5rem;">
+                    <a href="#" class="forgot-link" data-en="← Back to Sign In" data-ar="→ العودة لتسجيل الدخول" onclick="backToLogin(event)">← Back to Sign In</a>
+                </div>
+            </form>
+        </div>
+    </div>
     </div>
 
     <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+
+        // ===== Language for auth page =====
+        function initAuthLang() {
+            const saved = localStorage.getItem('badia_lang') || 'en';
+            setAuthLang(saved, false);
+        }
+
+        function setAuthLang(lang, save = true) {
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+            document.querySelectorAll('[data-en][data-ar]').forEach(el => {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+                const val = el.getAttribute(`data-${lang}`);
+                if (el.children.length > 0 && val.includes('<')) {
+                    el.innerHTML = val;
+                } else {
+                    el.textContent = val;
+                }
+            });
+
+            document.querySelectorAll('[data-placeholder-en][data-placeholder-ar]').forEach(el => {
+                el.placeholder = el.getAttribute(`data-placeholder-${lang}`);
+            });
+
+            const toggleBtn = document.getElementById('authLangToggle');
+            if (toggleBtn) toggleBtn.textContent = lang === 'en' ? 'عربي' : 'English';
+
+            if (save) localStorage.setItem('badia_lang', lang);
+        }
+
+        function toggleAuthLang() {
+            const current = document.documentElement.getAttribute('lang') || 'en';
+            setAuthLang(current === 'en' ? 'ar' : 'en');
+        }
+
         /* Tab switch */
         function switchTab(tab) {
             document.querySelectorAll('.auth-tab').forEach((t, i) => {
@@ -386,6 +485,37 @@
             });
             document.getElementById('panel-login').classList.toggle('active', tab === 'login');
             document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+            document.getElementById('panel-forgot').classList.remove('active');
+            document.getElementById('panel-reset-token').classList.remove('active');
+            document.querySelector('.auth-tabs').style.display = '';
+        }
+
+        /* Forgot password view */
+        function showForgotPassword(e) {
+            e.preventDefault();
+            document.getElementById('panel-login').classList.remove('active');
+            document.getElementById('panel-register').classList.remove('active');
+            document.getElementById('panel-forgot').classList.add('active');
+            document.getElementById('panel-reset-token').classList.remove('active');
+            document.querySelector('.auth-tabs').style.display = 'none';
+        }
+
+        /* Reset password with token view */
+        function showResetWithToken(e) {
+            e.preventDefault();
+            document.getElementById('panel-login').classList.remove('active');
+            document.getElementById('panel-register').classList.remove('active');
+            document.getElementById('panel-forgot').classList.remove('active');
+            document.getElementById('panel-reset-token').classList.add('active');
+            document.querySelector('.auth-tabs').style.display = 'none';
+        }
+
+        function backToLogin(e) {
+            e.preventDefault();
+            document.getElementById('panel-forgot').classList.remove('active');
+            document.getElementById('panel-reset-token').classList.remove('active');
+            document.getElementById('panel-login').classList.add('active');
+            document.querySelector('.auth-tabs').style.display = '';
         }
 
         /* Toggle password visibility */
@@ -408,14 +538,16 @@
             if (/[0-9]/.test(val)) score++;
             if (/[^A-Za-z0-9]/.test(val)) score++;
             const levels = ['', 'weak', 'fair', 'strong', 'strong'];
-            const labels = ['', 'ضعيفة', 'مقبولة', 'قوية', 'قوية جداً'];
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+            const labelsEN = ['', 'Weak', 'Fair', 'Strong', 'Very Strong'];
+            const labelsAR = ['', 'ضعيفة', 'مقبولة', 'قوية', 'قوية جداً'];
             const colors = ['', '#e74c3c', '#f39c12', '#27ae60', '#27ae60'];
             for (let i = 0; i < score; i++) bars[i].classList.add(levels[score]);
-            label.textContent = labels[score];
+            label.textContent = lang === 'ar' ? labelsAR[score] : labelsEN[score];
             label.style.color = colors[score];
         }
 
-        /* Toast helper (used by script.js too) */
+        /* Toast helper */
         function showToast(msg, type) {
             document.querySelectorAll('.notification').forEach(n => n.remove());
             const el = document.createElement('div');
@@ -427,10 +559,110 @@
             setTimeout(() => el.remove(), 3000);
         }
 
+        /* Google OAuth — redirect to backend */
+        function handleGoogleAuth() {
+            window.location.href = `${API_BASE}/auth/google`;
+        }
+        document.getElementById('googleLoginBtn').addEventListener('click', handleGoogleAuth);
+        document.getElementById('googleRegBtn').addEventListener('click', handleGoogleAuth);
+
+        /* Handle URL params (OAuth, Verification, Password Reset) on page load */
+        async function handleURLParams() {
+            const params = new URLSearchParams(window.location.search);
+            
+            // 1. Google OAuth Callback (Tokens in URL)
+            const accessToken = params.get('access_token');
+            const refreshToken = params.get('refresh_token');
+            if (accessToken) {
+                localStorage.setItem('access_token', accessToken);
+                if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+                const lang = document.documentElement.getAttribute('lang') || 'en';
+                showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
+                // Clean URL query parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+                setTimeout(() => window.location.href = 'account.html', 1000);
+                return;
+            }
+
+            // 1b. Google OAuth Callback (Code in URL)
+            const code = params.get('code');
+            if (code) {
+                const lang = document.documentElement.getAttribute('lang') || 'en';
+                showToast(lang === 'ar' ? 'جاري التحقق من حساب Google...' : 'Authenticating with Google...', 'success');
+                try {
+                    const res = await fetch(`${API_BASE}/auth/google/callback?code=${code}&remember_me=true`, {
+                        method: 'GET'
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        localStorage.setItem('access_token', data.access_token);
+                        if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
+                        showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        setTimeout(() => window.location.href = 'account.html', 1000);
+                    } else {
+                        const err = await res.json();
+                        showToast(err.detail || (lang === 'ar' ? 'فشل تسجيل الدخول باستخدام Google' : 'Google sign-in failed'), 'error');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                } catch {
+                    showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+                return;
+            }
+
+
+            // 2. Email Verification Token
+            const verifyToken = params.get('verify_token');
+            if (verifyToken) {
+                const lang = document.documentElement.getAttribute('lang') || 'en';
+                showToast(lang === 'ar' ? 'جاري التحقق من بريدك الإلكتروني...' : 'Verifying your email...', 'success');
+                try {
+                    const res = await fetch(`${API_BASE}/api/v1/email/auth/verify-email`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: verifyToken })
+                    });
+                    if (res.ok) {
+                        showToast(lang === 'ar' ? 'تم تفعيل البريد الإلكتروني بنجاح!' : 'Email verified successfully!', 'success');
+                    } else {
+                        const err = await res.json();
+                        showToast(err.detail || (lang === 'ar' ? 'فشل تفعيل البريد الإلكتروني' : 'Email verification failed'), 'error');
+                    }
+                } catch {
+                    showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+                }
+                // Clean URL query parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // 3. Password Reset Token
+            const resetToken = params.get('reset_token');
+            if (resetToken) {
+                // Switch to reset password tab
+                document.getElementById('panel-login').classList.remove('active');
+                document.getElementById('panel-register').classList.remove('active');
+                document.getElementById('panel-forgot').classList.remove('active');
+                document.getElementById('panel-reset-token').classList.add('active');
+                document.querySelector('.auth-tabs').style.display = 'none';
+                
+                // Pre-fill token input
+                document.getElementById('resetToken').value = resetToken;
+                
+                // Clean URL but keep token in field
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                const lang = document.documentElement.getAttribute('lang') || 'en';
+                showToast(lang === 'ar' ? 'تم استيراد رمز إعادة التعيين تلقائياً. يرجى إدخال كلمة مرور جديدة.' : 'Reset token imported automatically. Please enter a new password.', 'success');
+            }
+        }
+
         /* Login form — hits the backend */
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             let valid = true;
+            const lang = document.documentElement.getAttribute('lang') || 'en';
             const email = document.getElementById('loginEmail');
             const pass  = document.getElementById('loginPass');
             const emailErr = document.getElementById('loginEmailErr');
@@ -449,35 +681,199 @@
 
             const btn = this.querySelector('.btn-submit');
             btn.disabled = true;
-            btn.querySelector('span').textContent = 'جاري التحقق...';
+            btn.querySelector('span').textContent = lang === 'ar' ? 'جاري التحقق...' : 'Signing in...';
+
+            const rememberMe = document.getElementById('rememberMe').checked;
 
             try {
-                const res = await fetch('http://127.0.0.1:8000/auth/login', {
+                const res = await fetch(`${API_BASE}/api/v1/auth/login?remember_me=${rememberMe}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email.value, password: pass.value })
+                    body: JSON.stringify({ email: email.value, password: pass.value, remember_me: rememberMe })
                 });
 
                 if (res.ok) {
-                    // const data = await res.json();
-                    // localStorage.setItem('access_token', data.access_token); // uncomment once JWT is ready
-                    showToast('تم تسجيل الدخول بنجاح! جاري التحويل...', 'success');
+                    const data = await res.json();
+                    localStorage.setItem('access_token', data.access_token);
+                    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
+                    showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح! جاري التحويل...' : 'Signed in successfully! Redirecting...', 'success');
                     setTimeout(() => window.location.href = 'account.html', 1500);
                 } else {
                     const err = await res.json();
-                    showToast(err.detail || 'بيانات الدخول غير صحيحة', 'error');
+                    showToast(err.detail || (lang === 'ar' ? 'بيانات الدخول غير صحيحة' : 'Invalid credentials'), 'error');
                     btn.disabled = false;
-                    btn.querySelector('span').textContent = 'دخول إلى الحساب →';
+                    btn.querySelector('span').textContent = lang === 'ar' ? 'دخول إلى الحساب →' : 'Sign In →';
                 }
             } catch {
-                showToast('حدث خطأ في الاتصال بالخادم', 'error');
+                showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
                 btn.disabled = false;
-                btn.querySelector('span').textContent = 'دخول إلى الحساب →';
+                btn.querySelector('span').textContent = lang === 'ar' ? 'دخول إلى الحساب →' : 'Sign In →';
             }
         });
+
+        /* Register form — hits POST /api/v1/auth/register_local */
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+
+            const firstName = document.getElementById('regFirst').value.trim();
+            const lastName = document.getElementById('regLast').value.trim();
+            const company = document.getElementById('regCompany').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const password = document.getElementById('regPass').value;
+            const agreed = document.getElementById('agreeTerms').checked;
+
+            // Validation
+            if (!firstName || !lastName || !company || !email || !password) {
+                showToast(lang === 'ar' ? 'جميع الحقول المطلوبة يجب ملؤها' : 'All required fields must be filled', 'error');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                document.getElementById('regEmailErr').classList.add('visible');
+                return;
+            }
+            document.getElementById('regEmailErr').classList.remove('visible');
+
+            if (password.length < 8) {
+                showToast(lang === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters', 'error');
+                return;
+            }
+            if (!agreed) {
+                showToast(lang === 'ar' ? 'يجب الموافقة على شروط الاستخدام' : 'You must agree to the Terms of Use', 'error');
+                return;
+            }
+
+            const btn = this.querySelector('.btn-submit');
+            btn.disabled = true;
+            btn.querySelector('span').textContent = lang === 'ar' ? 'جاري إنشاء الحساب...' : 'Creating account...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/auth/register_local`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: lastName,
+                        company_name: company,
+                        email: email,
+                        password: password,
+                        phone: phone || null
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok || res.status === 201) {
+                    localStorage.setItem('access_token', data.access_token);
+                    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
+                    showToast(lang === 'ar' ? 'تم إنشاء الحساب بنجاح! جاري التحويل...' : 'Account created successfully! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = 'account.html', 1500);
+                } else {
+                    showToast(data.detail || (lang === 'ar' ? 'حدث خطأ أثناء التسجيل' : 'Registration error'), 'error');
+                    btn.disabled = false;
+                    btn.querySelector('span').textContent = lang === 'ar' ? 'إنشاء الحساب →' : 'Create Account →';
+                }
+            } catch {
+                showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+                btn.disabled = false;
+                btn.querySelector('span').textContent = lang === 'ar' ? 'إنشاء الحساب →' : 'Create Account →';
+            }
+        });
+
+        /* Forgot password form */
+        document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+            const email = document.getElementById('forgotEmail').value.trim();
+
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast(lang === 'ar' ? 'أدخل بريداً إلكترونياً صحيحاً' : 'Enter a valid email', 'error');
+                return;
+            }
+
+            const btn = this.querySelector('.btn-submit');
+            btn.disabled = true;
+            btn.querySelector('span').textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
+
+            try {
+                await fetch(`${API_BASE}/api/v1/email/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                // Always show success (security — don't reveal if email exists)
+                showToast(lang === 'ar' ? 'إذا كان البريد مسجلاً، تم إرسال رابط إعادة التعيين' : 'If the email exists, a reset link has been sent', 'success');
+            } catch {
+                showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+            }
+            btn.disabled = false;
+            btn.querySelector('span').textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين →' : 'Send Reset Link →';
+        });
+
+        /* Reset Password with Token form */
+        document.getElementById('resetTokenForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+            const token = document.getElementById('resetToken').value.trim();
+            const newPassword = document.getElementById('resetNewPass').value;
+
+            if (!token) {
+                showToast(lang === 'ar' ? 'يرجى إدخال رمز إعادة التعيين' : 'Please enter the reset token', 'error');
+                return;
+            }
+            if (newPassword.length < 8) {
+                showToast(lang === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters', 'error');
+                return;
+            }
+
+            const btn = this.querySelector('.btn-submit');
+            btn.disabled = true;
+            btn.querySelector('span').textContent = lang === 'ar' ? 'جاري إعادة التعيين...' : 'Resetting...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/email/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, new_password: newPassword })
+                });
+
+                if (res.ok) {
+                    showToast(lang === 'ar' ? 'تم إعادة تعيين كلمة المرور بنجاح!' : 'Password reset successfully!', 'success');
+                    setTimeout(() => {
+                        // Switch to login tab
+                        switchTab('login');
+                        // Clear fields
+                        document.getElementById('resetToken').value = '';
+                        document.getElementById('resetNewPass').value = '';
+                    }, 1500);
+                } else {
+                    const err = await res.json();
+                    showToast(err.detail || (lang === 'ar' ? 'فشل إعادة تعيين كلمة المرور' : 'Password reset failed'), 'error');
+                }
+            } catch {
+                showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+            }
+            btn.disabled = false;
+            btn.querySelector('span').textContent = lang === 'ar' ? 'إعادة تعيين كلمة المرور →' : 'Reset Password →';
+        });
+
+        // Init
+        initAuthLang();
+        handleURLParams();
+
+        // If already logged in, redirect (unless we have a verification token, in which case route it to account first)
+        if (localStorage.getItem('access_token')) {
+            const params = new URLSearchParams(window.location.search);
+            const verifyToken = params.get('verify_token');
+            if (verifyToken) {
+                window.location.href = `account.html?verify_token=${verifyToken}`;
+            } else {
+                window.location.href = 'account.html';
+            }
+        }
     </script>
 
-    <script src="script.js"></script>
 </body>
 
 </html>
