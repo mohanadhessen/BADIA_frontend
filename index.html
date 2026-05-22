@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BADIA</title>
-    <link rel="icon" href="assets/favicon.ico">
-    <link rel="icon" type="image/png" href="assets/logo.png">
-    <link rel="apple-touch-icon" href="assets/logo.png">
-    <meta name="description" content="BADIA – Your trusted partner in business consulting, operational management, feasibility studies, and accounting services in Kuwait.">
-    <meta name="keywords" content="business consulting, feasibility study, operational management, accounting, Kuwait, BADIA">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
 
-    <!-- Schema.org Local Business Markup -->
-    <script type="application/ld+json">
+<html dir="ltr" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BADIA</title>
+<link href="assets/favicon.ico" rel="icon"/>
+<link href="assets/logo.png" rel="icon" type="image/png"/>
+<link href="assets/logo.png" rel="apple-touch-icon"/>
+<meta content="BADIA – Your trusted partner in business consulting, operational management, feasibility studies, and accounting services in Kuwait." name="description"/>
+<meta content="business consulting, feasibility study, operational management, accounting, Kuwait, BADIA" name="keywords"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&amp;family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="styles.css" rel="stylesheet"/>
+<!-- Schema.org Local Business Markup -->
+<script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
@@ -35,486 +35,452 @@
     </script>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <div class="container">
-            <a href="#" class="logo">
-                <img src="assets/logo.png" alt="BADIA" class="logo-img">
-            </a>
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#about" data-en="About Us" data-ar="من نحن">About Us</a></li>
-                <li><a href="#services" data-en="Services" data-ar="الخدمات">Services</a></li>
-                <li><a href="#portfolio" data-en="Portfolio" data-ar="الأعمال">Portfolio</a></li>
-                <li><a href="#blog" data-en="Blog" data-ar="المدونة">Blog</a></li>
-                <li><a href="#contact" data-en="Contact Us" data-ar="تواصل معنا">Contact Us</a></li>
-                <li><a href="Signin.html" class="nav-login-link" data-en="Login" data-ar="تسجيل الدخول" id="navAuthLink">Login</a></li>
-            </ul>
-            <button class="lang-toggle" id="langToggle" aria-label="Switch Language">
-                <span class="lang-toggle-text">عربي</span>
-            </button>
-            <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </nav>
+<!-- Navigation -->
+<nav class="navbar" id="navbar">
+<div class="container">
+<a class="logo" href="#">
+<img alt="BADIA" class="logo-img" src="assets/logo.png"/>
+</a>
+<ul class="nav-links" id="navLinks">
+<li><a data-ar="من نحن" data-en="About Us" href="#about">About Us</a></li>
+<li><a data-ar="الخدمات" data-en="Services" href="#services">Services</a></li>
+<li><a data-ar="الأعمال" data-en="Portfolio" href="#portfolio">Portfolio</a></li>
+<li><a data-ar="تواصل معنا" data-en="Contact Us" href="#contact">Contact Us</a></li>
+<li><a class="nav-login-link" data-ar="تسجيل الدخول" data-en="Login" href="Signin.html" id="navAuthLink">Login</a></li>
+</ul>
+<button aria-label="Switch Language" class="lang-toggle" id="langToggle">
+<span class="lang-toggle-text">عربي</span>
+</button>
+<button aria-label="Menu" class="mobile-toggle" id="mobileToggle">
+<span></span><span></span><span></span>
+</button>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="hero" id="hero">
+<div class="hero-bg">
+<img alt="workspace" src="assets/yen-vu-OEt8lStU-wA-unsplash.jpg"/>
+<div class="hero-overlay"></div>
+</div>
+<div class="hero-content">
+<h1 class="hero-title" data-ar="حوّل فكرتك إلى واقع مربح" data-en="Turn Your Idea Into a Profitable Reality">Turn Your Idea Into a Profitable Reality</h1>
+<p class="hero-subtitle" data-ar="استشارات شاملة وإدارة عمليات متقدمة لنجاح عملك في الكويت" data-en="Comprehensive consulting and advanced operations management for your business success in Kuwait">Comprehensive consulting and advanced operations management for your business success in Kuwait</p>
+<button class="btn btn-primary" data-ar="اطلب استشارة مجانية" data-en="Request a Free Consultation" onclick="scrollToSection('contact')">Request a Free Consultation</button>
+</div>
+</section>
+<!-- Statistics Bar -->
+<section class="stats-bar">
+<div class="container">
+<div class="stat-item">
+<h3 data-target="450">0</h3>
+<p data-ar="مشروع منجز" data-en="Projects Completed">Projects Completed</p>
+</div>
+<div class="stat-item">
+<h3 data-target="12">0</h3>
+<p data-ar="سنة خبرة" data-en="Years of Experience">Years of Experience</p>
+</div>
+<div class="stat-item">
+<h3 data-target="250">0</h3>
+<p data-ar="عميل راضي" data-en="Satisfied Clients">Satisfied Clients</p>
+</div>
+<div class="stat-item">
+<h3 data-suffix="%" data-target="98">0</h3>
+<p data-ar="معدل النجاح" data-en="Success Rate">Success Rate</p>
+</div>
+</div>
+</section>
+<!-- About Section -->
+<section class="about" id="about">
+<div class="container">
+<div class="about-content">
+<h2 data-ar="من نحن" data-en="About Us">About Us</h2>
+<p class="section-desc" data-ar="نحن شركة بادية، متخصصة في تطوير وإدارة المشاريع التجارية بكفاءة عالية. مع أكثر من 12 سنة من الخبرة في السوق الكويتي، قمنا بمساعدة مئات رجال الأعمال والشركات على تحقيق أهدافهم المالية." data-en="We are BADIA, specialized in developing and managing commercial projects with high efficiency. With over 12 years of experience in the Kuwaiti market, we have helped hundreds of business owners and companies achieve their financial goals.">We are BADIA, specialized in developing and managing commercial projects with high efficiency. With over 12 years of experience in the Kuwaiti market, we have helped hundreds of business owners and companies achieve their financial goals.</p>
+<div class="about-grid">
+<div class="about-card">
+<div class="about-icon">🎯</div>
+<h3 data-ar="رؤيتنا" data-en="Our Vision">Our Vision</h3>
+<p data-ar="أن نكون الشريك الموثوق للمؤسسات والأفراد في تحقيق النمو المستدام" data-en="To be the trusted partner for institutions and individuals in achieving sustainable growth">To be the trusted partner for institutions and individuals in achieving sustainable growth</p>
+</div>
+<div class="about-card">
+<div class="about-icon">💼</div>
+<h3 data-ar="رسالتنا" data-en="Our Mission">Our Mission</h3>
+<p data-ar="تقديم استشارات احترافية وحلول عملية تضمن عائداً مالياً محققاً" data-en="Delivering professional consulting and practical solutions that guarantee real financial returns">Delivering professional consulting and practical solutions that guarantee real financial returns</p>
+</div>
+<div class="about-card">
+<div class="about-icon">✨</div>
+<h3 data-ar="قيمنا" data-en="Our Values">Our Values</h3>
+<p data-ar="الشفافية والمهنية والالتزام بنتائج قابلة للقياس" data-en="Transparency, professionalism, and commitment to measurable results">Transparency, professionalism, and commitment to measurable results</p>
+</div>
+</div>
+<!-- Why Choose Us USP -->
+<div class="usp-section">
+<h3 data-ar="لماذا تختارنا؟" data-en="Why Choose Us?">Why Choose Us?</h3>
+<div class="usp-grid">
+<div class="usp-item">
+<div class="usp-number">01</div>
+<h4 data-ar="خبرة محلية عميقة" data-en="Deep Local Expertise">Deep Local Expertise</h4>
+<p data-ar="فهم شامل للسوق الكويتي واللوائح التنظيمية" data-en="Comprehensive understanding of the Kuwaiti market and regulatory requirements">Comprehensive understanding of the Kuwaiti market and regulatory requirements</p>
+</div>
+<div class="usp-item">
+<div class="usp-number">02</div>
+<h4 data-ar="نتائج مضمونة" data-en="Guaranteed Results">Guaranteed Results</h4>
+<p data-ar="نعمل بنظام مشاركة الأرباح لضمان التزامنا بنجاحك" data-en="We work on a profit-sharing model to ensure our commitment to your success">We work on a profit-sharing model to ensure our commitment to your success</p>
+</div>
+<div class="usp-item">
+<div class="usp-number">03</div>
+<h4 data-ar="حلول متكاملة" data-en="Integrated Solutions">Integrated Solutions</h4>
+<p data-ar="من الدراسة إلى التنفيذ إلى الإدارة في مكان واحد" data-en="From research to execution to management — all in one place">From research to execution to management — all in one place</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Services Section -->
+<section class="services" id="services">
+<div class="container">
+<h2 data-ar="خدماتنا الرئيسية" data-en="Our Core Services">Our Core Services</h2>
+<p class="section-desc" data-ar="نقدم مجموعة متكاملة من الخدمات الاستشارية لضمان نجاح مشروعك من الفكرة إلى التنفيذ" data-en="We offer a comprehensive range of consulting services to ensure your project's success from idea to execution">We offer a comprehensive range of consulting services to ensure your project's success from idea to execution</p>
+<!-- Service 1: Operational Partnership -->
+<div class="service-block" id="service-operations">
+<div class="service-header">
+<div class="service-icon-large">⚙️</div>
+<div>
+<h3 data-ar="الشراكة التشغيلية" data-en="Operational Partnership">Operational Partnership</h3>
+<p class="service-tagline" data-ar="إدارة احترافية مقابل مشاركة الأرباح" data-en="Professional management through profit sharing">Professional management through profit sharing</p>
+</div>
+</div>
+<p class="service-desc" data-ar="نتولى إدارة عملياتك اليومية بالكامل مقابل حصة من الأرباح، مما يضمن التزامنا الكامل بنجاح مشروعك." data-en="We handle your daily operations entirely in exchange for a share of the profits, ensuring our full commitment to your project's success.">We handle your daily operations entirely in exchange for a share of the profits, ensuring our full commitment to your project's success.</p>
+<!-- Auth-gated Request Area -->
+<div class="service-gate">
+<div class="service-gate-preview">
+<div class="gate-preview-item"><span class="gate-check">✓</span> <span data-ar="تقييم وتحليل الفجوات" data-en="Assessment &amp; gap analysis">Assessment &amp; gap analysis</span></div>
+<div class="gate-preview-item"><span class="gate-check">✓</span> <span data-ar="صياغة اتفاقية الشراكة" data-en="Partnership agreement drafting">Partnership agreement drafting</span></div>
+<div class="gate-preview-item"><span class="gate-check">✓</span> <span data-ar="إدارة العمليات اليومية" data-en="Daily operations management">Daily operations management</span></div>
+<div class="gate-preview-item"><span class="gate-check">✓</span> <span data-ar="توزيع الأرباح الشهري" data-en="Monthly profit distribution">Monthly profit distribution</span></div>
+</div>
+<div class="service-gate-cta">
+<div class="gate-lock-icon">
+<svg fill="none" height="28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="28"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+</div>
+<p class="gate-message" data-ar="سجّل دخولك أو أنشئ حساباً لطلب هذه الخدمة والوصول إلى لوحة الشراكة." data-en="Sign in or create an account to request this service and access your partnership dashboard.">Sign in or create an account to request this service and access your partnership dashboard.</p>
+<button class="btn btn-primary service-request-btn" data-ar="اطلب الشراكة التشغيلية" data-en="Request Operational Partnership" onclick="handleServiceRequest('partnership')">Request Operational Partnership</button>
+</div>
+</div>
+<!-- Hidden original timeline (kept for reference, not rendered) -->
 
-    <!-- Hero Section -->
-    <section class="hero" id="hero">
-        <div class="hero-bg">
-            <img src="assets/yen-vu-OEt8lStU-wA-unsplash.jpg" alt="workspace">
-            <div class="hero-overlay"></div>
-        </div>
-        <div class="hero-content">
-            <h1 class="hero-title" data-en="Turn Your Idea Into a Profitable Reality" data-ar="حوّل فكرتك إلى واقع مربح">Turn Your Idea Into a Profitable Reality</h1>
-            <p class="hero-subtitle" data-en="Comprehensive consulting and advanced operations management for your business success in Kuwait" data-ar="استشارات شاملة وإدارة عمليات متقدمة لنجاح عملك في الكويت">Comprehensive consulting and advanced operations management for your business success in Kuwait</p>
-            <button class="btn btn-primary" onclick="scrollToSection('contact')" data-en="Request a Free Consultation" data-ar="اطلب استشارة مجانية">Request a Free Consultation</button>
-        </div>
-    </section>
+</div>
+<!-- Service 2: Feasibility Studies -->
+<div class="service-block" id="service-feasibility">
+<div class="service-header">
+<div class="service-icon-large">📊</div>
+<div>
+<h3 data-ar="دراسات الجدوى" data-en="Feasibility Studies">Feasibility Studies</h3>
+<p class="service-tagline" data-ar="تحليل شامل لضمان نجاح استثمارك" data-en="Comprehensive analysis to ensure your investment success">Comprehensive analysis to ensure your investment success</p>
+</div>
+</div>
+<p class="service-desc" data-ar="نقدم دراسة جدوى شاملة تغطي تحليل السوق والتوقعات المالية وتقييم المخاطر لمساعدتك على الاستثمار بثقة." data-en="We provide a comprehensive feasibility study covering market analysis, financial projections, and risk assessment to help you invest with confidence.">We provide a comprehensive feasibility study covering market analysis, financial projections, and risk assessment to help you invest with confidence.</p>
+<!-- Auth-gated Request Area -->
+<div class="service-gate">
+<div class="service-gate-preview">
+<div class="gate-preview-item"><span class="gate-check">✓</span> <span data-ar="تحليل مفصّل للسوق والمنافسين" data-en="Detailed market &amp; competitor analysis">Detailed market &amp; competitor analysis</span></div>
+<div class="gate-preview-item"><span class="gate-check">✓</span> <span data-ar="الدراسة المالية (IRR / NPV)" data-en="Financial study (IRR / NPV)">Financial study (IRR / NPV)</span></div>
+<div class="gate-preview-item"><span class="gate-check">✓</span> <span data-ar="تقييم المخاطر والفرص" data-en="Risk &amp; opportunity assessment">Risk &amp; opportunity assessment</span></div>
+<div class="gate-preview-item"><span class="gate-check">✓</span> <span data-ar="خيار الدراسة مع التنفيذ الكامل" data-en="Study + full execution option available">Study + full execution option available</span></div>
+</div>
+<div class="service-gate-cta">
+<div class="gate-lock-icon">
+<svg fill="none" height="28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="28"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+</div>
+<p class="gate-message" data-ar="سجّل دخولك أو أنشئ حساباً لطلب دراسة الجدوى ومتابعة مشروعك عبر لوحة التحكم." data-en="Sign in or create an account to request a feasibility study and track your project through your dashboard.">Sign in or create an account to request a feasibility study and track your project through your dashboard.</p>
+<button class="btn btn-primary service-request-btn" data-ar="اطلب دراسة الجدوى" data-en="Request Feasibility Study" onclick="handleServiceRequest('feasibility')">Request Feasibility Study</button>
+</div>
+</div>
+<!-- Hidden original tabs (kept for reference, not rendered) -->
 
-    <!-- Statistics Bar -->
-    <section class="stats-bar">
-        <div class="container">
-            <div class="stat-item">
-                <h3 data-target="450">0</h3>
-                <p data-en="Projects Completed" data-ar="مشروع منجز">Projects Completed</p>
-            </div>
-            <div class="stat-item">
-                <h3 data-target="12">0</h3>
-                <p data-en="Years of Experience" data-ar="سنة خبرة">Years of Experience</p>
-            </div>
-            <div class="stat-item">
-                <h3 data-target="250">0</h3>
-                <p data-en="Satisfied Clients" data-ar="عميل راضي">Satisfied Clients</p>
-            </div>
-            <div class="stat-item">
-                <h3 data-target="98" data-suffix="%">0</h3>
-                <p data-en="Success Rate" data-ar="معدل النجاح">Success Rate</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="about" id="about">
-        <div class="container">
-            <div class="about-content">
-                <h2 data-en="About Us" data-ar="من نحن">About Us</h2>
-                <p class="section-desc" data-en="We are BADIA, specialized in developing and managing commercial projects with high efficiency. With over 12 years of experience in the Kuwaiti market, we have helped hundreds of business owners and companies achieve their financial goals." data-ar="نحن شركة بادية، متخصصة في تطوير وإدارة المشاريع التجارية بكفاءة عالية. مع أكثر من 12 سنة من الخبرة في السوق الكويتي، قمنا بمساعدة مئات رجال الأعمال والشركات على تحقيق أهدافهم المالية.">We are BADIA, specialized in developing and managing commercial projects with high efficiency. With over 12 years of experience in the Kuwaiti market, we have helped hundreds of business owners and companies achieve their financial goals.</p>
-                <div class="about-grid">
-                    <div class="about-card">
-                        <div class="about-icon">🎯</div>
-                        <h3 data-en="Our Vision" data-ar="رؤيتنا">Our Vision</h3>
-                        <p data-en="To be the trusted partner for institutions and individuals in achieving sustainable growth" data-ar="أن نكون الشريك الموثوق للمؤسسات والأفراد في تحقيق النمو المستدام">To be the trusted partner for institutions and individuals in achieving sustainable growth</p>
-                    </div>
-                    <div class="about-card">
-                        <div class="about-icon">💼</div>
-                        <h3 data-en="Our Mission" data-ar="رسالتنا">Our Mission</h3>
-                        <p data-en="Delivering professional consulting and practical solutions that guarantee real financial returns" data-ar="تقديم استشارات احترافية وحلول عملية تضمن عائداً مالياً محققاً">Delivering professional consulting and practical solutions that guarantee real financial returns</p>
-                    </div>
-                    <div class="about-card">
-                        <div class="about-icon">✨</div>
-                        <h3 data-en="Our Values" data-ar="قيمنا">Our Values</h3>
-                        <p data-en="Transparency, professionalism, and commitment to measurable results" data-ar="الشفافية والمهنية والالتزام بنتائج قابلة للقياس">Transparency, professionalism, and commitment to measurable results</p>
-                    </div>
-                </div>
-
-                <!-- Why Choose Us USP -->
-                <div class="usp-section">
-                    <h3 data-en="Why Choose Us?" data-ar="لماذا تختارنا؟">Why Choose Us?</h3>
-                    <div class="usp-grid">
-                        <div class="usp-item">
-                            <div class="usp-number">01</div>
-                            <h4 data-en="Deep Local Expertise" data-ar="خبرة محلية عميقة">Deep Local Expertise</h4>
-                            <p data-en="Comprehensive understanding of the Kuwaiti market and regulatory requirements" data-ar="فهم شامل للسوق الكويتي واللوائح التنظيمية">Comprehensive understanding of the Kuwaiti market and regulatory requirements</p>
-                        </div>
-                        <div class="usp-item">
-                            <div class="usp-number">02</div>
-                            <h4 data-en="Guaranteed Results" data-ar="نتائج مضمونة">Guaranteed Results</h4>
-                            <p data-en="We work on a profit-sharing model to ensure our commitment to your success" data-ar="نعمل بنظام مشاركة الأرباح لضمان التزامنا بنجاحك">We work on a profit-sharing model to ensure our commitment to your success</p>
-                        </div>
-                        <div class="usp-item">
-                            <div class="usp-number">03</div>
-                            <h4 data-en="Integrated Solutions" data-ar="حلول متكاملة">Integrated Solutions</h4>
-                            <p data-en="From research to execution to management — all in one place" data-ar="من الدراسة إلى التنفيذ إلى الإدارة في مكان واحد">From research to execution to management — all in one place</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section class="services" id="services">
-        <div class="container">
-            <h2 data-en="Our Core Services" data-ar="خدماتنا الرئيسية">Our Core Services</h2>
-            <p class="section-desc" data-en="We offer a comprehensive range of consulting services to ensure your project's success from idea to execution" data-ar="نقدم مجموعة متكاملة من الخدمات الاستشارية لضمان نجاح مشروعك من الفكرة إلى التنفيذ">We offer a comprehensive range of consulting services to ensure your project's success from idea to execution</p>
-
-            <!-- Service 1: Operational Partnership -->
-            <div class="service-block" id="service-operations">
-                <div class="service-header">
-                    <div class="service-icon-large">⚙️</div>
-                    <div>
-                        <h3 data-en="Operational Partnership" data-ar="الشراكة التشغيلية">Operational Partnership</h3>
-                        <p class="service-tagline" data-en="Professional management through profit sharing" data-ar="إدارة احترافية مقابل مشاركة الأرباح">Professional management through profit sharing</p>
-                    </div>
-                </div>
-                <p class="service-desc" data-en="We handle your daily operations entirely in exchange for a share of the profits, ensuring our full commitment to your project's success." data-ar="نتولى إدارة عملياتك اليومية بالكامل مقابل حصة من الأرباح، مما يضمن التزامنا الكامل بنجاح مشروعك.">We handle your daily operations entirely in exchange for a share of the profits, ensuring our full commitment to your project's success.</p>
-
-                <!-- Process Timeline -->
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-marker">1</div>
-                        <div class="timeline-content">
-                            <h4 data-en="Assessment" data-ar="التقييم">Assessment</h4>
-                            <p data-en="Comprehensive analysis of current operations and identifying improvement opportunities" data-ar="تحليل شامل للعمليات الحالية وتحديد فرص التحسين">Comprehensive analysis of current operations and identifying improvement opportunities</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker">2</div>
-                        <div class="timeline-content">
-                            <h4 data-en="Agreement" data-ar="الاتفاقية">Agreement</h4>
-                            <p data-en="Setting partnership terms and sharing ratios with full transparency" data-ar="وضع شروط الشراكة ونسب المشاركة بشفافية كاملة">Setting partnership terms and sharing ratios with full transparency</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker">3</div>
-                        <div class="timeline-content">
-                            <h4 data-en="Operations" data-ar="التشغيل">Operations</h4>
-                            <p data-en="Professional daily management with regular performance reports" data-ar="إدارة يومية احترافية مع تقارير أداء دورية">Professional daily management with regular performance reports</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker">4</div>
-                        <div class="timeline-content">
-                            <h4 data-en="Profit Sharing" data-ar="مشاركة الأرباح">Profit Sharing</h4>
-                            <p data-en="Distributing profits per agreement with results review" data-ar="توزيع الأرباح وفق الاتفاقية مع مراجعة النتائج">Distributing profits per agreement with results review</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Service 2: Feasibility Studies -->
-            <div class="service-block" id="service-feasibility">
-                <div class="service-header">
-                    <div class="service-icon-large">📊</div>
-                    <div>
-                        <h3 data-en="Feasibility Studies" data-ar="دراسات الجدوى">Feasibility Studies</h3>
-                        <p class="service-tagline" data-en="Comprehensive analysis to ensure your investment success" data-ar="تحليل شامل لضمان نجاح استثمارك">Comprehensive analysis to ensure your investment success</p>
-                    </div>
-                </div>
-
-                <!-- Service Tabs -->
-                <div class="service-tabs">
-                    <button class="tab-btn active" data-tab="study-only" data-en="Study Only" data-ar="دراسة فقط">Study Only</button>
-                    <button class="tab-btn" data-tab="study-exec" data-en="Study + Execution" data-ar="دراسة + تنفيذ">Study + Execution</button>
-                </div>
-
-                <div class="tab-content active" id="study-only">
-                    <p data-en="We provide a comprehensive feasibility study covering all aspects to help you make the right decision." data-ar="نقدم دراسة جدوى شاملة تغطي جميع الجوانب لمساعدتك على اتخاذ القرار الصحيح.">We provide a comprehensive feasibility study covering all aspects to help you make the right decision.</p>
-                    <ul class="checklist">
-                        <li data-en="Detailed market analysis" data-ar="تحليل السوق المفصّل">Detailed market analysis</li>
-                        <li data-en="Financial study (IRR / NPV)" data-ar="الدراسة المالية (IRR / NPV)">Financial study (IRR / NPV)</li>
-                        <li data-en="Risk and opportunity assessment" data-ar="تقييم المخاطر والفرص">Risk and opportunity assessment</li>
-                        <li data-en="Competitor analysis" data-ar="تحليل المنافسين">Competitor analysis</li>
-                        <li data-en="Initial marketing plan" data-ar="خطة التسويق المبدئية">Initial marketing plan</li>
-                    </ul>
-                </div>
-                <div class="tab-content" id="study-exec">
-                    <p data-en="Everything in the study plus project execution and supervision until the operational stage." data-ar="كل ما في الدراسة بالإضافة إلى تنفيذ المشروع والإشراف عليه حتى مرحلة التشغيل.">Everything in the study plus project execution and supervision until the operational stage.</p>
-                    <ul class="checklist">
-                        <li data-en="All complete study outputs" data-ar="جميع مخرجات الدراسة الكاملة">All complete study outputs</li>
-                        <li data-en="Detailed execution plan" data-ar="خطة تنفيذ مفصّلة">Detailed execution plan</li>
-                        <li data-en="Execution and establishment supervision" data-ar="إشراف على التنفيذ والتأسيس">Execution and establishment supervision</li>
-                        <li data-en="Team training" data-ar="تدريب فريق العمل">Team training</li>
-                        <li data-en="Post-launch follow-up (3 months)" data-ar="متابعة ما بعد الإطلاق (3 أشهر)">Post-launch follow-up (3 months)</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Service 3: Accounting -->
-            <div class="service-block" id="service-accounting">
-                <div class="service-header">
-                    <div class="service-icon-large">📈</div>
-                    <div>
-                        <h3 data-en="Accounting Services" data-ar="الخدمات المحاسبية">Accounting Services</h3>
-                        <p class="service-tagline" data-en="Comprehensive accounting solutions for your business" data-ar="حلول محاسبية متكاملة لأعمالك">Comprehensive accounting solutions for your business</p>
-                    </div>
-                </div>
-
-                <!-- Pricing Grid -->
-                <div class="pricing-grid">
-                    <div class="pricing-card">
-                        <div class="pricing-badge" data-en="Monthly" data-ar="شهري">Monthly</div>
-                        <h4 data-en="Monthly Package" data-ar="الباقة الشهرية">Monthly Package</h4>
-                        <div class="pricing-price">150 <span data-en="KWD / month" data-ar="د.ك / شهر">KWD / month</span></div>
-                        <ul class="pricing-features">
-                            <li data-en="Bookkeeping" data-ar="مسك الدفاتر المحاسبية">Bookkeeping</li>
-                            <li data-en="Monthly report preparation" data-ar="إعداد التقارير الشهرية">Monthly report preparation</li>
-                            <li data-en="Receivables tracking" data-ar="متابعة الذمم المدينة">Receivables tracking</li>
-                            <li data-en="Phone support" data-ar="دعم فني عبر الهاتف">Phone support</li>
-                        </ul>
-                        <button class="btn btn-outline" onclick="scrollToSection('contact')" data-en="Subscribe Now" data-ar="اشترك الآن">Subscribe Now</button>
-                    </div>
-                    <div class="pricing-card featured">
-                        <div class="pricing-badge" data-en="Annual" data-ar="سنوي">Annual</div>
-                        <h4 data-en="Annual Package" data-ar="الباقة السنوية">Annual Package</h4>
-                        <div class="pricing-price">1,500 <span data-en="KWD / year" data-ar="د.ك / سنة">KWD / year</span></div>
-                        <p class="pricing-save" data-en="Save 300 KWD" data-ar="وفّر 300 د.ك">Save 300 KWD</p>
-                        <ul class="pricing-features">
-                            <li data-en="All monthly package features" data-ar="جميع مزايا الباقة الشهرية">All monthly package features</li>
-                            <li data-en="Tax return preparation" data-ar="إعداد الإقرارات الضريبية">Tax return preparation</li>
-                            <li data-en="Quarterly financial analysis" data-ar="تحليل مالي ربع سنوي">Quarterly financial analysis</li>
-                            <li data-en="Unlimited tax consulting" data-ar="استشارات ضريبية غير محدودة">Unlimited tax consulting</li>
-                            <li data-en="Accounting software training" data-ar="تدريب على البرامج المحاسبية">Accounting software training</li>
-                        </ul>
-                        <button class="btn btn-primary" onclick="scrollToSection('contact')" data-en="Subscribe Now" data-ar="اشترك الآن">Subscribe Now</button>
-                    </div>
-                </div>
-
-                <!-- Compatible Software -->
-                <div class="software-section">
-                    <h4 data-en="Compatible Software" data-ar="البرامج المتوافقة">Compatible Software</h4>
-                    <div class="software-grid">
-                        <div class="software-item">
-                            <div class="software-icon">Z</div>
-                            <span>Zoho</span>
-                        </div>
-                        <div class="software-item">
-                            <div class="software-icon">Q</div>
-                            <span>QuickBooks</span>
-                        </div>
-                        <div class="software-item">
-                            <div class="software-icon">O</div>
-                            <span>Odoo</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Portfolio Section -->
-    <section class="portfolio" id="portfolio">
-        <div class="container">
-            <h2 data-en="Our Latest Work" data-ar="أحدث أعمالنا">Our Latest Work</h2>
-            <p class="section-desc" data-en="Examples of our successful projects across various sectors" data-ar="نماذج من مشاريعنا الناجحة في مختلف القطاعات">Examples of our successful projects across various sectors</p>
-
-            <!-- Filter Buttons -->
-            <div class="portfolio-filters">
-                <button class="filter-btn active" data-filter="all" data-en="All" data-ar="الكل">All</button>
-                <button class="filter-btn" data-filter="restaurants" data-en="Restaurants" data-ar="مطاعم">Restaurants</button>
-                <button class="filter-btn" data-filter="retail" data-en="Retail" data-ar="تجزئة">Retail</button>
-                <button class="filter-btn" data-filter="services" data-en="Services" data-ar="خدمات">Services</button>
-            </div>
-
-            <div class="portfolio-grid">
-                <div class="portfolio-item" data-category="restaurants">
-                    <div class="portfolio-image"><div class="portfolio-placeholder">🍽️</div></div>
-                    <div class="portfolio-info">
-                        <h3 data-en="Fine Dining Restaurant" data-ar="مطعم فاخر">Fine Dining Restaurant</h3>
-                        <p data-en="Restructuring and 45% profit increase" data-ar="إعادة هيكلة وزيادة الأرباح بنسبة 45%">Restructuring and 45% profit increase</p>
-                        <span class="portfolio-tag" data-en="Restaurants" data-ar="مطاعم">Restaurants</span>
-                    </div>
-                </div>
-                <div class="portfolio-item" data-category="retail">
-                    <div class="portfolio-image"><div class="portfolio-placeholder">🏪</div></div>
-                    <div class="portfolio-info">
-                        <h3 data-en="Retail Store" data-ar="محل تجزئة">Retail Store</h3>
-                        <p data-en="Practical consulting and business model development" data-ar="استشارة عملية وتطوير نموذج العمل">Practical consulting and business model development</p>
-                        <span class="portfolio-tag" data-en="Retail" data-ar="تجزئة">Retail</span>
-                    </div>
-                </div>
-                <div class="portfolio-item" data-category="services">
-                    <div class="portfolio-image"><div class="portfolio-placeholder">🏗️</div></div>
-                    <div class="portfolio-info">
-                        <h3 data-en="Construction Contractor" data-ar="مقاول بناء">Construction Contractor</h3>
-                        <p data-en="Comprehensive feasibility study and successful financing" data-ar="دراسة جدوى شاملة وتمويل ناجح">Comprehensive feasibility study and successful financing</p>
-                        <span class="portfolio-tag" data-en="Services" data-ar="خدمات">Services</span>
-                    </div>
-                </div>
-                <div class="portfolio-item" data-category="services">
-                    <div class="portfolio-image"><div class="portfolio-placeholder">📋</div></div>
-                    <div class="portfolio-info">
-                        <h3 data-en="Consulting Services" data-ar="خدمات استشارية">Consulting Services</h3>
-                        <p data-en="Profitability improvement and regional expansion" data-ar="تحسين الربحية والتوسع الإقليمي">Profitability improvement and regional expansion</p>
-                        <span class="portfolio-tag" data-en="Services" data-ar="خدمات">Services</span>
-                    </div>
-                </div>
-                <div class="portfolio-item" data-category="retail">
-                    <div class="portfolio-image"><div class="portfolio-placeholder">🛒</div></div>
-                    <div class="portfolio-info">
-                        <h3 data-en="E-commerce Store" data-ar="متجر إلكتروني">E-commerce Store</h3>
-                        <p data-en="Building an effective marketing model and rapid growth" data-ar="بناء نموذج تسويقي فعال ونمو سريع">Building an effective marketing model and rapid growth</p>
-                        <span class="portfolio-tag" data-en="Retail" data-ar="تجزئة">Retail</span>
-                    </div>
-                </div>
-                <div class="portfolio-item" data-category="restaurants">
-                    <div class="portfolio-image"><div class="portfolio-placeholder">☕</div></div>
-                    <div class="portfolio-info">
-                        <h3 data-en="Coffee Chain" data-ar="سلسلة مقاهي">Coffee Chain</h3>
-                        <p data-en="Operations improvement and accounting automation" data-ar="تحسين العمليات والأتمتة المحاسبية">Operations improvement and accounting automation</p>
-                        <span class="portfolio-tag" data-en="Restaurants" data-ar="مطاعم">Restaurants</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials" id="testimonials">
-        <div class="container">
-            <h2 data-en="Client Testimonials" data-ar="آراء عملائنا">Client Testimonials</h2>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
-                    <p data-en="&quot;We worked with the team on three different projects and each time they delivered high-quality results on time.&quot;" data-ar="&quot;تعاملنا مع الفريق في ثلاث مشاريع مختلفة وفي كل مرة أسلموا النتائج بجودة عالية وفي المواعيد المحددة&quot;">"We worked with the team on three different projects and each time they delivered high-quality results on time."</p>
-                    <div class="testimonial-author">
-                        <h4 data-en="Ahmed Al-Abdulaziz" data-ar="أحمد العبدالعزيز">Ahmed Al-Abdulaziz</h4>
-                        <p class="role" data-en="Fine dining owner" data-ar="مالك مطعم فاخر">Fine dining owner</p>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
-                    <p data-en="&quot;The study they provided helped me make the right investment decision and avoid significant losses.&quot;" data-ar="&quot;الدراسة التي قدموها لي ساعدتني على اتخاذ قرار استثماري صحيح وتجنب خسائر كبيرة&quot;">"The study they provided helped me make the right investment decision and avoid significant losses."</p>
-                    <div class="testimonial-author">
-                        <h4 data-en="Mohammed Al-Saeed" data-ar="محمد السعيد">Mohammed Al-Saeed</h4>
-                        <p class="role" data-en="Investor" data-ar="مستثمر">Investor</p>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
-                    <p data-en="&quot;A very professional team that deeply understands the Kuwaiti market needs and provides practical solutions.&quot;" data-ar="&quot;فريق احترافي جداً، يفهمون احتياجات السوق الكويتي بشكل عميق ويقدمون حلول عملية&quot;">"A very professional team that deeply understands the Kuwaiti market needs and provides practical solutions."</p>
-                    <div class="testimonial-author">
-                        <h4 data-en="Fatima Al-Mohammed" data-ar="فاطمة المحمد">Fatima Al-Mohammed</h4>
-                        <p class="role" data-en="Services company manager" data-ar="مديرة شركة خدمات">Services company manager</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Blog Section -->
-    <section class="blog" id="blog">
-        <div class="container">
-            <h2 data-en="Blog" data-ar="المدونة">Blog</h2>
-            <p class="section-desc" data-en="Articles and tips for entrepreneurs in Kuwait" data-ar="مقالات ونصائح لرواد الأعمال في الكويت">Articles and tips for entrepreneurs in Kuwait</p>
-            <div class="blog-grid">
-                <article class="blog-card">
-                    <div class="blog-image"><div class="blog-placeholder">📝</div></div>
-                    <div class="blog-body">
-                        <span class="blog-date" data-en="Coming Soon" data-ar="قريباً">Coming Soon</span>
-                        <h3 data-en="How to Start Your First Project in Kuwait" data-ar="كيف تبدأ مشروعك الأول في الكويت">How to Start Your First Project in Kuwait</h3>
-                        <p data-en="A comprehensive guide for beginner entrepreneurs on the essential steps to establishing a successful project." data-ar="دليل شامل لرواد الأعمال المبتدئين حول الخطوات الأساسية لتأسيس مشروع ناجح.">A comprehensive guide for beginner entrepreneurs on the essential steps to establishing a successful project.</p>
-                    </div>
-                </article>
-                <article class="blog-card">
-                    <div class="blog-image"><div class="blog-placeholder">📊</div></div>
-                    <div class="blog-body">
-                        <span class="blog-date" data-en="Coming Soon" data-ar="قريباً">Coming Soon</span>
-                        <h3 data-en="The Importance of Feasibility Studies Before Investing" data-ar="أهمية دراسة الجدوى قبل الاستثمار">The Importance of Feasibility Studies Before Investing</h3>
-                        <p data-en="Why feasibility studies are the most important step before investing your money in any new project." data-ar="لماذا تعتبر دراسة الجدوى الخطوة الأهم قبل ضخ أموالك في أي مشروع جديد.">Why feasibility studies are the most important step before investing your money in any new project.</p>
-                    </div>
-                </article>
-                <article class="blog-card">
-                    <div class="blog-image"><div class="blog-placeholder">💡</div></div>
-                    <div class="blog-body">
-                        <span class="blog-date" data-en="Coming Soon" data-ar="قريباً">Coming Soon</span>
-                        <h3 data-en="5 Common Mistakes in Restaurant Management" data-ar="5 أخطاء شائعة في إدارة المطاعم">5 Common Mistakes in Restaurant Management</h3>
-                        <p data-en="Learn about the mistakes restaurant owners make and how to avoid them for success." data-ar="تعرف على الأخطاء التي يقع فيها أصحاب المطاعم وكيفية تجنبها لتحقيق النجاح.">Learn about the mistakes restaurant owners make and how to avoid them for success.</p>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section class="contact" id="contact">
-        <div class="container">
-            <h2 data-en="Contact Us" data-ar="تواصل معنا">Contact Us</h2>
-            <div class="contact-wrapper">
-                <form class="contact-form" id="contactForm">
-                    <div class="form-group">
-                        <input type="text" id="contactName" data-placeholder-en="Your Full Name" data-placeholder-ar="اسمك الكامل" placeholder="Your Full Name" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="contactEmail" data-placeholder-en="Your Email" data-placeholder-ar="بريدك الإلكتروني" placeholder="Your Email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="tel" id="contactPhone" data-placeholder-en="Phone Number" data-placeholder-ar="رقم الهاتف" placeholder="Phone Number" required>
-                    </div>
-                    <div class="form-group">
-                        <select id="contactService">
-                            <option value="" data-en="Select Required Service" data-ar="اختر الخدمة المطلوبة">Select Required Service</option>
-                            <option value="feasibility" data-en="Feasibility Study" data-ar="دراسة جدوى">Feasibility Study</option>
-                            <option value="operations" data-en="Operational Partnership" data-ar="شراكة تشغيلية">Operational Partnership</option>
-                            <option value="accounting" data-en="Accounting Services" data-ar="خدمات محاسبية">Accounting Services</option>
-                            <option value="other" data-en="Other" data-ar="أخرى">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="contactMessage" data-placeholder-en="Your Message" data-placeholder-ar="رسالتك" placeholder="Your Message" rows="5" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="submitBtn" data-en="Send Message" data-ar="أرسل الرسالة">Send Message</button>
-                </form>
-
-                <div class="contact-info">
-                    <h3 data-en="Contact Information" data-ar="معلومات التواصل">Contact Information</h3>
-                    <div class="info-item">
-                        <span class="icon">📍</span>
-                        <div>
-                            <h4 data-en="Address" data-ar="العنوان">Address</h4>
-                            <p data-en="Kuwait, Sharq District" data-ar="الكويت، منطقة الشرق">Kuwait, Sharq District</p>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <span class="icon">📞</span>
-                        <div>
-                            <h4 data-en="Phone" data-ar="الهاتف">Phone</h4>
-                            <p>+96550897501</p>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <span class="icon">✉️</span>
-                        <div>
-                            <h4 data-en="Email" data-ar="البريد">Email</h4>
-                            <p>info@kbs-kuwait.com</p>
-                        </div>
-                    </div>
-                    <div class="social-links">
-                        <a href="#" class="social-btn">LinkedIn</a>
-                        <a href="#" class="social-btn">Instagram</a>
-                        <a href="https://wa.me/96597639999?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D8%A8%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9" class="social-btn whatsapp">WhatsApp</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Floating WhatsApp Button with pre-filled text -->
-    <a href="https://wa.me/96597639999?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D8%A8%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20%D8%AE%D8%AF%D9%85%D8%A7%D8%AA%D9%83%D9%85" class="whatsapp-float" title="Chat on WhatsApp" target="_blank" rel="noopener">
-        <span>💬</span>
-    </a>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <img src="assets/logo.png" alt="BADIA" class="footer-logo">
-                    <p data-en="Your trusted partner in the business world" data-ar="شريكك الموثوق في عالم الأعمال">Your trusted partner in the business world</p>
-                </div>
-                <div class="footer-links">
-                    <a href="#about" data-en="About Us" data-ar="من نحن">About Us</a>
-                    <a href="#services" data-en="Services" data-ar="الخدمات">Services</a>
-                    <a href="#portfolio" data-en="Portfolio" data-ar="الأعمال">Portfolio</a>
-                    <a href="#contact" data-en="Contact Us" data-ar="تواصل معنا">Contact Us</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p data-en="&copy; 2024 BADIA. All rights reserved." data-ar="&copy; 2024 بادية - BADIA. جميع الحقوق محفوظة.">&copy; 2024 BADIA. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+<div class="tab-content active" id="study-only">
+<p data-ar="نقدم دراسة جدوى شاملة تغطي جميع الجوانب لمساعدتك على اتخاذ القرار الصحيح." data-en="We provide a comprehensive feasibility study covering all aspects to help you make the right decision.">We provide a comprehensive feasibility study covering all aspects to help you make the right decision.</p>
+<ul class="checklist">
+<li data-ar="تحليل السوق المفصّل" data-en="Detailed market analysis">Detailed market analysis</li>
+<li data-ar="الدراسة المالية (IRR / NPV)" data-en="Financial study (IRR / NPV)">Financial study (IRR / NPV)</li>
+<li data-ar="تقييم المخاطر والفرص" data-en="Risk and opportunity assessment">Risk and opportunity assessment</li>
+<li data-ar="تحليل المنافسين" data-en="Competitor analysis">Competitor analysis</li>
+<li data-ar="خطة التسويق المبدئية" data-en="Initial marketing plan">Initial marketing plan</li>
+</ul>
+</div>
+<div class="tab-content" id="study-exec">
+<p data-ar="كل ما في الدراسة بالإضافة إلى تنفيذ المشروع والإشراف عليه حتى مرحلة التشغيل." data-en="Everything in the study plus project execution and supervision until the operational stage.">Everything in the study plus project execution and supervision until the operational stage.</p>
+<ul class="checklist">
+<li data-ar="جميع مخرجات الدراسة الكاملة" data-en="All complete study outputs">All complete study outputs</li>
+<li data-ar="خطة تنفيذ مفصّلة" data-en="Detailed execution plan">Detailed execution plan</li>
+<li data-ar="إشراف على التنفيذ والتأسيس" data-en="Execution and establishment supervision">Execution and establishment supervision</li>
+<li data-ar="تدريب فريق العمل" data-en="Team training">Team training</li>
+<li data-ar="متابعة ما بعد الإطلاق (3 أشهر)" data-en="Post-launch follow-up (3 months)">Post-launch follow-up (3 months)</li>
+</ul>
+</div>
+</div>
+<!-- Service 3: Accounting -->
+<div class="service-block" id="service-accounting">
+<div class="service-header">
+<div class="service-icon-large">📈</div>
+<div>
+<h3 data-ar="الخدمات المحاسبية" data-en="Accounting Services">Accounting Services</h3>
+<p class="service-tagline" data-ar="حلول محاسبية متكاملة لأعمالك" data-en="Comprehensive accounting solutions for your business">Comprehensive accounting solutions for your business</p>
+</div>
+</div>
+<!-- Pricing Grid -->
+<div class="pricing-grid">
+<div class="pricing-card">
+<div class="pricing-badge" data-ar="شهري" data-en="Monthly">Monthly</div>
+<h4 data-ar="الباقة الشهرية" data-en="Monthly Package">Monthly Package</h4>
+<div class="pricing-price">150 <span data-ar="د.ك / شهر" data-en="KWD / month">KWD / month</span></div>
+<ul class="pricing-features">
+<li data-ar="مسك الدفاتر المحاسبية" data-en="Bookkeeping">Bookkeeping</li>
+<li data-ar="إعداد التقارير الشهرية" data-en="Monthly report preparation">Monthly report preparation</li>
+<li data-ar="متابعة الذمم المدينة" data-en="Receivables tracking">Receivables tracking</li>
+<li data-ar="دعم فني عبر الهاتف" data-en="Phone support">Phone support</li>
+</ul>
+<button class="btn btn-outline" data-ar="اشترك الآن" data-en="Subscribe Now" onclick="scrollToSection('contact')">Subscribe Now</button>
+</div>
+<div class="pricing-card featured">
+<div class="pricing-badge" data-ar="سنوي" data-en="Annual">Annual</div>
+<h4 data-ar="الباقة السنوية" data-en="Annual Package">Annual Package</h4>
+<div class="pricing-price">1,500 <span data-ar="د.ك / سنة" data-en="KWD / year">KWD / year</span></div>
+<p class="pricing-save" data-ar="وفّر 300 د.ك" data-en="Save 300 KWD">Save 300 KWD</p>
+<ul class="pricing-features">
+<li data-ar="جميع مزايا الباقة الشهرية" data-en="All monthly package features">All monthly package features</li>
+<li data-ar="إعداد الإقرارات الضريبية" data-en="Tax return preparation">Tax return preparation</li>
+<li data-ar="تحليل مالي ربع سنوي" data-en="Quarterly financial analysis">Quarterly financial analysis</li>
+<li data-ar="استشارات ضريبية غير محدودة" data-en="Unlimited tax consulting">Unlimited tax consulting</li>
+<li data-ar="تدريب على البرامج المحاسبية" data-en="Accounting software training">Accounting software training</li>
+</ul>
+<button class="btn btn-primary" data-ar="اشترك الآن" data-en="Subscribe Now" onclick="scrollToSection('contact')">Subscribe Now</button>
+</div>
+</div>
+<!-- Compatible Software -->
+<div class="software-section">
+<h4 data-ar="البرامج المتوافقة" data-en="Compatible Software">Compatible Software</h4>
+<div class="software-grid">
+<div class="software-item">
+<div class="software-icon">Z</div>
+<span>Zoho</span>
+</div>
+<div class="software-item">
+<div class="software-icon">Q</div>
+<span>QuickBooks</span>
+</div>
+<div class="software-item">
+<div class="software-icon">O</div>
+<span>Odoo</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Portfolio Section -->
+<section class="portfolio" id="portfolio">
+<div class="container">
+<h2 data-ar="أحدث أعمالنا" data-en="Our Latest Work">Our Latest Work</h2>
+<p class="section-desc" data-ar="نماذج من مشاريعنا الناجحة في مختلف القطاعات" data-en="Examples of our successful projects across various sectors">Examples of our successful projects across various sectors</p>
+<!-- Filter Buttons -->
+<div class="portfolio-filters">
+<button class="filter-btn active" data-ar="الكل" data-en="All" data-filter="all">All</button>
+<button class="filter-btn" data-ar="مطاعم" data-en="Restaurants" data-filter="restaurants">Restaurants</button>
+<button class="filter-btn" data-ar="تجزئة" data-en="Retail" data-filter="retail">Retail</button>
+<button class="filter-btn" data-ar="خدمات" data-en="Services" data-filter="services">Services</button>
+</div>
+<div class="portfolio-grid">
+<div class="portfolio-item" data-category="restaurants">
+<div class="portfolio-image"><div class="portfolio-placeholder">🍽️</div></div>
+<div class="portfolio-info">
+<h3 data-ar="مطعم فاخر" data-en="Fine Dining Restaurant">Fine Dining Restaurant</h3>
+<p data-ar="إعادة هيكلة وزيادة الأرباح بنسبة 45%" data-en="Restructuring and 45% profit increase">Restructuring and 45% profit increase</p>
+<span class="portfolio-tag" data-ar="مطاعم" data-en="Restaurants">Restaurants</span>
+</div>
+</div>
+<div class="portfolio-item" data-category="retail">
+<div class="portfolio-image"><div class="portfolio-placeholder">🏪</div></div>
+<div class="portfolio-info">
+<h3 data-ar="محل تجزئة" data-en="Retail Store">Retail Store</h3>
+<p data-ar="استشارة عملية وتطوير نموذج العمل" data-en="Practical consulting and business model development">Practical consulting and business model development</p>
+<span class="portfolio-tag" data-ar="تجزئة" data-en="Retail">Retail</span>
+</div>
+</div>
+<div class="portfolio-item" data-category="services">
+<div class="portfolio-image"><div class="portfolio-placeholder">🏗️</div></div>
+<div class="portfolio-info">
+<h3 data-ar="مقاول بناء" data-en="Construction Contractor">Construction Contractor</h3>
+<p data-ar="دراسة جدوى شاملة وتمويل ناجح" data-en="Comprehensive feasibility study and successful financing">Comprehensive feasibility study and successful financing</p>
+<span class="portfolio-tag" data-ar="خدمات" data-en="Services">Services</span>
+</div>
+</div>
+<div class="portfolio-item" data-category="services">
+<div class="portfolio-image"><div class="portfolio-placeholder">📋</div></div>
+<div class="portfolio-info">
+<h3 data-ar="خدمات استشارية" data-en="Consulting Services">Consulting Services</h3>
+<p data-ar="تحسين الربحية والتوسع الإقليمي" data-en="Profitability improvement and regional expansion">Profitability improvement and regional expansion</p>
+<span class="portfolio-tag" data-ar="خدمات" data-en="Services">Services</span>
+</div>
+</div>
+<div class="portfolio-item" data-category="retail">
+<div class="portfolio-image"><div class="portfolio-placeholder">🛒</div></div>
+<div class="portfolio-info">
+<h3 data-ar="متجر إلكتروني" data-en="E-commerce Store">E-commerce Store</h3>
+<p data-ar="بناء نموذج تسويقي فعال ونمو سريع" data-en="Building an effective marketing model and rapid growth">Building an effective marketing model and rapid growth</p>
+<span class="portfolio-tag" data-ar="تجزئة" data-en="Retail">Retail</span>
+</div>
+</div>
+<div class="portfolio-item" data-category="restaurants">
+<div class="portfolio-image"><div class="portfolio-placeholder">☕</div></div>
+<div class="portfolio-info">
+<h3 data-ar="سلسلة مقاهي" data-en="Coffee Chain">Coffee Chain</h3>
+<p data-ar="تحسين العمليات والأتمتة المحاسبية" data-en="Operations improvement and accounting automation">Operations improvement and accounting automation</p>
+<span class="portfolio-tag" data-ar="مطاعم" data-en="Restaurants">Restaurants</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials Section -->
+<section class="testimonials" id="testimonials">
+<div class="container">
+<h2 data-ar="آراء عملائنا" data-en="Client Testimonials">Client Testimonials</h2>
+<div class="testimonials-grid">
+<div class="testimonial-card">
+<div class="stars">★★★★★</div>
+<p data-ar='"تعاملنا مع الفريق في ثلاث مشاريع مختلفة وفي كل مرة أسلموا النتائج بجودة عالية وفي المواعيد المحددة"' data-en='"We worked with the team on three different projects and each time they delivered high-quality results on time."'>"We worked with the team on three different projects and each time they delivered high-quality results on time."</p>
+<div class="testimonial-author">
+<h4 data-ar="أحمد العبدالعزيز" data-en="Ahmed Al-Abdulaziz">Ahmed Al-Abdulaziz</h4>
+<p class="role" data-ar="مالك مطعم فاخر" data-en="Fine dining owner">Fine dining owner</p>
+</div>
+</div>
+<div class="testimonial-card">
+<div class="stars">★★★★★</div>
+<p data-ar='"الدراسة التي قدموها لي ساعدتني على اتخاذ قرار استثماري صحيح وتجنب خسائر كبيرة"' data-en='"The study they provided helped me make the right investment decision and avoid significant losses."'>"The study they provided helped me make the right investment decision and avoid significant losses."</p>
+<div class="testimonial-author">
+<h4 data-ar="محمد السعيد" data-en="Mohammed Al-Saeed">Mohammed Al-Saeed</h4>
+<p class="role" data-ar="مستثمر" data-en="Investor">Investor</p>
+</div>
+</div>
+<div class="testimonial-card">
+<div class="stars">★★★★★</div>
+<p data-ar='"فريق احترافي جداً، يفهمون احتياجات السوق الكويتي بشكل عميق ويقدمون حلول عملية"' data-en='"A very professional team that deeply understands the Kuwaiti market needs and provides practical solutions."'>"A very professional team that deeply understands the Kuwaiti market needs and provides practical solutions."</p>
+<div class="testimonial-author">
+<h4 data-ar="فاطمة المحمد" data-en="Fatima Al-Mohammed">Fatima Al-Mohammed</h4>
+<p class="role" data-ar="مديرة شركة خدمات" data-en="Services company manager">Services company manager</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Contact Section -->
+<section class="contact" id="contact">
+<div class="container">
+<h2 data-ar="تواصل معنا" data-en="Contact Us">Contact Us</h2>
+<div class="contact-wrapper">
+<form class="contact-form" id="contactForm">
+<div class="form-group">
+<input data-placeholder-ar="اسمك الكامل" data-placeholder-en="Your Full Name" id="contactName" placeholder="Your Full Name" required="" type="text"/>
+</div>
+<div class="form-group">
+<input data-placeholder-ar="بريدك الإلكتروني" data-placeholder-en="Your Email" id="contactEmail" placeholder="Your Email" required="" type="email"/>
+</div>
+<div class="form-group">
+<input data-placeholder-ar="رقم الهاتف" data-placeholder-en="Phone Number" id="contactPhone" placeholder="Phone Number" required="" type="tel"/>
+</div>
+<div class="form-group">
+<select id="contactService">
+<option data-ar="اختر الخدمة المطلوبة" data-en="Select Required Service" value="">Select Required Service</option>
+<option data-ar="دراسة جدوى" data-en="Feasibility Study" value="feasibility">Feasibility Study</option>
+<option data-ar="شراكة تشغيلية" data-en="Operational Partnership" value="operations">Operational Partnership</option>
+<option data-ar="خدمات محاسبية" data-en="Accounting Services" value="accounting">Accounting Services</option>
+<option data-ar="أخرى" data-en="Other" value="other">Other</option>
+</select>
+</div>
+<div class="form-group">
+<textarea data-placeholder-ar="رسالتك" data-placeholder-en="Your Message" id="contactMessage" placeholder="Your Message" required="" rows="5"></textarea>
+</div>
+<button class="btn btn-primary" data-ar="أرسل الرسالة" data-en="Send Message" id="submitBtn" type="submit">Send Message</button>
+</form>
+<div class="contact-info">
+<h3 data-ar="معلومات التواصل" data-en="Contact Information">Contact Information</h3>
+<div class="info-item">
+<span class="icon">📍</span>
+<div>
+<h4 data-ar="العنوان" data-en="Address">Address</h4>
+<p data-ar="الكويت، منطقة الشرق" data-en="Kuwait, Sharq District">Kuwait, Sharq District</p>
+</div>
+</div>
+<div class="info-item">
+<span class="icon">📞</span>
+<div>
+<h4 data-ar="الهاتف" data-en="Phone">Phone</h4>
+<p>+96550897501</p>
+</div>
+</div>
+<div class="info-item">
+<span class="icon">✉️</span>
+<div>
+<h4 data-ar="البريد" data-en="Email">Email</h4>
+<p>info@kbs-kuwait.com</p>
+</div>
+</div>
+<div class="social-links">
+<a class="social-btn" href="#">LinkedIn</a>
+<a class="social-btn" href="#">Instagram</a>
+<a class="social-btn whatsapp" href="https://wa.me/96597639999?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D8%A8%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9">WhatsApp</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating WhatsApp Button with pre-filled text -->
+<a class="whatsapp-float" href="https://wa.me/96597639999?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D8%A8%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20%D8%AE%D8%AF%D9%85%D8%A7%D8%AA%D9%83%D9%85" rel="noopener" target="_blank" title="Chat on WhatsApp">
+<span>💬</span>
+</a>
+<!-- Footer -->
+<footer class="footer">
+<div class="container">
+<div class="footer-content">
+<div class="footer-brand">
+<img alt="BADIA" class="footer-logo" src="assets/logo.png"/>
+<p data-ar="شريكك الموثوق في عالم الأعمال" data-en="Your trusted partner in the business world">Your trusted partner in the business world</p>
+</div>
+<div class="footer-links">
+<a data-ar="من نحن" data-en="About Us" href="#about">About Us</a>
+<a data-ar="الخدمات" data-en="Services" href="#services">Services</a>
+<a data-ar="الأعمال" data-en="Portfolio" href="#portfolio">Portfolio</a>
+<a data-ar="تواصل معنا" data-en="Contact Us" href="#contact">Contact Us</a>
+</div>
+</div>
+<div class="footer-bottom">
+<p data-ar="© 2024 بادية - BADIA. جميع الحقوق محفوظة." data-en="© 2024 BADIA. All rights reserved.">© 2024 BADIA. All rights reserved.</p>
+</div>
+</div>
+</footer>
+<script src="script.js"></script>
+<script>
+        /**
+         * Auth-gated service request handler.
+         * Checks for a logged-in session stored by Signin.html (key: 'badia_user').
+         * @param {'partnership'|'feasibility'} serviceType
+         */
+        function handleServiceRequest(serviceType) {
+            var isLoggedIn = !!localStorage.getItem('badia_user');
+            if (isLoggedIn) {
+                var destinations = {
+                    partnership: 'account.html#partnership',
+                    feasibility: 'account.html#feasibility'
+                };
+                window.location.href = destinations[serviceType] || 'account.html';
+            } else {
+                // Persist intended destination so Signin.html can redirect back after login
+                sessionStorage.setItem('badia_redirect_after_login',
+                    serviceType === 'partnership' ? 'account.html#partnership' : 'account.html#feasibility');
+                window.location.href = 'Signin.html';
+            }
+        }
+    </script>
 </body>
 </html>

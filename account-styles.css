@@ -47,6 +47,9 @@ html[lang="ar"] .account-sidebar { inset: 0 0 0 auto; border-right: none; border
 .account-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
 
 /* Logo */
+
+
+
 .account-sidebar .sidebar-logo {
   padding: 1.125rem 1.375rem;
   display: flex;
@@ -61,11 +64,13 @@ html[lang="ar"] .account-sidebar { inset: 0 0 0 auto; border-right: none; border
   flex-shrink: 0;
   line-height: 0;
 }
-.account-sidebar .sidebar-logo img {
+.account-sidebar .sidebar-logo img{
   height: 30px;
   width: auto;
   display: block;
   object-fit: contain;
+  border-radius: 0 !important;        
+  background: transparent !important; 
 }
 .account-sidebar .sidebar-logo span {
   font-size: 1.05rem;

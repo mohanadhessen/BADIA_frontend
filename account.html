@@ -24,7 +24,7 @@
     <!-- Sidebar -->
     <aside class="account-sidebar">
         <div class="sidebar-logo">
-            <a href="main.html"><img src="assets/logo.png" alt="BADIA"></a>
+            <a href="index.html"><img src="assets/logo.png" alt="BADIA"></a>
             <span>BADIA</span>
         </div>
         <div class="sidebar-user">
@@ -765,7 +765,7 @@
             if (res.ok) {
                 clearCachedUser();
                 showNotification(lang === 'ar' ? 'تم حذف الحساب بنجاح' : 'Account deleted successfully', 'success');
-                setTimeout(() => window.location.href = 'main.html', 2000);
+                setTimeout(() => window.location.href = 'index.html', 2000);
             } else {
                 const err = await res.json();
                 showNotification(err.detail || (lang === 'ar' ? 'فشل حذف الحساب' : 'Delete failed'), 'error');
@@ -1011,7 +1011,7 @@
     // ===== Logout =====
     function handleLogout() {
         clearCachedUser();
-        window.location.href = 'main.html';
+        window.location.href = 'index.html';
     }
 </script>
 
