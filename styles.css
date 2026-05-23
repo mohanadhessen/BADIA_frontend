@@ -213,10 +213,6 @@ html[lang="ar"] .testimonial-card{border-left:none;border-right:4px solid var(--
 .social-btn.whatsapp{background:#25d366;border-color:#25d366;color:var(--white)}
 .social-btn.whatsapp:hover{background:#1eae52;border-color:#1eae52}
 
-/* ===== WhatsApp Float ===== */
-.whatsapp-float{position:fixed;bottom:30px;right:30px;width:60px;height:60px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 4px 15px rgba(0,0,0,.2);z-index:999;animation:bounce 2s infinite;transition:var(--transition);text-decoration:none}
-html[lang="ar"] .whatsapp-float{right:auto;left:30px}
-.whatsapp-float:hover{transform:scale(1.1);box-shadow:0 6px 20px rgba(37,211,102,.4)}
 
 /* ===== Footer ===== */
 .footer{background:var(--primary);color:var(--white);padding:3rem 0 1.5rem;border-top:1px solid rgba(255,255,255,.1)}
