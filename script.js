@@ -1,6 +1,10 @@
 // ===== API Base URL =====
 const API_BASE = 'http://127.0.0.1:8000';
 
+// ===== Plans State =====
+let _cachedPlans = null;
+let _currentBilling = 'monthly';
+
 // ===== Language System =====
 function initLanguage() {
     const saved = localStorage.getItem('badia_lang') || 'en';
@@ -10,7 +14,7 @@ function initLanguage() {
 function setLanguage(lang, save = true) {
     const html = document.documentElement;
     html.setAttribute('lang', lang);
-    html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    // Layout stays LTR regardless of language
 
     // Update all elements with data-en / data-ar
     document.querySelectorAll('[data-en][data-ar]').forEach(el => {
@@ -40,6 +44,9 @@ function setLanguage(lang, save = true) {
     // Update nav auth link
     updateNavAuthLink();
 
+    // Re-render plans in new language if already loaded
+    if (_cachedPlans) renderPlans(_cachedPlans, _currentBilling);
+
     if (save) localStorage.setItem('badia_lang', lang);
 }
 
@@ -59,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLanguage();
 
     // Init animations
-    document.querySelectorAll('.service-block, .about-card, .portfolio-item, .testimonial-card, .blog-card, .usp-item').forEach(card => {
+    document.querySelectorAll('.service-block, .about-card, .portfolio-item, .testimonial-card, .blog-card, .usp-item, .web-service-card, .plan-card').forEach(card => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(20px)';
         card.style.transition = 'all 0.6s ease-out';
@@ -70,22 +77,43 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavAuthLink();
 });
 
-// ===== Nav Auth Link =====
+// ===== Nav Auth =====
 function updateNavAuthLink() {
-    const link = document.getElementById('navAuthLink');
-    if (!link) return;
+    const desktopAuth  = document.getElementById('navAuthDesktop');
+    const mobileAuth   = document.getElementById('navMobileAuth');
     const token = localStorage.getItem('access_token');
-    const lang = getCurrentLang();
+    const lang  = getCurrentLang();
+
     if (token) {
-        link.href = 'account.html';
-        link.setAttribute('data-en', 'My Account');
-        link.setAttribute('data-ar', 'حسابي');
-        link.textContent = lang === 'ar' ? 'حسابي' : 'My Account';
+        // Logged in → replace both auth zones with a single "My Account" link
+        const accountLabelEN = 'My Account';
+        const accountLabelAR = 'حسابي';
+        const label = lang === 'ar' ? accountLabelAR : accountLabelEN;
+
+        if (desktopAuth) {
+            desktopAuth.innerHTML = `<a href="account.html" class="nav-btn-account"
+                data-en="${accountLabelEN}" data-ar="${accountLabelAR}">${label}</a>`;
+        }
+        if (mobileAuth) {
+            mobileAuth.innerHTML = `<a href="account.html" class="nav-btn-register" style="flex:1;text-align:center"
+                data-en="${accountLabelEN}" data-ar="${accountLabelAR}">${label}</a>`;
+        }
     } else {
-        link.href = 'Signin.html';
-        link.setAttribute('data-en', 'Login');
-        link.setAttribute('data-ar', 'تسجيل الدخول');
-        link.textContent = lang === 'ar' ? 'تسجيل الدخول' : 'Login';
+        // Not logged in → show Sign In + Register
+        const siEN='Sign In', siAR='تسجيل الدخول', rgEN='Register', rgAR='إنشاء حساب';
+        const si = lang==='ar' ? siAR : siEN;
+        const rg = lang==='ar' ? rgAR : rgEN;
+
+        if (desktopAuth) {
+            desktopAuth.innerHTML = `
+                <a href="Signin.html"   class="nav-btn-signin"   id="navSignIn"   data-en="${siEN}" data-ar="${siAR}">${si}</a>
+                <a href="register.html" class="nav-btn-register" id="navRegister" data-en="${rgEN}" data-ar="${rgAR}">${rg}</a>`;
+        }
+        if (mobileAuth) {
+            mobileAuth.innerHTML = `
+                <a href="Signin.html"   class="nav-btn-signin"   data-en="${siEN}" data-ar="${siAR}">${si}</a>
+                <a href="register.html" class="nav-btn-register" data-en="${rgEN}" data-ar="${rgAR}">${rg}</a>`;
+        }
     }
 }
 
@@ -98,22 +126,34 @@ function scrollToSection(id) {
 document.querySelectorAll('.nav-links a, .footer-links a').forEach(link => {
     link.addEventListener('click', (e) => {
         const href = link.getAttribute('href');
-        if (href.startsWith('#')) {
+        if (href && href.startsWith('#')) {
             e.preventDefault();
             const el = document.getElementById(href.substring(1));
             if (el) el.scrollIntoView({ behavior: 'smooth' });
-            // Close mobile menu
-            document.getElementById('navLinks')?.classList.remove('open');
+            closeMobileMenu();
         }
     });
 });
 
 // ===== Mobile Menu Toggle =====
 const mobileToggle = document.getElementById('mobileToggle');
-const navLinks = document.getElementById('navLinks');
-if (mobileToggle && navLinks) {
-    mobileToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+const navLinks     = document.getElementById('navLinks');
+const navBackdrop  = document.getElementById('navBackdrop');
+
+function closeMobileMenu() {
+    navLinks?.classList.remove('open');
+    mobileToggle?.classList.remove('open');
+    navBackdrop?.classList.remove('visible');
 }
+
+if (mobileToggle && navLinks) {
+    mobileToggle.addEventListener('click', () => {
+        const isOpen = navLinks.classList.toggle('open');
+        mobileToggle.classList.toggle('open', isOpen);
+        navBackdrop?.classList.toggle('visible', isOpen);
+    });
+}
+navBackdrop?.addEventListener('click', closeMobileMenu);
 
 // ===== Form Submission =====
 document.getElementById('contactForm')?.addEventListener('submit', function(e) {
@@ -191,7 +231,7 @@ const observer = new IntersectionObserver((entries) => {
 // ===== Navbar Scroll Effect =====
 window.addEventListener('scroll', () => {
     const nav = document.getElementById('navbar');
-    if (nav) nav.style.boxShadow = window.scrollY > 100 ? '0 4px 15px rgba(0,0,0,.1)' : '0 2px 10px rgba(0,0,0,.05)';
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 60);
 });
 
 // ===== Active Nav Link =====
@@ -332,5 +372,223 @@ async function tryRefreshToken() {
     return false;
 }
 
+// ===== Testimonial Carousel =====
+(function() {
+    let current = 0;
+    let timer = null;
+
+    function goTo(idx) {
+        const slides = document.querySelectorAll('.tq-slide');
+        const dots   = document.querySelectorAll('.tq-dot');
+        if (!slides.length) return;
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (idx + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+    }
+
+    function startAuto() {
+        timer = setInterval(() => goTo(current + 1), 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.tq-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                clearInterval(timer);
+                goTo(Number(dot.dataset.idx));
+                startAuto();
+            });
+        });
+        startAuto();
+    });
+})();
+
 // ===== Load =====
-window.addEventListener('load', () => console.log('✓ BADIA website loaded'));
+window.addEventListener('load', () => {
+    console.log('✓ BADIA website loaded');
+    fetchPlans();
+});
+
+// ===== Plans API =====
+async function fetchPlans() {
+    const grid = document.getElementById('plansGrid');
+    if (!grid) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/api/v1/plans/`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Support both array response or { results: [...] } pagination wrapper
+        _cachedPlans = Array.isArray(data) ? data : (data.results || data.plans || []);
+        renderPlans(_cachedPlans, _currentBilling);
+    } catch (err) {
+        console.error('Plans fetch error:', err);
+        renderPlansError(grid);
+    }
+}
+
+// ===== Plan Details Decoder =====
+// Translates the structured plan_details object into a human-readable feature list.
+const FEATURE_LABELS = {
+    en: {
+        accounts:          'Chart of accounts',
+        invoices:          'Invoicing',
+        purchasing:        'Purchase orders',
+        basic_reports:     'Basic reports',
+        advanced_reports:  'Advanced reports',
+        inventory:         'Inventory management',
+        assets:            'Fixed assets',
+        payroll:           'Payroll',
+        kpi:               'KPI dashboard',
+        api:               'API access',
+        multi_branch:      'Multi-branch',
+        white_label:       'White label',
+        bank_integrations: 'Bank integrations',
+    },
+    ar: {
+        accounts:          'شجرة الحسابات',
+        invoices:          'الفواتير',
+        purchasing:        'أوامر الشراء',
+        basic_reports:     'التقارير الأساسية',
+        advanced_reports:  'التقارير المتقدمة',
+        inventory:         'إدارة المخزون',
+        assets:            'الأصول الثابتة',
+        payroll:           'الرواتب',
+        kpi:               'لوحة KPI',
+        api:               'وصول API',
+        multi_branch:      'متعدد الفروع',
+        white_label:       'العلامة البيضاء',
+        bank_integrations: 'تكاملات بنكية',
+    }
+};
+
+const SUPPORT_LABELS = {
+    en: { email: 'Email support', chat: 'Live chat support', phone: 'Phone support', account_manager: 'Dedicated account manager' },
+    ar: { email: 'دعم البريد الإلكتروني', chat: 'دعم المحادثة المباشرة', phone: 'دعم هاتفي', account_manager: 'مدير حساب مخصص' }
+};
+
+function decodePlanDetails(plan_details, lang) {
+    if (!plan_details || typeof plan_details !== 'object') return [];
+    const l = lang === 'ar' ? 'ar' : 'en';
+    const lines = [];
+
+    // Limits line
+    const limits = plan_details.limits || {};
+    const users = limits.users === 'unlimited'
+        ? (l === 'ar' ? 'مستخدمون غير محدودون' : 'Unlimited users')
+        : limits.users ? `${limits.users} ${l === 'ar' ? (limits.users === 1 ? 'مستخدم' : 'مستخدمين') : (limits.users === 1 ? 'user' : 'users')}` : null;
+    if (users) lines.push(users);
+
+    const txn = limits.transactions === 'unlimited'
+        ? (l === 'ar' ? 'معاملات غير محدودة' : 'Unlimited transactions')
+        : limits.transactions ? `${Number(limits.transactions).toLocaleString()} ${l === 'ar' ? 'معاملة / شهر' : 'transactions/month'}` : null;
+    if (txn) lines.push(txn);
+
+    const storage = limits.storage_gb === 'unlimited'
+        ? (l === 'ar' ? 'تخزين غير محدود' : 'Unlimited storage')
+        : limits.storage_gb ? `${limits.storage_gb} GB ${l === 'ar' ? 'تخزين' : 'storage'}` : null;
+    if (storage) lines.push(storage);
+
+    // Enabled features
+    const features = plan_details.features || {};
+    const featureLabels = FEATURE_LABELS[l];
+    Object.entries(features).forEach(([key, val]) => {
+        if (val === true && featureLabels[key]) lines.push(featureLabels[key]);
+    });
+
+    // Support channels
+    const support = plan_details.support || {};
+    const supportLabels = SUPPORT_LABELS[l];
+    Object.entries(support).forEach(([key, val]) => {
+        if (val === true && supportLabels[key]) lines.push(supportLabels[key]);
+    });
+
+    // SLA uptime
+    const sla = plan_details.sla || {};
+    if (sla.uptime) lines.push(`${sla.uptime} ${l === 'ar' ? 'وقت تشغيل' : 'uptime'}`);
+    if (sla.backup) {
+        const backupMap = { daily: l === 'ar' ? 'نسخ احتياطي يومي' : 'Daily backups', 'real-time': l === 'ar' ? 'نسخ احتياطي فوري' : 'Real-time backups' };
+        lines.push(backupMap[sla.backup] || `${sla.backup} ${l === 'ar' ? 'نسخ احتياطي' : 'backup'}`);
+    }
+
+    return lines;
+}
+
+function renderPlans(plans, billing) {
+    const grid = document.getElementById('plansGrid');
+    if (!grid) return;
+
+    if (!plans || plans.length === 0) {
+        grid.innerHTML = `<div class="plans-error"><p>No plans available at the moment.</p></div>`;
+        return;
+    }
+
+    const lang = getCurrentLang();
+    const isYearly = billing === 'yearly';
+
+    // Mark Pro (idx=2) as featured — it's the mid-tier with most value
+    grid.innerHTML = plans.map((plan, idx) => {
+        const name          = plan.name || `Plan ${idx + 1}`;
+        const monthlyPrice  = plan.price_monthly ?? plan.monthly_price ?? 0;
+        const yearlyPrice   = plan.price_yearly  ?? plan.yearly_price  ?? (monthlyPrice * 12);
+        const displayPrice  = isYearly ? yearlyPrice : monthlyPrice;
+        const isFeatured    = plan.name === 'Pro'; // Pro is the hero plan
+
+        const periodLabel = isYearly
+            ? (lang === 'ar' ? 'د.ك / سنة' : 'KWD / year')
+            : (lang === 'ar' ? 'د.ك / شهر' : 'KWD / month');
+
+        const badgeText = isFeatured
+            ? (lang === 'ar' ? 'الأكثر طلباً' : 'Most Popular')
+            : (isYearly ? (lang === 'ar' ? 'سنوي' : 'Annual') : (lang === 'ar' ? 'شهري' : 'Monthly'));
+
+        const subscribeText = lang === 'ar' ? 'اشترك الآن' : 'Subscribe Now';
+
+        const features = decodePlanDetails(plan.plan_details, lang);
+        const featureHTML = features.length
+            ? features.map(f => `<li>${f}</li>`).join('')
+            : `<li>${lang === 'ar' ? 'تفاصيل عبر الاتصال بنا' : 'Details via consultation'}</li>`;
+
+        // Yearly savings badge
+        let savingsHTML = '';
+        if (isYearly && monthlyPrice > 0) {
+            const saved = Math.round((monthlyPrice * 12) - yearlyPrice);
+            if (saved > 0) savingsHTML = `<p class="pricing-save">${lang === 'ar' ? `وفّر ${saved} د.ك` : `Save ${saved} KWD`}</p>`;
+        }
+
+        return `
+        <div class="plan-card${isFeatured ? ' featured' : ''}">
+            <span class="plan-badge">${badgeText}</span>
+            <div class="plan-name">${name}</div>
+            <div class="plan-price-box">
+                <span class="plan-price">${Number(displayPrice).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 1})}</span>
+                <span class="plan-price-period"> ${periodLabel}</span>
+            </div>
+            ${savingsHTML}
+            <ul class="plan-features">${featureHTML}</ul>
+            <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="scrollToSection('contact')">${subscribeText}</button>
+        </div>`;
+    }).join('');
+}
+
+function renderPlansError(grid) {
+    const lang = getCurrentLang();
+    grid.innerHTML = `
+        <div class="plans-error">
+            <p>${lang === 'ar' ? 'تعذّر تحميل الباقات. يرجى المحاولة مرة أخرى.' : 'Could not load plans. Please try again.'}</p>
+            <button class="btn btn-outline" onclick="fetchPlans()">${lang === 'ar' ? 'إعادة المحاولة' : 'Retry'}</button>
+        </div>`;
+}
+
+// ===== Billing Toggle =====
+document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('billingToggle');
+    if (toggle) {
+        toggle.addEventListener('change', () => {
+            _currentBilling = toggle.checked ? 'yearly' : 'monthly';
+            if (_cachedPlans) renderPlans(_cachedPlans, _currentBilling);
+        });
+    }
+});

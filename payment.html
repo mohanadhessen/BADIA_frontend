@@ -227,6 +227,11 @@
     flex-shrink: 0;
   }
 
+  /* Specific fix for KNET SVG asset padding issue */
+  .method-btn[data-method="knet"] .method-img {
+    transform: scale(1.6);
+  }
+
   /* Label wrapper layout */
   .method-label-col {
     display: flex;
@@ -367,7 +372,7 @@
 
   /* ─── Pay Button ─── */
   .pay-actions { animation: fadeUp 0.4s 0.2s var(--ease-out) both; }
-
+    
   .btn-pay {
     width: 100%; padding: 1rem;
     background: var(--primary); color: var(--white);
@@ -447,6 +452,7 @@
     .methods-grid { gap: 0.5rem; }
     .method-btn { padding: 0.75rem 0.35rem 0.6rem; }
     .method-img { width: 20px; height: 20px; }
+    .method-btn[data-method="knet"] .method-img { transform: scale(1.6); }
     .method-name { font-size: 0.68rem; }
     .method-sub-desc { font-size: 0.58rem; }
     .method-wallet-text { font-size: 0.78rem; }
@@ -489,7 +495,8 @@
     <p class="section-label" data-en="Payment Method" data-ar="طريقة الدفع">Payment Method</p>
     <div class="methods-grid" role="radiogroup" aria-label="Select payment method" id="methodsGrid">
 
-      <button class="method-btn" data-method="knet" data-en="KNET" data-ar="كي-نت" role="radio" aria-checked="false">
+      <button class="method-btn" data-method="knet" data-en="KNET" role="radio" aria-checked="false">
+        <img src="assets/knet.svg" class="method-img" alt="Card icon" />
         <span class="method-name">KNET</span>
       </button>
 
@@ -500,12 +507,7 @@
           <span class="method-sub-desc">Visa / MC</span>
         </div>
       </button>
-
-      <button class="method-btn" data-method="amex" data-en="Amex"  role="radio" aria-checked="false">
-        <img src="assets/amex-credit-card-svgrepo-com.svg" class="method-img" alt="Amex icon" />
-        <span class="method-name" data-en="Amex" >Amex</span>
-      </button>
-
+      
       <button class="method-btn" data-method="apple" data-en="Apple Pay" data-ar="آبل باي" role="radio" aria-checked="false">
         <img src="assets/apple-173-svgrepo-com.svg" class="method-img" alt="Apple icon" />
         <span class="method-wallet-text">Pay</span>
