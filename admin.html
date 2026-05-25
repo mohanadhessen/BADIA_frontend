@@ -346,7 +346,10 @@ tbody tr:hover{background:var(--bg)}
   transition:var(--transition);outline:none;
 }
 .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
-.form-input[type=number]{-moz-appearance:textfield}
+.form-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
 .form-input::placeholder{color:var(--text-3)}
 .toggle-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .toggle-item{
