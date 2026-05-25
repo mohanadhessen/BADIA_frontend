@@ -63,6 +63,10 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 /* Mobile-only items — hidden on desktop */
 .nav-mobile-divider{display:none}
 .nav-mobile-auth{display:none}
+.nav-mobile-lang{display:none}
+
+/* Nav link icons — hidden on desktop, shown in mobile dropdown */
+.nav-links li a i{display:none;margin-right:.5rem;width:18px;text-align:center;font-size:.95rem}
 
 /* Right-side action group */
 .nav-actions{display:flex;align-items:center;gap:.75rem;flex-shrink:0}
@@ -74,6 +78,7 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
     padding:.42rem 1.1rem;border-radius:7px;
     border:1.5px solid var(--gray-200);color:var(--gray-800);
     background:var(--white);transition:var(--transition);white-space:nowrap;
+    display:inline-flex;align-items:center;gap:.4rem;
 }
 .nav-btn-signin:hover{border-color:var(--primary);color:var(--primary);background:var(--gray-50)}
 .nav-btn-register{
@@ -81,6 +86,7 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
     padding:.42rem 1.1rem;border-radius:7px;
     background:var(--primary);color:var(--white);border:1.5px solid var(--primary);
     transition:var(--transition);white-space:nowrap;
+    display:inline-flex;align-items:center;gap:.4rem;
 }
 .nav-btn-register:hover{background:var(--accent);border-color:var(--accent);color:var(--primary)}
 
@@ -95,7 +101,7 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 
 /* Language toggle */
 .lang-toggle{
-    display:flex;align-items:center;justify-content:center;
+    display:flex;align-items:center;justify-content:center;gap:.4rem;
     padding:.4rem .95rem;border:1.5px solid var(--gray-200);border-radius:7px;
     background:transparent;color:var(--gray-800);font-family:inherit;
     font-size:.85rem;font-weight:700;cursor:pointer;transition:var(--transition);
@@ -110,7 +116,7 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
     padding:6px;border-radius:6px;transition:background .2s;
 }
 .mobile-toggle:hover{background:var(--gray-100)}
-.mobile-toggle span{display:block;width:22px;height:2px;background:var(--gray-800);transition:var(--transition);border-radius:2px}
+.mobile-toggle span{display:block;width:22px;height:2.5px;background:var(--gray-800);transition:var(--transition);border-radius:2px}
 
 /* Hamburger → X animation */
 .mobile-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
@@ -127,8 +133,12 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 
 /* ===== Mobile breakpoint ===== */
 @media(max-width:900px){
+    .nav-inner{justify-content:space-between}
     .nav-auth-desktop{display:none}
     .mobile-toggle{display:flex}
+
+    /* Hide desktop lang toggle, show the one inside the menu */
+    .nav-actions > .lang-toggle{display:none}
 
     .nav-links{
         position:fixed;top:68px;left:0;right:0;z-index:1000;
@@ -142,8 +152,12 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
     }
     .nav-links.open{max-height:520px;padding-top:1rem;padding-bottom:1.4rem}
 
+    /* Show icons in mobile nav links */
+    .nav-links li a i{display:inline-block}
+
     .nav-links li a{
-        display:block;padding:.7rem .8rem;border-radius:8px;
+        display:flex;align-items:center;gap:.5rem;
+        padding:.7rem .8rem;border-radius:8px;
         font-size:1rem;color:var(--gray-800);
     }
     .nav-links li a.active::after{display:none}
@@ -152,12 +166,35 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
         display:block;height:1px;
         background:var(--gray-200);margin:.6rem 0;
     }
+
+    /* Mobile language toggle */
+    .nav-mobile-lang{
+        display:block;
+    }
+    .nav-mobile-lang .lang-toggle{
+        width:100%;justify-content:center;gap:.5rem;
+        padding:.65rem .8rem;font-size:.95rem;
+        border-radius:8px;border-color:var(--gray-200);
+    }
+
     .nav-mobile-auth{
         display:flex;gap:.6rem;padding:.2rem 0;
     }
     .nav-mobile-auth .nav-btn-signin,
     .nav-mobile-auth .nav-btn-register{
         flex:1;text-align:center;padding:.6rem 0;font-size:.9rem;
+        display:flex;align-items:center;justify-content:center;gap:.4rem;
+    }
+    /* Fix: ensure register button text stays white on black background */
+    .nav-mobile-auth .nav-btn-register{
+        color:var(--white) !important;
+        background:var(--primary);
+        border-color:var(--primary);
+    }
+    .nav-mobile-auth .nav-btn-register:hover{
+        background:var(--accent);
+        border-color:var(--accent);
+        color:var(--primary) !important;
     }
     .nav-backdrop{display:block}
 }

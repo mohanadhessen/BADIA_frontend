@@ -19,7 +19,17 @@ function setLanguage(lang, save = true) {
     // Update all elements with data-en / data-ar
     document.querySelectorAll('[data-en][data-ar]').forEach(el => {
         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return; // skip — handled by placeholder
-        el.textContent = el.getAttribute(`data-${lang}`);
+        // Preserve Font Awesome icons inside the element
+        const icon = el.querySelector('i');
+        const text = el.getAttribute(`data-${lang}`);
+        if (icon) {
+            // Keep the icon, update only the text node
+            el.textContent = '';
+            el.appendChild(icon);
+            el.append(' ' + text);
+        } else {
+            el.textContent = text;
+        }
     });
 
     // Update placeholders
@@ -28,10 +38,10 @@ function setLanguage(lang, save = true) {
     });
 
     // Update toggle button text
-    const toggleBtn = document.querySelector('.lang-toggle-text');
-    if (toggleBtn) {
-        toggleBtn.textContent = lang === 'en' ? 'عربي' : 'English';
-    }
+    const toggleBtns = document.querySelectorAll('.lang-toggle-text');
+    toggleBtns.forEach(btn => {
+        btn.textContent = lang === 'en' ? 'عربي' : 'English';
+    });
 
     // Update meta description
     const metaDesc = document.querySelector('meta[name="description"]');
@@ -59,6 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const langToggle = document.getElementById('langToggle');
     if (langToggle) {
         langToggle.addEventListener('click', () => {
+            const current = getCurrentLang();
+            setLanguage(current === 'en' ? 'ar' : 'en');
+        });
+    }
+    // Also wire the mobile language toggle
+    const langToggleMobile = document.getElementById('langToggleMobile');
+    if (langToggleMobile) {
+        langToggleMobile.addEventListener('click', () => {
             const current = getCurrentLang();
             setLanguage(current === 'en' ? 'ar' : 'en');
         });
@@ -92,11 +110,11 @@ function updateNavAuthLink() {
 
         if (desktopAuth) {
             desktopAuth.innerHTML = `<a href="account.html" class="nav-btn-account"
-                data-en="${accountLabelEN}" data-ar="${accountLabelAR}">${label}</a>`;
+                data-en="${accountLabelEN}" data-ar="${accountLabelAR}"><i class="fa-solid fa-user-gear"></i> ${label}</a>`;
         }
         if (mobileAuth) {
-            mobileAuth.innerHTML = `<a href="account.html" class="nav-btn-register" style="flex:1;text-align:center"
-                data-en="${accountLabelEN}" data-ar="${accountLabelAR}">${label}</a>`;
+            mobileAuth.innerHTML = `<a href="account.html" class="nav-btn-register" style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:.4rem"
+                data-en="${accountLabelEN}" data-ar="${accountLabelAR}"><i class="fa-solid fa-user-gear"></i> ${label}</a>`;
         }
     } else {
         // Not logged in → show Sign In + Register
@@ -106,13 +124,13 @@ function updateNavAuthLink() {
 
         if (desktopAuth) {
             desktopAuth.innerHTML = `
-                <a href="Signin.html"   class="nav-btn-signin"   id="navSignIn"   data-en="${siEN}" data-ar="${siAR}">${si}</a>
-                <a href="register.html" class="nav-btn-register" id="navRegister" data-en="${rgEN}" data-ar="${rgAR}">${rg}</a>`;
+                <a href="Signin.html"   class="nav-btn-signin"   id="navSignIn"   data-en="${siEN}" data-ar="${siAR}"><i class="fa-regular fa-user"></i> ${si}</a>
+                <a href="Signin.html?tab=register" class="nav-btn-register" id="navRegister" data-en="${rgEN}" data-ar="${rgAR}"><i class="fa-solid fa-user-plus"></i> ${rg}</a>`;
         }
         if (mobileAuth) {
             mobileAuth.innerHTML = `
-                <a href="Signin.html"   class="nav-btn-signin"   data-en="${siEN}" data-ar="${siAR}">${si}</a>
-                <a href="register.html" class="nav-btn-register" data-en="${rgEN}" data-ar="${rgAR}">${rg}</a>`;
+                <a href="Signin.html"   class="nav-btn-signin"   data-en="${siEN}" data-ar="${siAR}"><i class="fa-regular fa-user"></i> ${si}</a>
+                <a href="Signin.html?tab=register" class="nav-btn-register" data-en="${rgEN}" data-ar="${rgAR}"><i class="fa-solid fa-user-plus"></i> ${rg}</a>`;
         }
     }
 }
@@ -410,24 +428,75 @@ window.addEventListener('load', () => {
     fetchPlans();
 });
 
+
+
 // ===== Plans API =====
 async function fetchPlans() {
     const grid = document.getElementById('plansGrid');
     if (!grid) return;
 
+    // 1. Instantly render cached plans from localStorage (no flash of empty state)
+    const cachedData = localStorage.getItem('plans_data');
+    if (cachedData) {
+        try {
+            _cachedPlans = JSON.parse(cachedData);
+            renderPlans(_cachedPlans, _currentBilling);
+        } catch (_) {
+            // Corrupted cache — clear it and continue to fetch
+            localStorage.removeItem('plans_data');
+            localStorage.removeItem('plans_etag');
+        }
+    }
+
+    // 2. Validate with the server using ETag
     try {
-        const res = await fetch(`${API_BASE}/api/v1/plans/`);
+        const headers = {};
+
+        const storedEtag = localStorage.getItem('plans_etag');
+        if (storedEtag) {
+            headers['If-None-Match'] = storedEtag;
+        }
+
+        const res = await fetch(`${API_BASE}/api/v1/plans/`, { headers });
+
+        // 3. 304 Not Modified → plans unchanged, cached version is already rendered
+        if (res.status === 304) {
+            console.log('Plans unchanged (304). Using localStorage cache.');
+            return;
+        }
+
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        // 4. 200 OK → backend has new/updated plans
         const data = await res.json();
 
         // Support both array response or { results: [...] } pagination wrapper
         _cachedPlans = Array.isArray(data) ? data : (data.results || data.plans || []);
+
+        // 5. Persist new data + ETag in localStorage
+        localStorage.setItem('plans_data', JSON.stringify(_cachedPlans));
+
+        const newEtag = res.headers.get('ETag');
+        if (newEtag) {
+            localStorage.setItem('plans_etag', newEtag);
+        }
+
+        // 6. Re-render with the fresh data
         renderPlans(_cachedPlans, _currentBilling);
+
     } catch (err) {
         console.error('Plans fetch error:', err);
-        renderPlansError(grid);
+
+        // Offline fallback: if we already rendered from cache above, nothing to do.
+        // If there was no cache at all, show the error state.
+        if (!_cachedPlans) {
+            renderPlansError(grid);
+        } else {
+            console.log('Network error. Showing previously cached plans.');
+        }
     }
 }
+
 
 // ===== Plan Details Decoder =====
 // Translates the structured plan_details object into a human-readable feature list.
@@ -463,6 +532,7 @@ const FEATURE_LABELS = {
         bank_integrations: 'تكاملات بنكية',
     }
 };
+
 
 const SUPPORT_LABELS = {
     en: { email: 'Email support', chat: 'Live chat support', phone: 'Phone support', account_manager: 'Dedicated account manager' },

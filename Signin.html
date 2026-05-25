@@ -210,6 +210,8 @@
             setAuthLang(saved, false);
         }
 
+        
+
         function setAuthLang(lang, save = true) {
             document.documentElement.setAttribute('lang', lang);
             document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
@@ -619,8 +621,20 @@
             btn.querySelector('span').textContent = lang === 'ar' ? 'إعادة تعيين كلمة المرور →' : 'Reset Password →';
         });
 
+        handleURLParams();
+        function openTabFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+        
+            if (tab === 'register') {
+                switchTab('register');
+            } else {
+                switchTab('login');
+            }
+        }
         // Init
         initAuthLang();
+        openTabFromURL();
         handleURLParams();
 
         // If already logged in, redirect (unless we have a verification token, in which case route it to account first)
