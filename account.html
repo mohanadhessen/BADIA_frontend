@@ -839,8 +839,46 @@
         btn.disabled = true;
         btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
 
-        // For now, show success as there's no backend endpoint for file uploads yet
-        showNotification(lang === 'ar' ? 'تم إرسال طلب الشراكة التشغيلية بنجاح!' : 'Operational Partnership application submitted successfully!', 'success');
+        try {
+            const formData = new FormData();
+            fileInputs.forEach(inp => {
+                if (inp.files && inp.files[0]) {
+                    formData.append('files', inp.files[0]);
+                }
+            });
+
+            const token = localStorage.getItem('access_token');
+            const res = await fetch(`${API_BASE}/api/v1/files/Operational_Partnership/submit`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                showNotification(
+                    lang === 'ar' ? 'تم إرسال طلب الشراكة التشغيلية بنجاح!' : 'Operational Partnership application submitted successfully!',
+                    'success'
+                );
+                // Reset all upload zones
+                fileInputs.forEach(inp => {
+                    const zoneId = inp.closest('.upload-zone').id;
+                    const filenameId = zoneId.replace('zone-', 'file-');
+                    inp.value = '';
+                    const filenameEl = document.getElementById(filenameId);
+                    if (filenameEl) filenameEl.textContent = '';
+                    inp.closest('.upload-zone').classList.remove('has-file');
+                });
+            } else {
+                const err = await res.json();
+                showNotification(err.detail || (lang === 'ar' ? 'فشل إرسال الطلب' : 'Submission failed'), 'error');
+            }
+        } catch {
+            showNotification(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+        }
+
         btn.disabled = false;
         btn.textContent = lang === 'ar' ? 'إرسال الطلب' : 'Submit Application';
     });
@@ -868,8 +906,33 @@
         btn.disabled = true;
         btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
 
-        // For now, show success as there's no backend endpoint for feasibility yet
-        showNotification(lang === 'ar' ? 'تم إرسال طلب دراسة الجدوى بنجاح!' : 'Feasibility Study request submitted successfully!', 'success');
+        try {
+            const res = await apiFetch('/api/v1/files/feasibility/submit', {
+                method: 'POST',
+                body: JSON.stringify({
+                    project_description: desc,
+                    estimated_cost: cost,
+                    funding_source: funding
+                })
+            });
+
+            if (res.ok) {
+                showNotification(
+                    lang === 'ar' ? 'تم إرسال طلب دراسة الجدوى بنجاح!' : 'Feasibility Study request submitted successfully!',
+                    'success'
+                );
+                // Reset form
+                document.getElementById('feasProjectDesc').value = '';
+                document.getElementById('feasEstCost').value = '';
+                document.getElementById('feasFunding').value = '';
+            } else {
+                const err = await res.json();
+                showNotification(err.detail || (lang === 'ar' ? 'فشل إرسال الطلب' : 'Submission failed'), 'error');
+            }
+        } catch {
+            showNotification(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+        }
+
         btn.disabled = false;
         btn.textContent = lang === 'ar' ? 'إرسال طلب الدراسة' : 'Submit Study Request';
     });

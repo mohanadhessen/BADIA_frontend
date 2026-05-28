@@ -133,6 +133,8 @@ function updateNavAuthLink() {
                 <a href="Signin.html?tab=register" class="nav-btn-register" data-en="${rgEN}" data-ar="${rgAR}"><i class="fa-solid fa-user-plus"></i> ${rg}</a>`;
         }
     }
+    // Sync service gates with current auth state
+    updateServiceGates();
 }
 
 // ===== Smooth Scroll =====
@@ -617,8 +619,15 @@ function renderPlans(plans, billing) {
         const subscribeText = lang === 'ar' ? 'اشترك الآن' : 'Subscribe Now';
 
         const features = decodePlanDetails(plan.plan_details, lang);
-        const featureHTML = features.length
-            ? features.map(f => `<li>${f}</li>`).join('')
+        const MAX_VIS = 6;
+        const vis = features.slice(0, MAX_VIS);
+        const hid = features.slice(MAX_VIS);
+        const moreText  = lang === 'ar' ? `+ ${hid.length} ميزة إضافية` : `+ ${hid.length} more`;
+        const lessText  = lang === 'ar' ? '↑ عرض أقل' : '↑ Less';
+        const featureHTML = vis.length
+            ? vis.map(f => `<li>${f}</li>`).join('')
+              + hid.map(f => `<li class="plan-feat-extra">${f}</li>`).join('')
+              + (hid.length ? `<li class="plan-feat-toggle" data-more="${moreText}" data-less="${lessText}"><span>${moreText}</span></li>` : '')
             : `<li>${lang === 'ar' ? 'تفاصيل عبر الاتصال بنا' : 'Details via consultation'}</li>`;
 
         // Yearly savings badge
@@ -661,4 +670,84 @@ document.addEventListener('DOMContentLoaded', () => {
             if (_cachedPlans) renderPlans(_cachedPlans, _currentBilling);
         });
     }
+
+    // Plan feature expand/collapse (event delegation on the grid)
+    document.getElementById('plansGrid')?.addEventListener('click', e => {
+        const btn = e.target.closest('.plan-feat-toggle');
+        if (!btn) return;
+        const card   = btn.closest('.plan-card');
+        const extras = card.querySelectorAll('.plan-feat-extra');
+        const exp    = btn.dataset.expanded === '1';
+        extras.forEach(li => li.style.display = exp ? 'none' : 'block');
+        btn.dataset.expanded = exp ? '0' : '1';
+        btn.querySelector('span').textContent = exp ? btn.dataset.more : btn.dataset.less;
+    });
 });
+
+// ===== Service Gate Auth State =====
+function updateServiceGates() {
+    const token = localStorage.getItem('access_token');
+    const isLoggedIn = !!token;
+    const lang = getCurrentLang();
+
+    document.querySelectorAll('.service-gate').forEach(gate => {
+        const blockId = gate.closest('.service-block')?.id;
+        const serviceType = blockId === 'service-operations' ? 'partnership' : 'feasibility';
+        const cta = gate.querySelector('.service-gate-cta');
+        if (!cta) return;
+
+        if (isLoggedIn) {
+            gate.classList.add('gate-open');
+            gate.classList.remove('gate-locked');
+
+            const btnEN  = serviceType === 'partnership' ? 'Request Operational Partnership' : 'Request Feasibility Study';
+            const btnAR  = serviceType === 'partnership' ? 'اطلب الشراكة التشغيلية'          : 'اطلب دراسة الجدوى';
+            const msgEN  = serviceType === 'partnership'
+                ? "You're all set. Submit your request and our team will follow up within 24 hours."
+                : "You're all set. Submit your request and we'll reach out to start your study.";
+            const msgAR  = serviceType === 'partnership'
+                ? 'أنت جاهز. أرسل طلبك وسيتواصل معك فريقنا خلال 24 ساعة.'
+                : 'أنت جاهز. أرسل طلبك وسنتواصل معك للبدء في دراستك.';
+            const labelEN = 'Account Connected';
+            const labelAR = 'الحساب متصل';
+
+            cta.innerHTML = `
+                <div class="gate-open-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <p class="gate-open-label" data-en="${labelEN}" data-ar="${labelAR}">${lang === 'ar' ? labelAR : labelEN}</p>
+                <p class="gate-open-message" data-en="${msgEN}" data-ar="${msgAR}">${lang === 'ar' ? msgAR : msgEN}</p>
+                <button class="btn btn-primary service-request-btn"
+                    data-en="${btnEN}" data-ar="${btnAR}"
+                    onclick="handleServiceRequest('${serviceType}')">
+                    ${lang === 'ar' ? btnAR : btnEN}
+                </button>`;
+        } else {
+            gate.classList.remove('gate-open');
+            gate.classList.add('gate-locked');
+
+            // Restore original lock CTA if it was replaced
+            if (!cta.querySelector('.gate-lock-icon')) {
+                const msgEN  = serviceType === 'partnership'
+                    ? 'Sign in or create an account to request this service and access your partnership dashboard.'
+                    : 'Sign in or create an account to request a feasibility study and track your project through your dashboard.';
+                const msgAR  = serviceType === 'partnership'
+                    ? 'سجّل دخولك أو أنشئ حساباً لطلب هذه الخدمة والوصول إلى لوحة الشراكة.'
+                    : 'سجّل دخولك أو أنشئ حساباً لطلب دراسة الجدوى ومتابعة مشروعك عبر لوحة التحكم.';
+                const btnEN  = serviceType === 'partnership' ? 'Request Operational Partnership' : 'Request Feasibility Study';
+                const btnAR  = serviceType === 'partnership' ? 'اطلب الشراكة التشغيلية'          : 'اطلب دراسة الجدوى';
+
+                cta.innerHTML = `
+                    <div class="gate-lock-icon">
+                        <svg fill="none" height="28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="28"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <p class="gate-message" data-en="${msgEN}" data-ar="${msgAR}">${lang === 'ar' ? msgAR : msgEN}</p>
+                    <button class="btn btn-primary service-request-btn"
+                        data-en="${btnEN}" data-ar="${btnAR}"
+                        onclick="handleServiceRequest('${serviceType}')">
+                        ${lang === 'ar' ? btnAR : btnEN}
+                    </button>`;
+            }
+        }
+    });
+}

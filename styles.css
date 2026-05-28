@@ -421,7 +421,7 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 .gate-preview-item{display:flex;align-items:center;gap:.8rem;padding:1rem 1.5rem;border-right:1px solid var(--gray-100);color:var(--gray-500);font-size:.95rem;transition:background .2s}
 .gate-preview-item:last-child{border-right:none}
 .gate-check{color:var(--accent);font-weight:700;font-size:1.1rem;flex-shrink:0}
-.service-gate-cta{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2.5rem 2rem;gap:1.2rem;background:linear-gradient(135deg,var(--gray-50) 0%,rgba(212,175,55,.04) 100%)}
+.service-gate-cta{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2.5rem 2rem;gap:1.2rem}
 .gate-lock-icon{width:56px;height:56px;border-radius:50%;background:var(--primary);color:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,.15)}
 .gate-message{max-width:480px;font-size:1rem;color:var(--gray-500);line-height:1.7;margin:0}
 .service-request-btn{position:relative;overflow:hidden}
@@ -477,6 +477,56 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 .skeleton-line.w70{width:70%}
 .skeleton-line.w80{width:80%}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ===== Plan Feature Toggle ===== */
+.plan-feat-extra { display: none }
+.plan-feat-toggle {
+    border: none !important;
+    padding: .55rem 0 !important;
+    background: none;
+    cursor: pointer;
+    list-style: none;
+}
+.plan-feat-toggle::before { display: none !important }
+.plan-feat-toggle span {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .85rem; font-weight: 600; color: var(--accent);
+    transition: color .2s;
+}
+.plan-feat-toggle:hover span { color: var(--primary) }
+
+/* ===== Service Gate — Locked (not logged in) ===== */
+.service-gate.gate-locked .service-gate-cta {
+    background: linear-gradient(135deg, var(--gray-50) 0%, rgba(212,175,55,.04) 100%);
+}
+
+/* ===== Service Gate — Open (logged in) ===== */
+.service-gate.gate-open { border-color: #d1fae5 }
+.service-gate.gate-open .service-gate-preview {
+    background: rgba(16,185,129,.03);
+    border-bottom-color: #d1fae5;
+}
+.service-gate.gate-open .gate-check { color: #10b981 }
+.service-gate.gate-open .gate-preview-item { color: var(--gray-800); font-weight: 500 }
+.service-gate.gate-open .service-gate-cta {
+    background: linear-gradient(135deg, #f0fdf4 0%, rgba(16,185,129,.05) 100%);
+    border-top: 1px solid #d1fae5;
+}
+.gate-open-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #10b981; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(16,185,129,.3);
+    flex-shrink: 0;
+}
+.gate-open-label {
+    font-size: .75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: #10b981; margin-bottom: -.4rem;
+}
+.gate-open-message {
+    max-width: 480px; font-size: 1rem;
+    color: var(--gray-500); line-height: 1.7; margin: 0;
+}
 
 /* ===== Website Creation Services ===== */
 .web-services{padding:5rem 0;background:var(--gray-50)}

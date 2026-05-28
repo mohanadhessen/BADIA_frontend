@@ -3,478 +3,575 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BADIA — Admin Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<title>BADIA — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-/* ── Reset & Variables ─────────────────────────────────────── */
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --brand:#000; --accent:#d4af37; --accent-dim:rgba(212,175,55,.12);
-  --sidebar-w:256px;
-  --white:#fff; --bg:#f4f5f7;
-  --surface:#fff; --surface2:#fafafa;
-  --border:#e8e8e8;
-  --text:#111; --text-2:#555; --text-3:#999;
-  --green:#10b981; --red:#ef4444; --blue:#3b82f6; --orange:#f59e0b;
-  --radius:10px; --radius-sm:6px;
-  --shadow:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);
-  --shadow-md:0 4px 24px rgba(0,0,0,.1);
-  --transition:all .2s ease;
+/* ── Variables ───────────────────────────────────────────────── */
+:root {
+  --brand:#0a0a0a; --accent:#d4af37; --accent-dim:rgba(212,175,55,.1); --accent-mid:rgba(212,175,55,.2);
+  --sidebar-w:260px;
+  --white:#ffffff; --bg:#f6f7f9; --bg2:#eef0f3;
+  --surface:#ffffff; --surface2:#f9fafb;
+  --border:#e4e6ea; --border2:rgba(0,0,0,.06);
+  --text:#0d0d0d; --text-2:#5a5f6b; --text-3:#a0a5b1;
+  --green:#10b981; --green-dim:rgba(16,185,129,.1);
+  --red:#ef4444;   --red-dim:rgba(239,68,68,.1);
+  --blue:#3b82f6;  --blue-dim:rgba(59,130,246,.1);
+  --orange:#f59e0b;--orange-dim:rgba(245,158,11,.1);
+  --yellow:#eab308;--yellow-dim:rgba(234,179,8,.12);
+  --purple:#8b5cf6;--purple-dim:rgba(139,92,246,.1);
+  --radius:12px; --radius-sm:8px; --radius-xs:6px;
+  --shadow:0 1px 3px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.05);
+  --shadow-md:0 4px 20px rgba(0,0,0,.08);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.12);
+  --transition:all .18s ease;
 }
-html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{text-decoration:none}button{font-family:inherit}
 
-/* ── Layout ─────────────────────────────────────────────────── */
+/* ── Layout ──────────────────────────────────────────────────── */
 .admin-wrap{display:flex;min-height:100vh}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:199;display:none;backdrop-filter:blur(2px)}
+.sidebar-overlay.visible{display:block}
 
-/* ── Sidebar ────────────────────────────────────────────────── */
+/* ── Sidebar ─────────────────────────────────────────────────── */
 .sidebar{
   width:var(--sidebar-w);flex-shrink:0;
-  background:var(--brand);color:var(--white);
+  background:var(--brand);
   display:flex;flex-direction:column;
   position:fixed;inset:0 auto 0 0;z-index:200;
-  transition:transform .3s ease;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
 }
 .sidebar-logo{
-  padding:24px 20px 20px;
-  border-bottom:1px solid rgba(255,255,255,.08);
+  padding:22px 20px 18px;
   display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.06);
 }
-.sidebar-logo img{height:36px;width:auto;object-fit:contain;filter:brightness(0) invert(1)}
-.sidebar-logo-text{font-size:1.1rem;font-weight:800;color:var(--white);letter-spacing:-.3px}
+.sidebar-logo img{height:32px;width:auto;object-fit:contain;filter:brightness(0) invert(1);flex-shrink:0}
+.sidebar-logo-text{font-size:1.05rem;font-weight:800;color:#fff;letter-spacing:-.4px}
 .sidebar-logo-badge{
-  font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  background:var(--accent);color:var(--brand);
-  padding:.15rem .45rem;border-radius:4px;margin-left:auto;flex-shrink:0;
+  margin-left:auto;font-size:.6rem;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;
+  background:var(--accent);color:var(--brand);padding:.2rem .5rem;border-radius:4px;flex-shrink:0;
 }
-.sidebar-section-label{
-  font-size:.68rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
-  color:rgba(255,255,255,.3);padding:20px 20px 8px;
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0 12px;scrollbar-width:none}
+.sidebar-nav::-webkit-scrollbar{display:none}
+.nav-group-label{
+  font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.25);padding:16px 20px 6px;
 }
-.sidebar-nav{flex:1;overflow-y:auto;padding-bottom:12px}
-.sidebar-nav a{
-  display:flex;align-items:center;gap:12px;
-  padding:10px 20px;border-radius:0;
-  color:rgba(255,255,255,.6);font-weight:500;font-size:.88rem;
-  text-decoration:none;transition:var(--transition);position:relative;cursor:pointer;
-  border-left:3px solid transparent;
+.nav-link{
+  display:flex;align-items:center;gap:11px;
+  margin:1px 10px;padding:9px 12px;border-radius:9px;
+  color:rgba(255,255,255,.5);font-weight:500;font-size:.86rem;
+  cursor:pointer;transition:var(--transition);position:relative;
 }
-.sidebar-nav a:hover{color:var(--white);background:rgba(255,255,255,.05);border-left-color:rgba(255,255,255,.2)}
-.sidebar-nav a.active{color:var(--white);background:rgba(212,175,55,.15);border-left-color:var(--accent)}
-.sidebar-nav a .nav-icon{width:18px;height:18px;flex-shrink:0;opacity:.8}
-.sidebar-nav a.active .nav-icon{opacity:1}
+.nav-link:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.06)}
+.nav-link.active{color:#fff;background:rgba(212,175,55,.15)}
+.nav-link.active .nav-icon-wrap{background:var(--accent);color:var(--brand)}
+.nav-icon-wrap{
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);flex-shrink:0;
+  transition:var(--transition);
+}
+.nav-link:hover .nav-icon-wrap{background:rgba(255,255,255,.1)}
+.nav-icon-wrap svg{width:14px;height:14px}
 .nav-badge{
   margin-left:auto;background:var(--accent);color:var(--brand);
-  font-size:.65rem;font-weight:800;padding:.1rem .45rem;border-radius:20px;
+  font-size:.62rem;font-weight:800;padding:.15rem .45rem;border-radius:20px;min-width:20px;text-align:center;
 }
+.nav-badge.red{background:var(--red);color:#fff}
 .sidebar-bottom{
-  padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);
+  padding:14px 10px;border-top:1px solid rgba(255,255,255,.06);
   display:flex;align-items:center;gap:10px;
 }
-.sidebar-user-avatar{
-  width:34px;height:34px;border-radius:50%;background:var(--accent);
+.sidebar-avatar{
+  width:34px;height:34px;border-radius:9px;background:var(--accent);
   color:var(--brand);font-weight:800;font-size:.85rem;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.sidebar-user-info{flex:1;min-width:0}
-.sidebar-user-name{font-size:.85rem;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-user-role{font-size:.72rem;color:rgba(255,255,255,.4)}
+.sidebar-user{flex:1;min-width:0}
+.sidebar-user-name{font-size:.84rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user-role{font-size:.7rem;color:rgba(255,255,255,.35);margin-top:1px}
 .sidebar-logout{
-  background:none;border:none;cursor:pointer;
-  color:rgba(255,255,255,.4);padding:4px;border-radius:4px;
+  width:28px;height:28px;border-radius:7px;background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;
   transition:var(--transition);flex-shrink:0;
 }
-.sidebar-logout:hover{color:var(--red)}
+.sidebar-logout:hover{background:rgba(239,68,68,.15);color:var(--red)}
 
-/* ── Main Area ───────────────────────────────────────────────── */
-.main{
-  margin-left:var(--sidebar-w);flex:1;
-  display:flex;flex-direction:column;min-width:0;
-}
+/* ── Main ────────────────────────────────────────────────────── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
 
-/* Top bar */
+/* ── Topbar ──────────────────────────────────────────────────── */
 .topbar{
   background:var(--white);border-bottom:1px solid var(--border);
-  padding:0 28px;height:60px;
-  display:flex;align-items:center;gap:16px;
+  padding:0 24px;height:58px;
+  display:flex;align-items:center;gap:14px;
   position:sticky;top:0;z-index:100;
 }
-.topbar-hamburger{
-  display:none;background:none;border:none;cursor:pointer;
-  flex-direction:column;gap:4px;padding:4px;
-}
-.topbar-hamburger span{display:block;width:20px;height:2px;background:var(--text);border-radius:2px}
-.topbar-title{font-size:1rem;font-weight:700;color:var(--text)}
-.topbar-subtitle{font-size:.8rem;color:var(--text-3);margin-left:8px}
+.topbar-brand{display:none;align-items:center;gap:8px;flex-shrink:0}
+.topbar-brand img{height:28px;filter:brightness(0);width:auto;object-fit:contain}
+.topbar-brand-text{font-size:.95rem;font-weight:800;color:var(--text)}
+.topbar-title{font-size:.96rem;font-weight:700;color:var(--text);white-space:nowrap}
 .topbar-spacer{flex:1}
 .topbar-search{
   display:flex;align-items:center;gap:8px;
-  background:var(--bg);border:1px solid var(--border);border-radius:8px;
-  padding:6px 12px;width:240px;transition:var(--transition);
+  background:var(--bg);border:1.5px solid var(--border);border-radius:9px;
+  padding:6px 12px;width:230px;transition:var(--transition);
 }
-.topbar-search:focus-within{border-color:var(--accent);background:var(--white)}
-.topbar-search input{border:none;background:none;font-size:.85rem;color:var(--text);outline:none;width:100%;font-family:inherit}
+.topbar-search:focus-within{border-color:var(--accent);background:var(--white);box-shadow:0 0 0 3px var(--accent-dim)}
+.topbar-search input{border:none;background:none;font-size:.84rem;color:var(--text);outline:none;width:100%;font-family:inherit}
 .topbar-search input::placeholder{color:var(--text-3)}
 .topbar-actions{display:flex;align-items:center;gap:8px}
 .topbar-btn{
-  background:none;border:1px solid var(--border);border-radius:8px;
-  padding:6px 14px;font-size:.82rem;font-weight:600;color:var(--text-2);
-  cursor:pointer;transition:var(--transition);font-family:inherit;
-  display:flex;align-items:center;gap:6px;white-space:nowrap;
+  background:none;border:1.5px solid var(--border);border-radius:8px;
+  padding:6px 13px;font-size:.81rem;font-weight:600;color:var(--text-2);
+  cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:5px;white-space:nowrap;
 }
 .topbar-btn:hover{border-color:var(--accent);color:var(--accent)}
-.topbar-btn.primary{background:var(--brand);border-color:var(--brand);color:var(--white)}
-.topbar-btn.primary:hover{background:#333;border-color:#333;color:var(--white)}
+.topbar-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.topbar-btn.primary:hover{background:#333;border-color:#333;color:#fff}
+.topbar-hamburger{
+  display:none;background:none;border:1.5px solid var(--border);border-radius:8px;
+  cursor:pointer;padding:7px;flex-direction:column;gap:4px;
+  width:36px;height:36px;align-items:center;justify-content:center;
+}
+.topbar-hamburger span{display:block;width:16px;height:2px;background:var(--text);border-radius:2px;transition:var(--transition)}
+.topbar-hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.topbar-hamburger.open span:nth-child(2){opacity:0}
+.topbar-hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
 
-/* Content area */
-.content{padding:28px;flex:1}
-
-/* ── Page switching ──────────────────────────────────────────── */
+/* ── Content ─────────────────────────────────────────────────── */
+.content{padding:24px;flex:1}
 .page{display:none}
 .page.active{display:block}
 
-/* ── Stats Cards ─────────────────────────────────────────────── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+/* ── Page header ─────────────────────────────────────────────── */
+.page-header{margin-bottom:22px}
+.page-header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.page-header h1{font-size:1.25rem;font-weight:800;color:var(--text);line-height:1.2}
+.page-header p{font-size:.83rem;color:var(--text-3);margin-top:3px}
+
+/* ── Stat Cards ──────────────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stats-grid-6{grid-template-columns:repeat(6,1fr)}
 .stat-card{
-  background:var(--white);border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px 22px;position:relative;overflow:hidden;
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;position:relative;overflow:hidden;transition:var(--transition);
 }
-.stat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:var(--stat-color,var(--accent));
+.stat-card:hover{border-color:var(--accent-mid);box-shadow:var(--shadow)}
+.stat-card-inner{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.stat-label{font-size:.71rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-3);margin-bottom:7px}
+.stat-value{font-size:1.9rem;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.5px}
+.stat-sub{font-size:.74rem;color:var(--text-3);margin-top:5px}
+.stat-trend{font-size:.74rem;font-weight:600;margin-top:5px}
+.stat-trend.up{color:var(--green)}.stat-trend.down{color:var(--red)}
+.stat-icon-box{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
 }
-.stat-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:8px}
-.stat-value{font-size:2rem;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px}
-.stat-sub{font-size:.78rem;color:var(--text-3)}
-.stat-icon{
-  position:absolute;top:18px;right:18px;width:38px;height:38px;border-radius:8px;
-  background:var(--stat-color,var(--accent));opacity:.12;
-}
-.stat-icon svg{position:absolute;inset:7px;opacity:0}
+.stat-icon-box svg{width:18px;height:18px}
 
 /* ── Section Header ──────────────────────────────────────────── */
-.section-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.section-title{font-size:1rem;font-weight:700;color:var(--text)}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.section-title{font-size:.95rem;font-weight:700;color:var(--text)}
 .section-count{
-  font-size:.75rem;font-weight:600;background:var(--bg);
-  border:1px solid var(--border);color:var(--text-2);
-  padding:.2rem .6rem;border-radius:20px;
+  font-size:.72rem;font-weight:600;background:var(--bg2);
+  border:1.5px solid var(--border);color:var(--text-2);
+  padding:.18rem .55rem;border-radius:20px;
 }
 .section-spacer{flex:1}
+
+/* ── Filter Bar ──────────────────────────────────────────────── */
+.filter-bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:12px 16px;margin-bottom:16px;
+}
+.filter-bar .search-box{min-width:200px;flex:1}
+.filter-select{
+  background:var(--bg);border:1.5px solid var(--border);border-radius:8px;
+  padding:6px 10px;font-size:.82rem;font-family:inherit;color:var(--text);
+  outline:none;cursor:pointer;transition:var(--transition);min-width:120px;
+}
+.filter-select:focus{border-color:var(--accent);background:var(--white)}
+.filter-divider{width:1px;height:24px;background:var(--border);flex-shrink:0}
+
+/* Search box */
 .search-box{
-  display:flex;align-items:center;gap:6px;
-  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  display:flex;align-items:center;gap:7px;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:8px;
   padding:6px 10px;transition:var(--transition);
 }
 .search-box:focus-within{border-color:var(--accent);background:var(--white)}
-.search-box input{border:none;background:none;font-size:.82rem;outline:none;font-family:inherit;color:var(--text);width:180px}
+.search-box input{border:none;background:none;font-size:.82rem;outline:none;font-family:inherit;color:var(--text);min-width:160px}
 .search-box input::placeholder{color:var(--text-3)}
 
 /* ── Table ───────────────────────────────────────────────────── */
-.table-wrap{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:var(--radius);overflow:hidden;
-}
+.table-wrap{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .table-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
-thead{background:var(--surface2)}
+thead{background:var(--bg2)}
 th{
-  padding:11px 16px;text-align:left;font-size:.72rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);
-  border-bottom:1px solid var(--border);white-space:nowrap;
+  padding:10px 16px;text-align:left;font-size:.69rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:1px;color:var(--text-3);
+  border-bottom:1.5px solid var(--border);white-space:nowrap;
 }
-td{
-  padding:13px 16px;border-bottom:1px solid var(--border);
-  color:var(--text-2);vertical-align:middle;
-}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-2);vertical-align:middle}
 tbody tr:last-child td{border-bottom:none}
-tbody tr{transition:background .15s}
+tbody tr{transition:background .12s}
 tbody tr:hover{background:var(--bg)}
+tbody tr.expanded{background:#fffbf0}
+tbody tr.expanded-detail td{background:#fffbf0;border-bottom:1.5px solid var(--accent-mid)}
 .td-primary{color:var(--text);font-weight:600}
-.td-mono{font-family:'Courier New',monospace;font-size:.8rem;color:var(--text-3)}
+.td-mono{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--text-3)}
+.td-muted{color:var(--text-3);font-size:.8rem}
 
-/* Status badges */
+/* ── Badges & Pills ──────────────────────────────────────────── */
 .badge{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:.25rem .7rem;border-radius:20px;font-size:.72rem;font-weight:700;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:.22rem .65rem;border-radius:20px;font-size:.71rem;font-weight:700;
   text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;
 }
-.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
-.badge-green{background:rgba(16,185,129,.1);color:var(--green)}
-.badge-red{background:rgba(239,68,68,.1);color:var(--red)}
-.badge-blue{background:rgba(59,130,246,.1);color:var(--blue)}
-.badge-orange{background:rgba(245,158,11,.1);color:var(--orange)}
-.badge-gray{background:var(--bg);color:var(--text-3)}
+.badge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge-green{background:var(--green-dim);color:var(--green)}
+.badge-green .badge-dot{background:var(--green)}
+.badge-red{background:var(--red-dim);color:var(--red)}
+.badge-red .badge-dot{background:var(--red)}
+.badge-blue{background:var(--blue-dim);color:var(--blue)}
+.badge-blue .badge-dot{background:var(--blue)}
+.badge-orange{background:var(--orange-dim);color:var(--orange)}
+.badge-orange .badge-dot{background:var(--orange)}
+.badge-yellow{background:var(--yellow-dim);color:#92710d}
+.badge-yellow .badge-dot{background:var(--yellow)}
+.badge-gray{background:var(--bg2);color:var(--text-3)}
+.badge-gray .badge-dot{background:var(--text-3)}
+.plan-pill{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.71rem;font-weight:700;border:1.5px solid;white-space:nowrap}
+.plan-starter{background:rgba(139,92,246,.08);color:var(--purple);border-color:rgba(139,92,246,.2)}
+.plan-business{background:var(--blue-dim);color:var(--blue);border-color:rgba(59,130,246,.2)}
+.plan-pro{background:var(--accent-dim);color:#9a7920;border-color:var(--accent-mid)}
+.plan-enterprise{background:rgba(0,0,0,.05);color:var(--text);border-color:rgba(0,0,0,.1)}
+.plan-none{background:var(--bg2);color:var(--text-3);border-color:var(--border)}
 
-/* Plan badge */
-.plan-pill{
-  display:inline-block;padding:.2rem .65rem;border-radius:20px;
-  font-size:.72rem;font-weight:700;border:1px solid;white-space:nowrap;
+/* Request type chips */
+.type-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:.22rem .65rem;border-radius:20px;font-size:.72rem;font-weight:600;white-space:nowrap;
 }
-.plan-starter{background:rgba(99,102,241,.08);color:#6366f1;border-color:rgba(99,102,241,.2)}
-.plan-business{background:rgba(59,130,246,.08);color:var(--blue);border-color:rgba(59,130,246,.2)}
-.plan-pro{background:rgba(212,175,55,.1);color:#b8960c;border-color:rgba(212,175,55,.3)}
-.plan-enterprise{background:rgba(0,0,0,.06);color:var(--text);border-color:rgba(0,0,0,.12)}
-.plan-none{background:var(--bg);color:var(--text-3);border-color:var(--border)}
+.type-partnership{background:var(--purple-dim);color:var(--purple)}
+.type-feasibility{background:var(--blue-dim);color:var(--blue)}
 
-/* Action buttons */
-.action-group{display:flex;gap:6px;flex-wrap:wrap}
-.btn-action{
-  background:none;border:1px solid var(--border);border-radius:6px;
-  padding:5px 10px;font-size:.78rem;font-weight:600;color:var(--text-2);
-  cursor:pointer;transition:var(--transition);font-family:inherit;
+/* ── Action Buttons ──────────────────────────────────────────── */
+.action-group{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.btn-icon{
+  background:none;border:1.5px solid var(--border);border-radius:7px;
+  padding:5px 9px;font-size:.78rem;font-weight:600;color:var(--text-2);
+  cursor:pointer;transition:var(--transition);
   display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
 }
-.btn-action:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
-.btn-action.danger:hover{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.06)}
-.btn-action.success:hover{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.06)}
+.btn-icon:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.btn-icon.approve:hover{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.btn-icon.reject:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.btn-icon.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.btn-icon.download:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.btn-icon svg{width:12px;height:12px;flex-shrink:0}
 
-/* ── Empty state ─────────────────────────────────────────────── */
-.empty-state{
-  text-align:center;padding:48px 24px;color:var(--text-3);
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn{
+  padding:9px 18px;border-radius:9px;font-size:.84rem;font-weight:600;
+  cursor:pointer;transition:var(--transition);font-family:inherit;
+  display:inline-flex;align-items:center;gap:6px;border:1.5px solid transparent;white-space:nowrap;
 }
-.empty-state-icon{font-size:2.5rem;margin-bottom:12px}
-.empty-state p{font-size:.88rem}
+.btn-primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn-primary:hover{background:#2a2a2a;border-color:#2a2a2a}
+.btn-accent{background:var(--accent);color:var(--brand);border-color:var(--accent)}
+.btn-accent:hover{background:#c4a030;border-color:#c4a030}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-green:hover{background:#0ea572}
+.btn-ghost{background:none;color:var(--text-2);border-color:var(--border)}
+.btn-ghost:hover{border-color:var(--text);color:var(--text)}
+.btn-danger{background:none;color:var(--red);border-color:rgba(239,68,68,.3)}
+.btn-danger:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-sm{padding:6px 13px;font-size:.79rem}
+.btn-xs{padding:4px 10px;font-size:.76rem}
+.btn-full{width:100%;justify-content:center}
 
-/* ── Plans Grid ──────────────────────────────────────────────── */
-.plans-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
-.plan-admin-card{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:var(--radius);overflow:hidden;
+/* ── File Chips ──────────────────────────────────────────────── */
+.file-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:7px;padding:4px 9px;
+  font-size:.74rem;font-weight:500;color:var(--text-2);
+  cursor:pointer;transition:var(--transition);white-space:nowrap;margin:2px;
 }
-.plan-admin-card.featured{border-color:var(--accent)}
-.plan-card-header{
-  padding:18px 20px 14px;border-bottom:1px solid var(--border);
+.file-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.file-chip svg{flex-shrink:0;width:11px;height:11px}
+.file-chip .file-size{color:var(--text-3);font-size:.7rem}
+
+/* ── Request Detail Row ──────────────────────────────────────── */
+.request-detail{padding:16px 20px 20px;border-top:1px dashed var(--border)}
+.request-detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.detail-group{display:flex;flex-direction:column;gap:3px}
+.detail-label{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3)}
+.detail-value{font-size:.84rem;color:var(--text);font-weight:500}
+.detail-files{margin-top:12px}
+.detail-files-label{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:6px}
+.notes-box{
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;
+  padding:10px 12px;font-size:.82rem;color:var(--text-2);line-height:1.5;
+  font-style:italic;
+}
+.rejection-note{background:var(--red-dim);border-color:rgba(239,68,68,.2);color:var(--red);font-style:normal;font-weight:500}
+
+/* ── Dashboard widgets ───────────────────────────────────────── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.dash-grid-3{grid-template-columns:1.4fr 1fr 1fr}
+.dash-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.dash-card-header{
+  padding:14px 18px 12px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;
 }
-.plan-card-name{font-size:1.05rem;font-weight:800;color:var(--text)}
-.plan-card-id{font-size:.72rem;color:var(--text-3)}
-.plan-card-body{padding:16px 20px}
-.plan-price-row{display:flex;gap:16px;margin-bottom:14px}
-.plan-price-item{flex:1}
-.plan-price-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:2px}
-.plan-price-val{font-size:1.35rem;font-weight:800;color:var(--text)}
-.plan-price-val span{font-size:.8rem;font-weight:400;color:var(--text-3)}
-.plan-limits{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.dash-card-title{font-size:.86rem;font-weight:700;color:var(--text)}
+.dash-card-link{font-size:.75rem;font-weight:600;color:var(--accent);cursor:pointer;transition:color .15s}
+.dash-card-link:hover{color:var(--text)}
+.dash-card-body{padding:14px 18px}
+
+/* Plan distribution */
+.plan-dist-item{margin-bottom:11px}
+.plan-dist-label{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px}
+.plan-dist-label span:first-child{font-weight:600;color:var(--text)}
+.plan-dist-label span:last-child{color:var(--text-3)}
+.plan-dist-bar{height:6px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.plan-dist-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* Recent users */
+.recent-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.recent-row:last-child{border-bottom:none}
+.recent-avatar{
+  width:32px;height:32px;border-radius:9px;
+  background:var(--brand);color:var(--accent);
+  font-weight:800;font-size:.78rem;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.recent-info{flex:1;min-width:0}
+.recent-name{font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-time{font-size:.72rem;color:var(--text-3)}
+
+/* Quick actions */
+.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.quick-action-card{
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:16px;cursor:pointer;transition:var(--transition);
+  display:flex;align-items:center;gap:12px;
+}
+.quick-action-card:hover{border-color:var(--accent);background:var(--accent-dim);transform:translateY(-1px);box-shadow:var(--shadow)}
+.quick-action-icon{
+  width:38px;height:38px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.quick-action-icon svg{width:16px;height:16px}
+.quick-action-text{font-size:.82rem;font-weight:600;color:var(--text);line-height:1.3}
+.quick-action-sub{font-size:.72rem;color:var(--text-3);margin-top:2px}
+
+/* Pending requests widget */
+.pending-req-row{
+  display:flex;align-items:center;gap:10px;padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.pending-req-row:last-child{border-bottom:none}
+.pending-req-type{flex:1;min-width:0}
+.pending-req-email{font-size:.81rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pending-req-meta{font-size:.72rem;color:var(--text-3);margin-top:1px}
+.pending-req-actions{display:flex;gap:5px;flex-shrink:0}
+
+/* ── Plans Grid ──────────────────────────────────────────────── */
+.plans-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.plan-admin-card{
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;
+  transition:var(--transition);
+}
+.plan-admin-card:hover{border-color:var(--accent-mid);box-shadow:var(--shadow)}
+.plan-admin-card.featured{border-color:var(--accent)}
+.plan-card-top{
+  padding:16px 18px 14px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.plan-card-name{font-size:1rem;font-weight:800;color:var(--text)}
+.plan-card-id{font-size:.7rem;color:var(--text-3);margin-top:2px}
+.plan-card-body{padding:14px 18px}
+.plan-price-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.plan-price-label{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:2px}
+.plan-price-val{font-size:1.25rem;font-weight:800;color:var(--text);line-height:1}
+.plan-price-val span{font-size:.75rem;font-weight:400;color:var(--text-3)}
+.plan-limits{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .limit-chip{
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:6px;padding:3px 8px;
-  font-size:.72rem;font-weight:600;color:var(--text-2);white-space:nowrap;
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:6px;
+  padding:2px 8px;font-size:.7rem;font-weight:600;color:var(--text-2);white-space:nowrap;
 }
-.plan-features-list{list-style:none;margin-bottom:14px}
-.plan-features-list li{
-  display:flex;align-items:center;gap:8px;
-  padding:3px 0;font-size:.8rem;color:var(--text-2);
-}
-.feat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.feat-on{background:var(--green)}
-.feat-off{background:var(--border)}
-.feat-off ~ span{color:var(--text-3);text-decoration:line-through;opacity:.6}
+.plan-feat-list{list-style:none;margin-bottom:10px}
+.plan-feat-list li{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:.79rem;color:var(--text-2)}
+.feat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.feat-on{background:var(--green)}.feat-off{background:var(--border)}
 .plan-card-footer{
-  padding:12px 20px;border-top:1px solid var(--border);
+  padding:10px 18px;border-top:1px solid var(--border);
   background:var(--surface2);display:flex;gap:8px;
 }
 
-/* ── Files section ───────────────────────────────────────────── */
-.file-chip{
-  display:inline-flex;align-items:center;gap:5px;
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:6px;padding:3px 8px;
-  font-size:.75rem;color:var(--text-2);
-  cursor:pointer;transition:var(--transition);white-space:nowrap;margin:2px;
-}
-.file-chip:hover{border-color:var(--accent);color:var(--accent)}
-.file-chip svg{flex-shrink:0}
-.file-count{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:20px;height:20px;border-radius:50%;
-  font-size:.7rem;font-weight:700;
-}
-.file-count.has{background:var(--accent);color:var(--brand)}
-.file-count.none{background:var(--bg);color:var(--text-3);border:1px solid var(--border)}
-
 /* ── Modal ───────────────────────────────────────────────────── */
 .modal-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);
+  position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
   z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;
   opacity:0;pointer-events:none;transition:opacity .2s;
 }
 .modal-backdrop.open{opacity:1;pointer-events:auto}
 .modal{
-  background:var(--white);border-radius:14px;width:100%;max-width:580px;
-  box-shadow:0 24px 80px rgba(0,0,0,.2);
-  transform:translateY(12px) scale(.98);transition:transform .25s ease;
+  background:var(--white);border-radius:16px;width:100%;max-width:560px;
+  box-shadow:0 24px 80px rgba(0,0,0,.18);
+  transform:translateY(16px) scale(.98);transition:transform .25s cubic-bezier(.4,0,.2,1);
   max-height:90vh;display:flex;flex-direction:column;
 }
+.modal-lg{max-width:720px}
 .modal-backdrop.open .modal{transform:none}
 .modal-header{
-  padding:22px 24px 18px;border-bottom:1px solid var(--border);
+  padding:20px 22px 16px;border-bottom:1px solid var(--border);
   display:flex;align-items:flex-start;gap:12px;flex-shrink:0;
 }
-.modal-icon{
-  width:38px;height:38px;border-radius:9px;display:flex;align-items:center;
-  justify-content:center;flex-shrink:0;
-}
-.modal-icon.danger{background:rgba(239,68,68,.1)}
+.modal-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-icon.danger{background:var(--red-dim)}
 .modal-icon.edit{background:var(--accent-dim)}
-.modal-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:2px}
-.modal-subtitle{font-size:.82rem;color:var(--text-3)}
+.modal-icon.view{background:var(--blue-dim)}
+.modal-icon.success{background:var(--green-dim)}
+.modal-title{font-size:.96rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.modal-subtitle{font-size:.8rem;color:var(--text-3)}
 .modal-close{
   margin-left:auto;background:none;border:none;cursor:pointer;
-  color:var(--text-3);padding:4px;border-radius:6px;transition:var(--transition);
-  flex-shrink:0;
+  color:var(--text-3);padding:4px;border-radius:6px;transition:var(--transition);flex-shrink:0;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
 }
-.modal-close:hover{background:var(--bg);color:var(--text)}
-.modal-body{padding:22px 24px;overflow-y:auto;flex:1}
+.modal-close:hover{background:var(--bg2);color:var(--text)}
+.modal-body{padding:20px 22px;overflow-y:auto;flex:1}
 .modal-footer{
-  padding:16px 24px;border-top:1px solid var(--border);
-  display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;
+  padding:14px 22px;border-top:1px solid var(--border);
+  display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;background:var(--surface2);
+  border-radius:0 0 16px 16px;
 }
 
-/* Form elements */
-.form-section{margin-bottom:20px}
+/* Form */
+.form-section{margin-bottom:18px}
 .form-section-title{
-  font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
-  color:var(--text-3);margin-bottom:12px;padding-bottom:6px;
+  font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--text-3);margin-bottom:10px;padding-bottom:6px;
   border-bottom:1px solid var(--border);
 }
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-group{margin-bottom:12px}
-.form-label{font-size:.78rem;font-weight:600;color:var(--text-2);margin-bottom:5px;display:block}
+.form-label{font-size:.77rem;font-weight:600;color:var(--text-2);margin-bottom:5px;display:block}
+.form-label span{color:var(--text-3);font-weight:400}
 .form-input{
-  width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:7px;
-  font-size:.85rem;font-family:inherit;color:var(--text);background:var(--white);
+  width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:.84rem;font-family:inherit;color:var(--text);background:var(--white);
   transition:var(--transition);outline:none;
 }
 .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
-.form-input[type="number"] {
-  appearance: textfield;
-  -moz-appearance: textfield;
-}
 .form-input::placeholder{color:var(--text-3)}
-.toggle-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.form-input[type="number"]{appearance:textfield;-moz-appearance:textfield}
+.form-textarea{resize:vertical;min-height:80px}
+
+/* Toggle */
+.toggle-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .toggle-item{
   display:flex;align-items:center;justify-content:space-between;
-  padding:8px 10px;border:1px solid var(--border);border-radius:7px;
-  cursor:pointer;transition:var(--transition);
+  padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;
+  cursor:pointer;transition:var(--transition);user-select:none;
 }
-.toggle-item:hover{border-color:var(--accent);background:var(--accent-dim)}
-.toggle-item input{display:none}
-.toggle-item.checked{border-color:var(--green);background:rgba(16,185,129,.05)}
-.toggle-label{font-size:.8rem;font-weight:500;color:var(--text-2)}
-.toggle-switch{
-  width:32px;height:18px;border-radius:9px;background:var(--border);
-  position:relative;transition:var(--transition);flex-shrink:0;
-}
-.toggle-switch::after{
-  content:'';position:absolute;width:12px;height:12px;border-radius:50%;
-  background:var(--white);top:3px;left:3px;transition:var(--transition);
-  box-shadow:0 1px 3px rgba(0,0,0,.2);
-}
+.toggle-item:hover{border-color:var(--accent-mid)}
+.toggle-item.checked{border-color:var(--green);background:var(--green-dim)}
+.toggle-label{font-size:.79rem;font-weight:500;color:var(--text-2)}
+.toggle-switch{width:30px;height:17px;border-radius:9px;background:var(--border);position:relative;transition:var(--transition);flex-shrink:0}
+.toggle-switch::after{content:'';position:absolute;width:11px;height:11px;border-radius:50%;background:#fff;top:3px;left:3px;transition:var(--transition);box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .toggle-item.checked .toggle-switch{background:var(--green)}
-.toggle-item.checked .toggle-switch::after{transform:translateX(14px)}
+.toggle-item.checked .toggle-switch::after{transform:translateX(13px)}
 
 /* Confirm modal */
-.confirm-body{text-align:center;padding:8px 0}
-.confirm-icon{font-size:2.5rem;margin-bottom:12px}
-.confirm-msg{font-size:.9rem;color:var(--text-2);line-height:1.6}
-.confirm-detail{
-  font-size:.82rem;color:var(--text-3);margin-top:8px;
-  padding:8px 12px;background:var(--bg);border-radius:7px;
-}
+.confirm-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px}
+.confirm-card p{font-size:.83rem;color:var(--text-2)}
+.confirm-card strong{color:var(--text)}
 
-/* Buttons */
-.btn{
-  padding:9px 20px;border-radius:8px;font-size:.85rem;font-weight:600;
-  cursor:pointer;transition:var(--transition);font-family:inherit;
-  display:inline-flex;align-items:center;gap:6px;border:1.5px solid transparent;
-  white-space:nowrap;
+/* ── Empty state ─────────────────────────────────────────────── */
+.empty-state{text-align:center;padding:52px 24px;color:var(--text-3)}
+.empty-state-icon{
+  width:56px;height:56px;border-radius:14px;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
 }
-.btn-primary{background:var(--brand);color:var(--white);border-color:var(--brand)}
-.btn-primary:hover{background:#333;border-color:#333}
-.btn-accent{background:var(--accent);color:var(--brand);border-color:var(--accent)}
-.btn-accent:hover{background:#c4a030}
-.btn-ghost{background:none;color:var(--text-2);border-color:var(--border)}
-.btn-ghost:hover{border-color:var(--text-2);color:var(--text)}
-.btn-danger{background:none;color:var(--red);border-color:var(--red)}
-.btn-danger:hover{background:var(--red);color:var(--white)}
-.btn-sm{padding:6px 14px;font-size:.8rem}
+.empty-state-icon svg{width:24px;height:24px}
+.empty-state h3{font-size:.9rem;font-weight:700;color:var(--text-2);margin-bottom:4px}
+.empty-state p{font-size:.82rem}
 
 /* ── Toast ───────────────────────────────────────────────────── */
-.toast-stack{
-  position:fixed;bottom:24px;right:24px;z-index:1000;
-  display:flex;flex-direction:column;gap:8px;pointer-events:none;
-}
+.toast-stack{position:fixed;bottom:22px;right:22px;z-index:1000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{
-  background:var(--text);color:var(--white);
-  padding:11px 16px;border-radius:9px;font-size:.83rem;font-weight:500;
-  box-shadow:var(--shadow-md);min-width:220px;max-width:340px;
-  display:flex;align-items:center;gap:8px;pointer-events:auto;
-  animation:toastIn .25s ease;
+  background:var(--text);color:#fff;padding:10px 14px;border-radius:10px;
+  font-size:.82rem;font-weight:500;box-shadow:var(--shadow-lg);min-width:220px;max-width:340px;
+  display:flex;align-items:center;gap:8px;pointer-events:auto;animation:toastIn .22s ease;
 }
+.toast-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--text-3)}
 .toast.success .toast-dot{background:var(--green)}
 .toast.error .toast-dot{background:var(--red)}
 .toast.info .toast-dot{background:var(--accent)}
-.toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-@keyframes toastIn{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+@keyframes toastIn{from{transform:translateX(16px);opacity:0}to{transform:none;opacity:1}}
 
-/* ── Dashboard charts row ────────────────────────────────────── */
-.dash-grid{display:grid;grid-template-columns:1fr 340px;gap:18px;margin-bottom:28px}
-.dash-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.dash-card-header{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.dash-card-title{font-size:.88rem;font-weight:700;color:var(--text)}
-.dash-card-body{padding:16px 20px}
-
-/* Plan distribution bars */
-.plan-dist-item{margin-bottom:12px}
-.plan-dist-label{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px}
-.plan-dist-label span:first-child{font-weight:600;color:var(--text)}
-.plan-dist-label span:last-child{color:var(--text-3)}
-.plan-dist-bar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
-.plan-dist-fill{height:100%;border-radius:4px;transition:width .6s ease}
-
-/* Recent signups */
-.recent-user{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
-.recent-user:last-child{border-bottom:none}
-.recent-avatar{
-  width:32px;height:32px;border-radius:50%;background:var(--brand);
-  color:var(--accent);font-weight:700;font-size:.8rem;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.recent-email{font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.recent-time{font-size:.73rem;color:var(--text-3);white-space:nowrap}
-.recent-plan{margin-left:auto;flex-shrink:0}
+/* ── Settings ────────────────────────────────────────────────── */
+.settings-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:28px;max-width:520px;margin-bottom:18px}
 
 /* ── Responsive ──────────────────────────────────────────────── */
-@media(max-width:1024px){
+@media(max-width:1280px){
+  .stats-grid-6{grid-template-columns:repeat(3,1fr)}
+  .dash-grid-3{grid-template-columns:1fr 1fr}
+  .quick-actions{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:1100px){
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .dash-grid{grid-template-columns:1fr}
+  .request-detail-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:768px){
-  :root{--sidebar-w:256px}
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:none}
   .main{margin-left:0}
   .topbar-hamburger{display:flex}
+  .topbar-brand{display:flex}
+  .topbar-title{display:none}
   .topbar-search{display:none}
-  .content{padding:16px}
+  .content{padding:14px}
   .stats-grid{grid-template-columns:1fr 1fr}
-  .sidebar-overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199;
-    display:none;
-  }
-  .sidebar-overlay.visible{display:block}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr}
+  .stats-grid-6{grid-template-columns:1fr 1fr}
+  .dash-grid-3{grid-template-columns:1fr}
+  .quick-actions{grid-template-columns:1fr 1fr}
+  .filter-bar{flex-direction:column;align-items:stretch}
+  .filter-bar .search-box{min-width:0}
+  .filter-select{width:100%}
+  .filter-divider{display:none}
+  .request-detail-grid{grid-template-columns:1fr}
   .form-row{grid-template-columns:1fr}
   .toggle-grid{grid-template-columns:1fr}
+  .plans-admin-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .stats-grid,.stats-grid-6{grid-template-columns:1fr}
+  .quick-actions{grid-template-columns:1fr}
+  .dash-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 <div class="admin-wrap">
 
-<!-- Sidebar overlay (mobile) -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <!-- ── Sidebar ──────────────────────────────────────────────── -->
@@ -486,42 +583,53 @@ tbody tr:hover{background:var(--bg)}
   </div>
 
   <nav class="sidebar-nav">
-    <div class="sidebar-section-label">Overview</div>
-    <a onclick="showPage('dashboard')" class="active" data-page="dashboard">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <div class="nav-group-label">Overview</div>
+    <div class="nav-link active" onclick="showPage('dashboard')" data-page="dashboard">
+      <div class="nav-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </div>
       Dashboard
-    </a>
+    </div>
 
-    <div class="sidebar-section-label">Management</div>
-    <a onclick="showPage('users')" data-page="users">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <div class="nav-group-label">Management</div>
+    <div class="nav-link" onclick="showPage('requests')" data-page="requests">
+      <div class="nav-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      </div>
+      Requests
+      <span class="nav-badge red" id="sidebarPendingCount">—</span>
+    </div>
+    <div class="nav-link" onclick="showPage('users')" data-page="users">
+      <div class="nav-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
       Users
       <span class="nav-badge" id="sidebarUserCount">—</span>
-    </a>
-    <a onclick="showPage('plans')" data-page="plans">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    </div>
+    <div class="nav-link" onclick="showPage('plans')" data-page="plans">
+      <div class="nav-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
       Plans
-    </a>
-    <a onclick="showPage('files')" data-page="files">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      User Files
-    </a>
+    </div>
 
-    <div class="sidebar-section-label">Settings</div>
-    <a onclick="showPage('settings')" data-page="settings">
-      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    <div class="nav-group-label">System</div>
+    <div class="nav-link" onclick="showPage('settings')" data-page="settings">
+      <div class="nav-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      </div>
       Settings
-    </a>
+    </div>
   </nav>
 
   <div class="sidebar-bottom">
-    <div class="sidebar-user-avatar">A</div>
-    <div class="sidebar-user-info">
-      <div class="sidebar-user-name">Admin</div>
-      <div class="sidebar-user-role">Super Administrator</div>
+    <div class="sidebar-avatar">A</div>
+    <div class="sidebar-user">
+      <div class="sidebar-user-name">Administrator</div>
+      <div class="sidebar-user-role">Super Admin</div>
     </div>
     <button class="sidebar-logout" onclick="handleLogout()" title="Log out">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </button>
   </div>
 </aside>
@@ -529,94 +637,325 @@ tbody tr:hover{background:var(--bg)}
 <!-- ── Main ─────────────────────────────────────────────────── -->
 <div class="main">
 
-  <!-- Top bar -->
+  <!-- Topbar -->
   <header class="topbar">
-    <button class="topbar-hamburger" id="hamburger" onclick="toggleSidebar()">
-      <span></span><span></span><span></span>
-    </button>
-    <div>
-      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-brand">
+      <img src="assets/logo.png" alt="BADIA" onerror="this.style.display='none'"/>
+      <span class="topbar-brand-text">BADIA</span>
     </div>
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
     <div class="topbar-spacer"></div>
     <div class="topbar-search">
-      <svg width="14" height="14" fill="none" stroke="#999" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg width="13" height="13" fill="none" stroke="#a0a5b1" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="globalSearch" placeholder="Search anything…" oninput="handleGlobalSearch(this.value)"/>
     </div>
     <div class="topbar-actions">
       <button class="topbar-btn" onclick="refreshAll()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         Refresh
+      </button>
+      <button class="topbar-hamburger" id="hamburger" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
       </button>
     </div>
   </header>
 
   <div class="content">
 
-    <!-- ══ Dashboard Page ══════════════════════════════════════ -->
+    <!-- ══ Dashboard ═══════════════════════════════════════════ -->
     <div class="page active" id="page-dashboard">
-      <div class="stats-grid" id="statsGrid">
-        <div class="stat-card" style="--stat-color:var(--blue)">
-          <div class="stat-icon"></div>
-          <div class="stat-label">Total Users</div>
-          <div class="stat-value" id="statUsers">—</div>
-          <div class="stat-sub">All registered accounts</div>
-        </div>
-        <div class="stat-card" style="--stat-color:var(--green)">
-          <div class="stat-icon"></div>
-          <div class="stat-label">Active Plans</div>
-          <div class="stat-value" id="statActive">—</div>
-          <div class="stat-sub">Users with a paid plan</div>
-        </div>
-        <div class="stat-card" style="--stat-color:var(--accent)">
-          <div class="stat-icon"></div>
-          <div class="stat-label">Files Uploaded</div>
-          <div class="stat-value" id="statFiles">—</div>
-          <div class="stat-sub">Operational + Feasibility</div>
-        </div>
-        <div class="stat-card" style="--stat-color:var(--orange)">
-          <div class="stat-icon"></div>
-          <div class="stat-label">Available Plans</div>
-          <div class="stat-value" id="statPlans">—</div>
-          <div class="stat-sub">Pricing tiers configured</div>
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Welcome back, Administrator. Here's what's happening today.</p>
+          </div>
+          <button class="btn btn-accent btn-sm" onclick="showPage('requests')">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+            View All Requests
+          </button>
         </div>
       </div>
 
-      <div class="dash-grid">
+      <!-- Stats 6-grid -->
+      <div class="stats-grid stats-grid-6">
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Total Users</div>
+              <div class="stat-value" id="statUsers">—</div>
+              <div class="stat-sub">Registered accounts</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Active Plans</div>
+              <div class="stat-value" id="statActive">—</div>
+              <div class="stat-sub">Paid subscriptions</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Total Requests</div>
+              <div class="stat-value" id="statRequests">—</div>
+              <div class="stat-sub">All time</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--accent-dim);color:#9a7920">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Pending Review</div>
+              <div class="stat-value" id="statPending">—</div>
+              <div class="stat-sub">Awaiting action</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Approved</div>
+              <div class="stat-value" id="statApproved">—</div>
+              <div class="stat-sub">Requests approved</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Plans</div>
+              <div class="stat-value" id="statPlans">—</div>
+              <div class="stat-sub">Pricing tiers</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--purple-dim);color:var(--purple)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <div class="quick-action-card" onclick="showPage('requests')">
+          <div class="quick-action-icon" style="background:var(--yellow-dim);color:#92710d">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          </div>
+          <div><div class="quick-action-text">Review Pending</div><div class="quick-action-sub">Check awaiting requests</div></div>
+        </div>
+        <div class="quick-action-card" onclick="showPage('users')">
+          <div class="quick-action-icon" style="background:var(--blue-dim);color:var(--blue)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+          </div>
+          <div><div class="quick-action-text">Manage Users</div><div class="quick-action-sub">View & edit accounts</div></div>
+        </div>
+        <div class="quick-action-card" onclick="showPage('plans')">
+          <div class="quick-action-icon" style="background:var(--accent-dim);color:#9a7920">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div><div class="quick-action-text">Edit Plans</div><div class="quick-action-sub">Update pricing tiers</div></div>
+        </div>
+        <div class="quick-action-card" onclick="showPage('settings')">
+          <div class="quick-action-icon" style="background:var(--purple-dim);color:var(--purple)">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          </div>
+          <div><div class="quick-action-text">Settings</div><div class="quick-action-sub">Configure the system</div></div>
+        </div>
+      </div>
+
+      <!-- Bottom grid -->
+      <div class="dash-grid dash-grid-3">
+        <!-- Pending requests -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <span class="dash-card-title">Pending Requests</span>
+            <span class="dash-card-link" onclick="showPage('requests')">View all →</span>
+          </div>
+          <div class="dash-card-body" id="dashPendingList">
+            <div style="color:var(--text-3);font-size:.82rem">Loading…</div>
+          </div>
+        </div>
         <!-- Plan distribution -->
         <div class="dash-card">
           <div class="dash-card-header">
             <span class="dash-card-title">Plan Distribution</span>
           </div>
           <div class="dash-card-body" id="planDistribution">
-            <div style="color:var(--text-3);font-size:.82rem;padding:12px 0">Loading…</div>
+            <div style="color:var(--text-3);font-size:.82rem">Loading…</div>
           </div>
         </div>
         <!-- Recent signups -->
         <div class="dash-card">
           <div class="dash-card-header">
             <span class="dash-card-title">Recent Sign-ups</span>
+            <span class="dash-card-link" onclick="showPage('users')">View all →</span>
           </div>
           <div class="dash-card-body" id="recentSignups">
-            <div style="color:var(--text-3);font-size:.82rem;padding:12px 0">Loading…</div>
+            <div style="color:var(--text-3);font-size:.82rem">Loading…</div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Requests Page ════════════════════════════════════════ -->
+    <div class="page" id="page-requests">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <h1>Service Requests</h1>
+            <p>Review, approve, or reject user-submitted service requests.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Request stats -->
+      <div class="stats-grid" style="margin-bottom:18px">
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Total</div>
+              <div class="stat-value" id="reqStatTotal">—</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--bg2);color:var(--text-3)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Pending</div>
+              <div class="stat-value" style="color:#92710d" id="reqStatPending">—</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Approved</div>
+              <div class="stat-value" style="color:var(--green)" id="reqStatApproved">—</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-inner">
+            <div>
+              <div class="stat-label">Rejected</div>
+              <div class="stat-value" style="color:var(--red)" id="reqStatRejected">—</div>
+            </div>
+            <div class="stat-icon-box" style="background:var(--red-dim);color:var(--red)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <div class="search-box" style="flex:1;min-width:180px">
+          <svg width="13" height="13" fill="none" stroke="#a0a5b1" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="reqSearch" placeholder="Search by user, email, type…" oninput="filterRequests()"/>
+        </div>
+        <div class="filter-divider"></div>
+        <select class="filter-select" id="reqTypeFilter" onchange="filterRequests()">
+          <option value="">All Types</option>
+          <option value="partnership">Operational Partnership</option>
+          <option value="feasibility">Feasibility Study</option>
+        </select>
+        <select class="filter-select" id="reqStatusFilter" onchange="filterRequests()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <select class="filter-select" id="reqPlanFilter" onchange="filterRequests()">
+          <option value="">All Plans</option>
+        </select>
+        <select class="filter-select" id="reqSortFilter" onchange="filterRequests()">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
+      </div>
+
+      <div class="section-header">
+        <span class="section-title">Requests</span>
+        <span class="section-count" id="reqCount">—</span>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>User</th>
+                <th>Plan</th>
+                <th>Files</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="requestsTableBody">
+              <tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></div><h3>Loading requests…</h3></div></td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
     <!-- ══ Users Page ══════════════════════════════════════════ -->
     <div class="page" id="page-users">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <h1>Users</h1>
+            <p>Manage all registered user accounts.</p>
+          </div>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="search-box" style="flex:1;min-width:180px">
+          <svg width="13" height="13" fill="none" stroke="#a0a5b1" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="userSearch" placeholder="Search by name, email, ID…" oninput="filterUsers(this.value)"/>
+        </div>
+        <div class="filter-divider"></div>
+        <select class="filter-select" id="planFilter" onchange="filterUsers(document.getElementById('userSearch').value)">
+          <option value="">All Plans</option>
+        </select>
+        <select class="filter-select" id="statusFilter" onchange="filterUsers(document.getElementById('userSearch').value)">
+          <option value="">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
       <div class="section-header">
         <span class="section-title">All Users</span>
         <span class="section-count" id="userCount">—</span>
-        <div class="section-spacer"></div>
-        <div class="search-box">
-          <svg width="13" height="13" fill="none" stroke="#999" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="userSearch" placeholder="Search by email, name…" oninput="filterUsers(this.value)"/>
-        </div>
-        <!-- Filter by plan -->
-        <select class="form-input" id="planFilter" style="width:140px;padding:6px 10px;font-size:.8rem" onchange="filterUsers(document.getElementById('userSearch').value)">
-          <option value="">All Plans</option>
-        </select>
       </div>
       <div class="table-wrap">
         <div class="table-scroll">
@@ -624,8 +963,7 @@ tbody tr:hover{background:var(--bg)}
             <thead>
               <tr>
                 <th>#</th>
-                <th>User ID</th>
-                <th>Name</th>
+                <th>User</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Plan</th>
@@ -635,7 +973,7 @@ tbody tr:hover{background:var(--bg)}
               </tr>
             </thead>
             <tbody id="usersTableBody">
-              <tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading users…</p></div></td></tr>
+              <tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><h3>Loading users…</h3></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -644,58 +982,31 @@ tbody tr:hover{background:var(--bg)}
 
     <!-- ══ Plans Page ══════════════════════════════════════════ -->
     <div class="page" id="page-plans">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <h1>Pricing Plans</h1>
+            <p>Manage subscription tiers, features, and pricing.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewPlanModal()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Plan
+          </button>
+        </div>
+      </div>
       <div class="section-header">
-        <span class="section-title">Pricing Plans</span>
+        <span class="section-title">Configured Plans</span>
         <span class="section-count" id="plansCount">—</span>
-        <div class="section-spacer"></div>
-        <button class="btn btn-primary btn-sm" onclick="openNewPlanModal()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          New Plan
-        </button>
       </div>
       <div class="plans-admin-grid" id="plansAdminGrid">
-        <div style="color:var(--text-3);font-size:.85rem;padding:20px">Loading plans…</div>
+        <div style="color:var(--text-3);font-size:.84rem;padding:12px">Loading plans…</div>
       </div>
     </div>
 
-    <!-- ══ Files Page ══════════════════════════════════════════ -->
-    <div class="page" id="page-files">
-      <div class="section-header">
-        <span class="section-title">User Files</span>
-        <div class="section-spacer"></div>
-        <div class="search-box">
-          <svg width="13" height="13" fill="none" stroke="#999" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="fileSearch" placeholder="Search by email or ID…" oninput="filterFiles(this.value)"/>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>User ID</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Current Plan</th>
-                <th>Operational Partnership</th>
-                <th>Feasibility Studies</th>
-                <th>Total Files</th>
-              </tr>
-            </thead>
-            <tbody id="filesTableBody">
-              <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading files…</p></div></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ Settings Page ══════════════════════════════════════ -->
+    <!-- ══ Settings Page ════════════════════════════════════════ -->
     <div class="page" id="page-settings">
-      <div class="section-header">
-        <span class="section-title">Settings</span>
-      </div>
-      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:520px">
+      <div class="page-header"><h1>Settings</h1><p>Configure system-wide admin preferences.</p></div>
+      <div class="settings-card">
         <div class="form-section">
           <div class="form-section-title">API Configuration</div>
           <div class="form-group">
@@ -705,13 +1016,15 @@ tbody tr:hover{background:var(--bg)}
         </div>
         <div class="form-section">
           <div class="form-section-title">Admin Account</div>
-          <div class="form-group">
-            <label class="form-label">Admin Email</label>
-            <input class="form-input" type="email" placeholder="admin@badia.com"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">New Password</label>
-            <input class="form-input" type="password" placeholder="Leave blank to keep current"/>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Admin Email</label>
+              <input class="form-input" type="email" placeholder="admin@badia.com"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input class="form-input" type="password" placeholder="Leave blank to keep current"/>
+            </div>
           </div>
         </div>
         <div style="display:flex;gap:10px">
@@ -725,27 +1038,26 @@ tbody tr:hover{background:var(--bg)}
 </div><!-- /main -->
 </div><!-- /admin-wrap -->
 
-<!-- ── Toast stack ─────────────────────────────────────────── -->
 <div class="toast-stack" id="toastStack"></div>
 
-<!-- ── Delete Confirm Modal ────────────────────────────────── -->
+<!-- ── Delete User Modal ──────────────────────────────────────── -->
 <div class="modal-backdrop" id="deleteModal">
   <div class="modal" style="max-width:420px">
     <div class="modal-header">
       <div class="modal-icon danger">
-        <svg width="18" height="18" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        <svg width="18" height="18" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
       </div>
       <div>
         <div class="modal-title">Delete User</div>
         <div class="modal-subtitle">This action cannot be undone</div>
       </div>
-      <button class="modal-close" onclick="closeModal('deleteModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('deleteModal')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="modal-body">
-      <div class="confirm-body">
-        <div class="confirm-msg">You are about to permanently delete this user and all their data.</div>
-        <div class="confirm-detail" id="deleteUserDetail">—</div>
-      </div>
+      <p style="font-size:.86rem;color:var(--text-2);line-height:1.6">You are about to permanently delete this user and all their associated data. This cannot be reversed.</p>
+      <div class="confirm-card"><p>User: <strong id="deleteUserDetail">—</strong></p></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancel</button>
@@ -754,7 +1066,7 @@ tbody tr:hover{background:var(--bg)}
   </div>
 </div>
 
-<!-- ── Edit User Modal ──────────────────────────────────────── -->
+<!-- ── Edit User Modal ────────────────────────────────────────── -->
 <div class="modal-backdrop" id="editUserModal">
   <div class="modal">
     <div class="modal-header">
@@ -765,7 +1077,9 @@ tbody tr:hover{background:var(--bg)}
         <div class="modal-title">Edit User</div>
         <div class="modal-subtitle" id="editUserSubtitle">—</div>
       </div>
-      <button class="modal-close" onclick="closeModal('editUserModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('editUserModal')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="editUserId"/>
@@ -787,17 +1101,19 @@ tbody tr:hover{background:var(--bg)}
         <label class="form-label">Phone</label>
         <input class="form-input" id="editPhone" type="tel" placeholder="+965 XXXX XXXX"/>
       </div>
-      <div class="form-group">
-        <label class="form-label">Plan</label>
-        <select class="form-input" id="editPlan"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Account Status</label>
-        <select class="form-input" id="editStatus">
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="suspended">Suspended</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Plan</label>
+          <select class="form-input" id="editPlan"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Status</label>
+          <select class="form-input" id="editStatus">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -807,9 +1123,9 @@ tbody tr:hover{background:var(--bg)}
   </div>
 </div>
 
-<!-- ── Edit Plan Modal ──────────────────────────────────────── -->
+<!-- ── Edit Plan Modal ────────────────────────────────────────── -->
 <div class="modal-backdrop" id="editPlanModal">
-  <div class="modal" style="max-width:640px">
+  <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-icon edit">
         <svg width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -818,7 +1134,9 @@ tbody tr:hover{background:var(--bg)}
         <div class="modal-title" id="editPlanModalTitle">Edit Plan</div>
         <div class="modal-subtitle" id="editPlanModalSub">—</div>
       </div>
-      <button class="modal-close" onclick="closeModal('editPlanModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('editPlanModal')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="editPlanId"/>
@@ -829,7 +1147,7 @@ tbody tr:hover{background:var(--bg)}
             <label class="form-label">Plan Name</label>
             <input class="form-input" id="editPlanName" type="text" placeholder="e.g. Pro"/>
           </div>
-          <div class="form-group"><!-- spacer --></div>
+          <div class="form-group"></div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -846,7 +1164,7 @@ tbody tr:hover{background:var(--bg)}
         <div class="form-section-title">Limits</div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Max Users <span style="color:var(--text-3);font-weight:400">(leave blank = unlimited)</span></label>
+            <label class="form-label">Max Users <span>(blank = unlimited)</span></label>
             <input class="form-input" id="editPlanMaxUsers" type="number" min="1" placeholder="Unlimited"/>
           </div>
           <div class="form-group">
@@ -867,20 +1185,103 @@ tbody tr:hover{background:var(--bg)}
       </div>
       <div class="form-section">
         <div class="form-section-title">Features</div>
-        <div class="toggle-grid" id="featuresToggleGrid">
-          <!-- Rendered by JS -->
-        </div>
+        <div class="toggle-grid" id="featuresToggleGrid"></div>
       </div>
       <div class="form-section">
         <div class="form-section-title">Support Channels</div>
-        <div class="toggle-grid" id="supportToggleGrid">
-          <!-- Rendered by JS -->
-        </div>
+        <div class="toggle-grid" id="supportToggleGrid"></div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('editPlanModal')">Cancel</button>
       <button class="btn btn-accent" onclick="savePlan()">Save Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── View Request Modal ─────────────────────────────────────── -->
+<div class="modal-backdrop" id="viewReqModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-icon view">
+        <svg width="18" height="18" fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      </div>
+      <div>
+        <div class="modal-title" id="viewReqTitle">Request Details</div>
+        <div class="modal-subtitle" id="viewReqSubtitle">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('viewReqModal')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="viewReqBody">—</div>
+    <div class="modal-footer" id="viewReqFooter">
+      <button class="btn btn-ghost" onclick="closeModal('viewReqModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reject Request Modal ───────────────────────────────────── -->
+<div class="modal-backdrop" id="rejectReqModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-icon danger">
+        <svg width="18" height="18" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <div>
+        <div class="modal-title">Reject Request</div>
+        <div class="modal-subtitle" id="rejectReqSubtitle">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('rejectReqModal')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="rejectReqId"/>
+      <p style="font-size:.85rem;color:var(--text-2);line-height:1.6;margin-bottom:14px">
+        Optionally provide a reason for the rejection. The user may see this note.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Rejection Reason <span>(optional)</span></label>
+        <textarea class="form-input form-textarea" id="rejectReqReason" placeholder="e.g. Incomplete documentation, missing financial statements…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Admin Notes <span>(internal only)</span></label>
+        <textarea class="form-input form-textarea" id="rejectReqNotes" placeholder="Internal notes not visible to the user…" style="min-height:60px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('rejectReqModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmRejectRequest()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        Reject Request
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete Request Modal ───────────────────────────────────── -->
+<div class="modal-backdrop" id="deleteReqModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-icon danger">
+        <svg width="18" height="18" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </div>
+      <div>
+        <div class="modal-title">Delete Request</div>
+        <div class="modal-subtitle">This action cannot be undone</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('deleteReqModal')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.86rem;color:var(--text-2);line-height:1.6">Permanently delete this request and all associated files?</p>
+      <div class="confirm-card"><p>Request: <strong id="deleteReqDetail">—</strong></p></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('deleteReqModal')">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteReqBtn">Delete Request</button>
     </div>
   </div>
 </div>
@@ -891,12 +1292,12 @@ let API = localStorage.getItem('badia_admin_api') || 'http://127.0.0.1:8000';
 const TOKEN = () => localStorage.getItem('access_token') || '';
 
 // ── State ───────────────────────────────────────────────────────
-let _users  = [];
-let _plans  = [];
-let _files  = [];
+let _users    = [];
+let _plans    = [];
+let _requests = [];
 let _currentPage = 'dashboard';
 
-// ── Helpers: API ────────────────────────────────────────────────
+// ── API Helper ──────────────────────────────────────────────────
 async function apiFetch(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
   if (TOKEN()) headers['Authorization'] = `Bearer ${TOKEN()}`;
@@ -904,32 +1305,32 @@ async function apiFetch(path, opts = {}) {
     const res = await fetch(`${API}${path}`, { ...opts, headers });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
-  } catch (e) {
-    throw e;
-  }
+  } catch (e) { throw e; }
 }
 
 // ── Page Navigation ─────────────────────────────────────────────
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
   document.getElementById(`page-${id}`)?.classList.add('active');
   document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
   _currentPage = id;
-
-  const titles = { dashboard:'Dashboard', users:'Users', plans:'Pricing Plans', files:'User Files', settings:'Settings' };
+  const titles = { dashboard:'Dashboard', requests:'Service Requests', users:'Users', plans:'Pricing Plans', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[id] || id;
   closeSidebar();
 }
 
-// ── Sidebar mobile ──────────────────────────────────────────────
+// ── Sidebar ─────────────────────────────────────────────────────
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('visible');
+  const s = document.getElementById('sidebar');
+  const o = document.getElementById('sidebarOverlay');
+  const h = document.getElementById('hamburger');
+  s.classList.toggle('open'); o.classList.toggle('visible'); h.classList.toggle('open');
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('visible');
+  document.getElementById('hamburger').classList.remove('open');
 }
 
 // ── Toast ───────────────────────────────────────────────────────
@@ -939,22 +1340,48 @@ function toast(msg, type = 'info') {
   el.className = `toast ${type}`;
   el.innerHTML = `<div class="toast-dot"></div>${msg}`;
   stack.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 3000);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(() => el.remove(), 300); }, 3200);
 }
 
 // ── Modal helpers ───────────────────────────────────────────────
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// ── Plan utils ──────────────────────────────────────────────────
+// ── Utilities ───────────────────────────────────────────────────
 function planClass(name) {
-  const map = { starter:'plan-starter', business:'plan-business', pro:'plan-pro', enterprise:'plan-enterprise' };
-  return map[(name||'').toLowerCase()] || 'plan-none';
+  const m = { starter:'plan-starter', business:'plan-business', pro:'plan-pro', enterprise:'plan-enterprise' };
+  return m[(name||'').toLowerCase()] || 'plan-none';
+}
+function statusBadge(status) {
+  const m = {
+    pending: '<span class="badge badge-yellow"><span class="badge-dot"></span>Pending</span>',
+    approved: '<span class="badge badge-green"><span class="badge-dot"></span>Approved</span>',
+    rejected: '<span class="badge badge-red"><span class="badge-dot"></span>Rejected</span>',
+    active:   '<span class="badge badge-green"><span class="badge-dot"></span>Active</span>',
+    inactive: '<span class="badge badge-gray"><span class="badge-dot"></span>Inactive</span>',
+    suspended:'<span class="badge badge-red"><span class="badge-dot"></span>Suspended</span>',
+  };
+  return m[status] || `<span class="badge badge-gray"><span class="badge-dot"></span>${status}</span>`;
+}
+function typeChip(type) {
+  return type === 'partnership'
+    ? '<span class="type-chip type-partnership"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Partnership</span>'
+    : '<span class="type-chip type-feasibility"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Feasibility</span>';
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+function fmtSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes}B`;
+  if (bytes < 1048576) return `${(bytes/1024).toFixed(0)}KB`;
+  return `${(bytes/1048576).toFixed(1)}MB`;
 }
 
-// ── Load All Data ───────────────────────────────────────────────
+// ── Load All ─────────────────────────────────────────────────────
 async function loadAll() {
-  await Promise.allSettled([loadUsers(), loadPlans(), loadFiles()]);
+  await Promise.allSettled([loadUsers(), loadPlans(), loadRequests()]);
   renderDashboard();
 }
 
@@ -969,7 +1396,7 @@ async function loadUsers() {
   } catch (e) {
     _users = [];
     renderUsersTable([]);
-    toast('Could not load users — API endpoint not yet available', 'error');
+    toast('Could not load users — API not yet available', 'error');
   }
 }
 
@@ -978,48 +1405,61 @@ function updateUserCount() {
   document.getElementById('userCount').textContent = `${n} user${n !== 1 ? 's' : ''}`;
   document.getElementById('sidebarUserCount').textContent = n;
   document.getElementById('statUsers').textContent = n;
+  document.getElementById('statActive').textContent = _users.filter(u => u.is_active !== false && (u.plan_name || u.plan)).length;
 }
 
 function populatePlanFilter() {
-  const sel = document.getElementById('planFilter');
-  const existing = new Set([...sel.options].map(o => o.value));
-  const planNames = [...new Set(_users.map(u => u.plan_name || u.plan || '').filter(Boolean))];
-  planNames.forEach(p => {
-    if (!existing.has(p)) {
-      const o = document.createElement('option');
-      o.value = p; o.textContent = p;
-      sel.appendChild(o);
-    }
+  ['planFilter','reqPlanFilter'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const existing = new Set([...sel.options].map(o => o.value));
+    const names = [...new Set(_users.map(u => u.plan_name || u.plan || '').filter(Boolean))];
+    names.forEach(p => {
+      if (!existing.has(p)) {
+        const o = document.createElement('option');
+        o.value = p; o.textContent = p; sel.appendChild(o);
+      }
+    });
   });
 }
 
 function renderUsersTable(users) {
   const tbody = document.getElementById('usersTableBody');
   if (!users.length) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">👥</div><p>No users found</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><h3>No users found</h3><p>Try adjusting your search or filters</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = users.map((u, i) => {
-    const name  = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || '—';
-    const email = u.email || '—';
-    const phone = u.phone || u.phone_number || '—';
-    const plan  = u.plan_name || u.plan || 'None';
+    const name   = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || '—';
+    const email  = u.email || '—';
+    const phone  = u.phone || u.phone_number || '—';
+    const plan   = u.plan_name || u.plan || 'None';
     const status = u.is_active === false ? 'inactive' : 'active';
-    const joined = u.date_joined || u.created_at ? new Date(u.date_joined || u.created_at).toLocaleDateString('en-GB') : '—';
+    const joined = fmtDate(u.date_joined || u.created_at);
+    const initials = name !== '—' ? name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (email[0]||'?').toUpperCase();
     return `<tr>
-      <td class="td-primary">${i + 1}</td>
-      <td><span class="td-mono">#${u.id || u.user_id || '—'}</span></td>
-      <td class="td-primary">${name}</td>
+      <td class="td-mono" style="width:40px">${i+1}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:9px">
+          <div class="recent-avatar" style="width:30px;height:30px;font-size:.72rem;border-radius:8px">${initials}</div>
+          <span class="td-primary">${name}</span>
+        </div>
+      </td>
       <td>${email}</td>
-      <td>${phone}</td>
+      <td class="td-muted">${phone}</td>
       <td><span class="plan-pill ${planClass(plan)}">${plan}</span></td>
-      <td><span class="badge ${status === 'active' ? 'badge-green' : 'badge-gray'}">${status}</span></td>
-      <td>${joined}</td>
+      <td>${statusBadge(status)}</td>
+      <td class="td-muted">${joined}</td>
       <td>
         <div class="action-group">
-          <button class="btn-action" onclick="openEditUser(${JSON.stringify(u).replace(/"/g,'&quot;')})">✏️ Edit</button>
-          <button class="btn-action" onclick="viewUserFiles('${u.id || u.user_id}')">📁 Files</button>
-          <button class="btn-action danger" onclick="confirmDelete(${u.id || u.user_id},'${email}')">🗑 Delete</button>
+          <button class="btn-icon" onclick="openEditUser(${JSON.stringify(u).replace(/"/g,'&quot;')})">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </button>
+          <button class="btn-icon danger" onclick="confirmDelete(${u.id||u.user_id},'${email}')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Delete
+          </button>
         </div>
       </td>
     </tr>`;
@@ -1028,16 +1468,20 @@ function renderUsersTable(users) {
 
 function filterUsers(q) {
   const plan = document.getElementById('planFilter').value.toLowerCase();
+  const st   = document.getElementById('statusFilter')?.value.toLowerCase() || '';
   const query = q.toLowerCase();
   const filtered = _users.filter(u => {
     const matchQ = !query ||
-      (u.email || '').toLowerCase().includes(query) ||
-      (u.first_name || '').toLowerCase().includes(query) ||
-      (u.last_name || '').toLowerCase().includes(query) ||
-      String(u.id || u.user_id || '').includes(query);
-    const matchPlan = !plan || (u.plan_name || u.plan || '').toLowerCase() === plan;
-    return matchQ && matchPlan;
+      (u.email||'').toLowerCase().includes(query) ||
+      (u.first_name||'').toLowerCase().includes(query) ||
+      (u.last_name||'').toLowerCase().includes(query) ||
+      String(u.id||u.user_id||'').includes(query);
+    const matchPlan = !plan || (u.plan_name||u.plan||'').toLowerCase() === plan;
+    const status = u.is_active === false ? 'inactive' : 'active';
+    const matchSt = !st || status === st;
+    return matchQ && matchPlan && matchSt;
   });
+  document.getElementById('userCount').textContent = `${filtered.length} user${filtered.length!==1?'s':''}`;
   renderUsersTable(filtered);
 }
 
@@ -1049,12 +1493,9 @@ function openEditUser(user) {
   document.getElementById('editPhone').value  = user.phone || user.phone_number || '';
   document.getElementById('editStatus').value = user.is_active === false ? 'inactive' : 'active';
   document.getElementById('editUserSubtitle').textContent = user.email || `User #${user.id}`;
-
-  // Populate plan select
   const sel = document.getElementById('editPlan');
   sel.innerHTML = `<option value="">No Plan</option>` +
-    _plans.map(p => `<option value="${p.id}" ${(user.plan_id === p.id) ? 'selected' : ''}>${p.name}</option>`).join('');
-
+    _plans.map(p => `<option value="${p.id}" ${user.plan_id===p.id?'selected':''}>${p.name}</option>`).join('');
   openModal('editUserModal');
 }
 
@@ -1069,11 +1510,9 @@ async function saveUser() {
     plan_id:    document.getElementById('editPlan').value || null,
   };
   // TODO: PUT /api/v1/users/{id}/
-  // const res = await apiFetch(`/api/v1/users/${id}/`, { method:'PUT', body:JSON.stringify(payload) });
   closeModal('editUserModal');
-  toast('User updated successfully ✓', 'success');
-  // Update local state optimistically
-  const idx = _users.findIndex(u => String(u.id || u.user_id) === String(id));
+  toast('User updated successfully', 'success');
+  const idx = _users.findIndex(u => String(u.id||u.user_id) === String(id));
   if (idx >= 0) { _users[idx] = { ..._users[idx], ...payload }; renderUsersTable(_users); }
 }
 
@@ -1085,12 +1524,283 @@ function confirmDelete(userId, email) {
 
 async function deleteUser(userId) {
   // TODO: DELETE /api/v1/users/{userId}/
-  // await apiFetch(`/api/v1/users/${userId}/`, { method:'DELETE' });
-  _users = _users.filter(u => String(u.id || u.user_id) !== String(userId));
+  _users = _users.filter(u => String(u.id||u.user_id) !== String(userId));
   renderUsersTable(_users);
   updateUserCount();
   closeModal('deleteModal');
   toast('User deleted', 'info');
+}
+
+// ── REQUESTS ─────────────────────────────────────────────────────
+async function loadRequests() {
+  try {
+    const data = await apiFetch('/api/v1/admin/requests/');
+    _requests = Array.isArray(data) ? data : (data.results || data.requests || []);
+  } catch (e) {
+    _requests = [];
+  }
+  renderRequests(_requests);
+  updateRequestStats();
+}
+
+function updateRequestStats() {
+  const total    = _requests.length;
+  const pending  = _requests.filter(r => r.status === 'pending').length;
+  const approved = _requests.filter(r => r.status === 'approved').length;
+  const rejected = _requests.filter(r => r.status === 'rejected').length;
+  document.getElementById('reqStatTotal').textContent    = total;
+  document.getElementById('reqStatPending').textContent  = pending;
+  document.getElementById('reqStatApproved').textContent = approved;
+  document.getElementById('reqStatRejected').textContent = rejected;
+  document.getElementById('statRequests').textContent    = total;
+  document.getElementById('statPending').textContent     = pending;
+  document.getElementById('statApproved').textContent    = approved;
+  document.getElementById('sidebarPendingCount').textContent = pending || '—';
+  document.getElementById('reqCount').textContent = `${total} request${total!==1?'s':''}`;
+}
+
+function filterRequests() {
+  const q      = (document.getElementById('reqSearch').value || '').toLowerCase();
+  const type   = document.getElementById('reqTypeFilter').value;
+  const status = document.getElementById('reqStatusFilter').value;
+  const plan   = document.getElementById('reqPlanFilter').value.toLowerCase();
+  const sort   = document.getElementById('reqSortFilter').value;
+
+  let filtered = _requests.filter(r => {
+    const user = r.user || {};
+    const matchQ = !q ||
+      (user.email||'').toLowerCase().includes(q) ||
+      ((user.full_name||'') + ' ' + (user.first_name||'')+' '+(user.last_name||'')).toLowerCase().includes(q) ||
+      (r.request_type||r.type||'').toLowerCase().includes(q) ||
+      String(r.id||'').includes(q);
+    const matchType   = !type   || (r.request_type||r.type||'') === type;
+    const matchStatus = !status || r.status === status;
+    const matchPlan   = !plan   || (user.plan||user.plan_name||'').toLowerCase() === plan;
+    return matchQ && matchType && matchStatus && matchPlan;
+  });
+
+  filtered.sort((a, b) => {
+    const da = new Date(a.created_at||0), db = new Date(b.created_at||0);
+    return sort === 'oldest' ? da - db : db - da;
+  });
+
+  document.getElementById('reqCount').textContent = `${filtered.length} request${filtered.length!==1?'s':''}`;
+  renderRequests(filtered);
+}
+
+function renderRequests(requests) {
+  const tbody = document.getElementById('requestsTableBody');
+  if (!requests.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></div><h3>No requests found</h3><p>Try adjusting your filters</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  requests.forEach(req => {
+    const user  = req.user || {};
+    const type  = req.request_type || req.type || 'unknown';
+    const plan  = user.plan || user.plan_name || 'None';
+    const files = req.files || [];
+    const fileChips = files.slice(0,2).map(f => {
+      const name = typeof f === 'string' ? f : (f.name || f.filename || 'file.pdf');
+      const sz   = fmtSize(f.size || 0);
+      const url  = typeof f === 'string' ? f : (f.url || '#');
+      return `<span class="file-chip" onclick="event.stopPropagation();downloadFile('${url}','${name}')" title="${name}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        ${name.length > 16 ? name.slice(0,13)+'…' : name}
+        ${sz ? `<span class="file-size">${sz}</span>` : ''}
+      </span>`;
+    }).join('');
+    const extraFiles = files.length > 2 ? `<span class="file-chip" style="cursor:default;color:var(--text-3)">+${files.length-2} more</span>` : '';
+    const nameDisplay = user.full_name || [user.first_name,user.last_name].filter(Boolean).join(' ') || user.email || '—';
+    const initials = (nameDisplay !== '—' ? nameDisplay : (user.email||'?')).split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+
+    const row = document.createElement('tr');
+    row.dataset.reqId = req.id;
+    row.innerHTML = `
+      <td class="td-mono">#${req.id}</td>
+      <td>${typeChip(type)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:9px">
+          <div class="recent-avatar" style="width:28px;height:28px;font-size:.68rem;border-radius:7px;flex-shrink:0">${initials}</div>
+          <div>
+            <div class="td-primary" style="font-size:.83rem">${nameDisplay}</div>
+            <div class="td-muted" style="font-size:.74rem">${user.email||'—'}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="plan-pill ${planClass(plan)}">${plan}</span></td>
+      <td>
+        <div style="display:flex;flex-wrap:wrap;gap:2px">
+          ${fileChips}${extraFiles}
+          ${!files.length ? '<span class="td-muted">No files</span>' : ''}
+        </div>
+      </td>
+      <td>${statusBadge(req.status)}</td>
+      <td class="td-muted">${fmtDate(req.created_at)}</td>
+      <td>
+        <div class="action-group">
+          <button class="btn-icon" onclick="viewRequest(${req.id})" title="View details">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          ${req.status === 'pending' ? `
+          <button class="btn-icon approve" onclick="approveRequest(${req.id})" title="Approve">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+          </button>
+          <button class="btn-icon reject" onclick="openRejectModal(${req.id})" title="Reject">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>` : ''}
+          ${files.length ? `<button class="btn-icon download" onclick="downloadAllFiles(${req.id})" title="Download files">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>` : ''}
+          <button class="btn-icon danger" onclick="confirmDeleteRequest(${req.id})" title="Delete">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+      </td>`;
+    tbody.appendChild(row);
+  });
+}
+
+async function approveRequest(reqId) {
+  const req = _requests.find(r => r.id === reqId);
+  if (!req) return;
+  // TODO: PATCH /api/v1/admin/requests/{reqId}/ { status: 'approved' }
+  req.status = 'approved';
+  filterRequests();
+  updateRequestStats();
+  renderDashboard();
+  toast('Request approved successfully', 'success');
+}
+
+function openRejectModal(reqId) {
+  const req = _requests.find(r => r.id === reqId);
+  document.getElementById('rejectReqId').value = reqId;
+  document.getElementById('rejectReqReason').value = '';
+  document.getElementById('rejectReqNotes').value = '';
+  document.getElementById('rejectReqSubtitle').textContent =
+    req ? `Request #${reqId} — ${req.user?.email || '—'}` : `Request #${reqId}`;
+  openModal('rejectReqModal');
+}
+
+async function confirmRejectRequest() {
+  const reqId = parseInt(document.getElementById('rejectReqId').value);
+  const reason = document.getElementById('rejectReqReason').value.trim();
+  const notes  = document.getElementById('rejectReqNotes').value.trim();
+  const req = _requests.find(r => r.id === reqId);
+  if (!req) return;
+  // TODO: PATCH /api/v1/admin/requests/{reqId}/ { status:'rejected', rejection_reason:reason, admin_notes:notes }
+  req.status = 'rejected';
+  req.rejection_reason = reason;
+  req.admin_notes = notes;
+  closeModal('rejectReqModal');
+  filterRequests();
+  updateRequestStats();
+  renderDashboard();
+  toast('Request rejected', 'info');
+}
+
+function viewRequest(reqId) {
+  const req = _requests.find(r => r.id === reqId);
+  if (!req) return;
+  const user  = req.user || {};
+  const type  = req.request_type || req.type || 'unknown';
+  const files = req.files || [];
+  const name  = user.full_name || [user.first_name,user.last_name].filter(Boolean).join(' ') || user.email || '—';
+
+  document.getElementById('viewReqTitle').textContent = `Request #${req.id}`;
+  document.getElementById('viewReqSubtitle').textContent = `${type === 'partnership' ? 'Operational Partnership' : 'Feasibility Study'} — ${fmtDate(req.created_at)}`;
+
+  const fileCards = files.length
+    ? `<div style="display:flex;flex-wrap:wrap;gap:6px">${files.map(f => {
+        const fname = typeof f === 'string' ? f : (f.name||'file.pdf');
+        const fsize = fmtSize(f.size||0);
+        const fdate = fmtDate(f.uploaded_at||f.upload_date);
+        const furl  = typeof f === 'string' ? f : (f.url||'#');
+        return `<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:9px;min-width:200px;flex:1">
+          <div style="width:34px;height:34px;border-radius:8px;background:var(--red-dim);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:.81rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fname}</div>
+            <div style="font-size:.72rem;color:var(--text-3)">${[fsize,fdate].filter(Boolean).join(' · ')}</div>
+          </div>
+          <button class="btn-icon download btn-xs" onclick="downloadFile('${furl}','${fname}')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>`;
+      }).join('')}</div>`
+    : '<p style="font-size:.83rem;color:var(--text-3)">No files attached to this request.</p>';
+
+  const notesSection = req.admin_notes
+    ? `<div style="margin-top:14px"><div class="detail-label" style="margin-bottom:5px">Admin Notes</div><div class="notes-box">${req.admin_notes}</div></div>` : '';
+  const rejSection = req.rejection_reason
+    ? `<div style="margin-top:10px"><div class="detail-label" style="margin-bottom:5px">Rejection Reason</div><div class="notes-box rejection-note">${req.rejection_reason}</div></div>` : '';
+
+  document.getElementById('viewReqBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-bottom:18px">
+      <div><div class="detail-label">User</div><div class="detail-value">${name}</div></div>
+      <div><div class="detail-label">Email</div><div class="detail-value">${user.email||'—'}</div></div>
+      <div><div class="detail-label">Plan</div><div>${'<span class="plan-pill '+planClass(user.plan||user.plan_name||'None')+'">'+(user.plan||user.plan_name||'None')+'</span>'}</div></div>
+      <div><div class="detail-label">Status</div><div>${statusBadge(req.status)}</div></div>
+      <div><div class="detail-label">Type</div><div>${typeChip(type)}</div></div>
+      <div><div class="detail-label">Submitted</div><div class="detail-value">${fmtDate(req.created_at)}</div></div>
+    </div>
+    <div class="detail-label" style="margin-bottom:8px">Uploaded Files (${files.length})</div>
+    ${fileCards}
+    ${notesSection}${rejSection}`;
+
+  const footer = document.getElementById('viewReqFooter');
+  footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal('viewReqModal')">Close</button>`;
+  if (req.status === 'pending') {
+    footer.innerHTML += `
+      <button class="btn btn-danger" onclick="closeModal('viewReqModal');openRejectModal(${req.id})">Reject</button>
+      <button class="btn btn-green" onclick="closeModal('viewReqModal');approveRequest(${req.id})">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+        Approve
+      </button>`;
+  }
+  openModal('viewReqModal');
+}
+
+function downloadFile(url, name) {
+  if (!url || url === '#') { toast('File URL not available', 'error'); return; }
+  const a = document.createElement('a');
+  a.href = url.startsWith('http') ? url : `${API}${url}`;
+  a.download = name || 'file';
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  toast(`Downloading ${name}…`, 'info');
+}
+
+function downloadAllFiles(reqId) {
+  const req = _requests.find(r => r.id === reqId);
+  if (!req?.files?.length) { toast('No files to download', 'error'); return; }
+  req.files.forEach(f => {
+    const name = typeof f === 'string' ? f : (f.name||'file');
+    const url  = typeof f === 'string' ? f : (f.url||'#');
+    setTimeout(() => downloadFile(url, name), 300);
+  });
+}
+
+function confirmDeleteRequest(reqId) {
+  const req = _requests.find(r => r.id === reqId);
+  document.getElementById('deleteReqDetail').textContent =
+    req ? `#${reqId} — ${req.user?.email || '—'} (${req.request_type || req.type || 'unknown'})` : `#${reqId}`;
+  document.getElementById('confirmDeleteReqBtn').onclick = () => deleteRequest(reqId);
+  openModal('deleteReqModal');
+}
+
+async function deleteRequest(reqId) {
+  // TODO: DELETE /api/v1/admin/requests/{reqId}/
+  _requests = _requests.filter(r => r.id !== reqId);
+  closeModal('deleteReqModal');
+  filterRequests();
+  updateRequestStats();
+  renderDashboard();
+  toast('Request deleted', 'info');
 }
 
 // ── PLANS ────────────────────────────────────────────────────────
@@ -1110,11 +1820,11 @@ async function loadPlans() {
     const data = await apiFetch('/api/v1/plans/');
     _plans = Array.isArray(data) ? data : (data.results || data.plans || []);
     renderPlansAdmin(_plans);
-    document.getElementById('statPlans').textContent = _plans.length;
-    document.getElementById('plansCount').textContent = `${_plans.length} plans`;
+    document.getElementById('statPlans').textContent  = _plans.length;
+    document.getElementById('plansCount').textContent = `${_plans.length} plan${_plans.length!==1?'s':''}`;
   } catch (e) {
     _plans = [];
-    document.getElementById('plansAdminGrid').innerHTML = `<div style="color:var(--text-3);font-size:.85rem">Could not load plans — endpoint not yet available.</div>`;
+    document.getElementById('plansAdminGrid').innerHTML = `<div style="color:var(--text-3);font-size:.84rem">Could not load plans — endpoint not yet available.</div>`;
     toast('Could not load plans', 'error');
   }
 }
@@ -1122,29 +1832,24 @@ async function loadPlans() {
 function renderPlansAdmin(plans) {
   const grid = document.getElementById('plansAdminGrid');
   if (!plans.length) { grid.innerHTML = `<div style="color:var(--text-3)">No plans configured.</div>`; return; }
-
   grid.innerHTML = plans.map(plan => {
     const d  = plan.plan_details || {};
     const ft = d.features || {};
     const sp = d.support  || {};
     const lm = d.limits   || {};
-
-    const featureItems = Object.entries(FEATURE_MAP).map(([k, label]) =>
-      `<li><span class="feat-dot ${ft[k] ? 'feat-on' : 'feat-off'}"></span><span>${label}</span></li>`
+    const featureItems = Object.entries(FEATURE_MAP).map(([k,label]) =>
+      `<li><span class="feat-dot ${ft[k]?'feat-on':'feat-off'}"></span><span${ft[k]?'':' style="color:var(--text-3);text-decoration:line-through;opacity:.55"'}>${label}</span></li>`
     ).join('');
-
     const chips = [
-      lm.users       ? `${lm.users === 'unlimited' ? '∞' : lm.users} users`          : null,
-      lm.transactions? `${lm.transactions === 'unlimited' ? '∞' : lm.transactions} txn` : null,
-      lm.storage_gb  ? `${lm.storage_gb === 'unlimited' ? '∞' : lm.storage_gb} GB`    : null,
-    ].filter(Boolean).map(c => `<span class="limit-chip">${c}</span>`).join('');
-
-    const supportIcons = Object.entries(SUPPORT_MAP).map(([k, label]) =>
-      sp[k] ? `<span class="badge badge-green" style="font-size:.68rem">${label}</span>` : ''
+      lm.users       ? `${lm.users==='unlimited'?'∞ users':`${lm.users} users`}`  : null,
+      lm.transactions? `${lm.transactions==='unlimited'?'∞ txn':`${lm.transactions} txn`}` : null,
+      lm.storage_gb  ? `${lm.storage_gb==='unlimited'?'∞ GB':`${lm.storage_gb} GB`}` : null,
+    ].filter(Boolean).map(c=>`<span class="limit-chip">${c}</span>`).join('');
+    const suppBadges = Object.entries(SUPPORT_MAP).map(([k,l]) =>
+      sp[k] ? `<span class="badge badge-green" style="font-size:.66rem">${l}</span>` : ''
     ).join('');
-
-    return `<div class="plan-admin-card ${plan.name === 'Pro' ? 'featured' : ''}">
-      <div class="plan-card-header">
+    return `<div class="plan-admin-card${plan.name==='Pro'?' featured':''}">
+      <div class="plan-card-top">
         <div>
           <div class="plan-card-name">${plan.name}</div>
           <div class="plan-card-id">ID: ${plan.id}</div>
@@ -1153,22 +1858,21 @@ function renderPlansAdmin(plans) {
       </div>
       <div class="plan-card-body">
         <div class="plan-price-row">
-          <div class="plan-price-item">
-            <div class="plan-price-label">Monthly</div>
-            <div class="plan-price-val">${plan.price_monthly} <span>KWD</span></div>
-          </div>
-          <div class="plan-price-item">
-            <div class="plan-price-label">Yearly</div>
-            <div class="plan-price-val">${plan.price_yearly} <span>KWD</span></div>
-          </div>
+          <div><div class="plan-price-label">Monthly</div><div class="plan-price-val">${plan.price_monthly} <span>KWD</span></div></div>
+          <div><div class="plan-price-label">Yearly</div><div class="plan-price-val">${plan.price_yearly} <span>KWD</span></div></div>
         </div>
         <div class="plan-limits">${chips}</div>
-        <ul class="plan-features-list">${featureItems}</ul>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">${supportIcons}</div>
+        <ul class="plan-feat-list">${featureItems}</ul>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">${suppBadges}</div>
       </div>
       <div class="plan-card-footer">
-        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openEditPlan(${JSON.stringify(plan).replace(/"/g,'&quot;')})">✏️ Edit Plan</button>
-        <button class="btn btn-danger btn-sm" onclick="deletePlan(${plan.id},'${plan.name}')">🗑</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openEditPlan(${JSON.stringify(plan).replace(/"/g,'&quot;')})">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit Plan
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deletePlan(${plan.id},'${plan.name}')">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
       </div>
     </div>`;
   }).join('');
@@ -1181,47 +1885,28 @@ function openEditPlan(plan) {
   document.getElementById('editPlanName').value    = plan.name || '';
   document.getElementById('editPlanMonthly').value = plan.price_monthly ?? '';
   document.getElementById('editPlanYearly').value  = plan.price_yearly  ?? '';
-
   const lm = plan.plan_details?.limits || {};
-  document.getElementById('editPlanMaxUsers').value   = lm.users && lm.users !== 'unlimited' ? lm.users : '';
-  document.getElementById('editPlanMaxTxn').value     = lm.transactions && lm.transactions !== 'unlimited' ? lm.transactions : '';
-  document.getElementById('editPlanStorage').value    = lm.storage_gb && lm.storage_gb !== 'unlimited' ? lm.storage_gb : '';
-  document.getElementById('editPlanUptime').value     = plan.plan_details?.sla?.uptime || '';
-
-  // Features toggles
+  document.getElementById('editPlanMaxUsers').value = lm.users && lm.users!=='unlimited' ? lm.users : '';
+  document.getElementById('editPlanMaxTxn').value   = lm.transactions && lm.transactions!=='unlimited' ? lm.transactions : '';
+  document.getElementById('editPlanStorage').value  = lm.storage_gb && lm.storage_gb!=='unlimited' ? lm.storage_gb : '';
+  document.getElementById('editPlanUptime').value   = plan.plan_details?.sla?.uptime || '';
   const ft = plan.plan_details?.features || {};
-  document.getElementById('featuresToggleGrid').innerHTML = Object.entries(FEATURE_MAP).map(([k, label]) =>
-    buildToggle(`feat_${k}`, label, !!ft[k])
-  ).join('');
-
-  // Support toggles
+  document.getElementById('featuresToggleGrid').innerHTML = Object.entries(FEATURE_MAP).map(([k,l]) => buildToggle(`feat_${k}`,l,!!ft[k])).join('');
   const sp = plan.plan_details?.support || {};
-  document.getElementById('supportToggleGrid').innerHTML = Object.entries(SUPPORT_MAP).map(([k, label]) =>
-    buildToggle(`supp_${k}`, label, !!sp[k])
-  ).join('');
-
-  document.querySelectorAll('.toggle-item').forEach(item => {
-    item.addEventListener('click', () => {
-      item.classList.toggle('checked');
-    });
-  });
-
+  document.getElementById('supportToggleGrid').innerHTML = Object.entries(SUPPORT_MAP).map(([k,l]) => buildToggle(`supp_${k}`,l,!!sp[k])).join('');
+  document.querySelectorAll('.toggle-item').forEach(item => item.addEventListener('click', () => item.classList.toggle('checked')));
   openModal('editPlanModal');
 }
 
 function buildToggle(id, label, checked) {
-  return `<label class="toggle-item ${checked ? 'checked' : ''}" id="toggle_${id}">
+  return `<label class="toggle-item${checked?' checked':''}" id="toggle_${id}">
     <span class="toggle-label">${label}</span>
     <span class="toggle-switch"></span>
   </label>`;
 }
 
 function openNewPlanModal() {
-  // Reset all fields
-  ['editPlanId','editPlanName','editPlanMonthly','editPlanYearly',
-   'editPlanMaxUsers','editPlanMaxTxn','editPlanStorage','editPlanUptime'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+  ['editPlanId','editPlanName','editPlanMonthly','editPlanYearly','editPlanMaxUsers','editPlanMaxTxn','editPlanStorage','editPlanUptime'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('editPlanModalTitle').textContent = 'New Plan';
   document.getElementById('editPlanModalSub').textContent = 'Create a new pricing tier';
   document.getElementById('featuresToggleGrid').innerHTML = Object.entries(FEATURE_MAP).map(([k,l]) => buildToggle(`feat_${k}`,l,false)).join('');
@@ -1244,13 +1929,8 @@ function collectPlanPayload() {
     max_users:        mu ? parseInt(mu) : null,
     max_transactions: mt ? parseInt(mt) : null,
     plan_details: {
-      limits: {
-        users:        mu ? parseInt(mu) : 'unlimited',
-        transactions: mt ? parseInt(mt) : 'unlimited',
-        storage_gb:   sg ? parseInt(sg) : 'unlimited',
-      },
-      features: feat,
-      support:  supp,
+      limits:   { users: mu ? parseInt(mu) : 'unlimited', transactions: mt ? parseInt(mt) : 'unlimited', storage_gb: sg ? parseInt(sg) : 'unlimited' },
+      features: feat, support: supp,
       sla: { uptime: document.getElementById('editPlanUptime').value || '99.9%', backup: 'daily' },
     }
   };
@@ -1261,8 +1941,7 @@ async function savePlan() {
   const payload = collectPlanPayload();
   // TODO: if id → PUT /api/v1/plans/{id}/ else POST /api/v1/plans/
   closeModal('editPlanModal');
-  toast(`Plan "${payload.name}" saved ✓`, 'success');
-  // Optimistic update
+  toast(`Plan "${payload.name}" saved`, 'success');
   if (id) {
     const idx = _plans.findIndex(p => String(p.id) === String(id));
     if (idx >= 0) _plans[idx] = { ..._plans[idx], ...payload };
@@ -1277,144 +1956,98 @@ async function deletePlan(planId, planName) {
   // TODO: DELETE /api/v1/plans/{planId}/
   _plans = _plans.filter(p => p.id !== planId);
   renderPlansAdmin(_plans);
+  document.getElementById('statPlans').textContent  = _plans.length;
+  document.getElementById('plansCount').textContent = `${_plans.length} plans`;
   toast(`Plan "${planName}" deleted`, 'info');
-}
-
-// ── FILES ─────────────────────────────────────────────────────────
-async function loadFiles() {
-  try {
-    // TODO: Replace with real endpoint e.g. GET /api/v1/admin/user-files/
-    const data = await apiFetch('/api/v1/admin/user-files/');
-    _files = Array.isArray(data) ? data : (data.results || []);
-    renderFilesTable(_files);
-    document.getElementById('statFiles').textContent = _files.reduce((s, u) => {
-      return s + (u.operational_files?.length || 0) + (u.feasibility_files?.length || 0);
-    }, 0);
-  } catch (e) {
-    _files = [];
-    renderFilesTable([]);
-  }
-}
-
-function renderFilesTable(rows) {
-  const tbody = document.getElementById('filesTableBody');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📂</div><p>No file records found — endpoint not yet available</p></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map(u => {
-    const opFiles = u.operational_files || [];
-    const fsFiles = u.feasibility_files || [];
-    const total   = opFiles.length + fsFiles.length;
-    const plan    = u.plan_name || u.plan || 'None';
-
-    const renderFiles = (files) => files.length
-      ? files.map(f => {
-          const name = typeof f === 'string' ? f : (f.name || f.filename || 'file');
-          return `<span class="file-chip" title="${name}">
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-            ${name.length > 18 ? name.slice(0,15)+'…' : name}
-          </span>`;
-        }).join('')
-      : '<span style="color:var(--text-3);font-size:.78rem">None</span>';
-
-    return `<tr>
-      <td><span class="td-mono">#${u.user_id || u.id || '—'}</span></td>
-      <td class="td-primary">${u.email || '—'}</td>
-      <td>${u.phone || u.phone_number || '—'}</td>
-      <td><span class="plan-pill ${planClass(plan)}">${plan}</span></td>
-      <td>${renderFiles(opFiles)}</td>
-      <td>${renderFiles(fsFiles)}</td>
-      <td><span class="file-count ${total > 0 ? 'has' : 'none'}">${total}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-function filterFiles(q) {
-  const query = q.toLowerCase();
-  const filtered = _files.filter(u =>
-    (u.email || '').toLowerCase().includes(query) ||
-    String(u.user_id || u.id || '').includes(query)
-  );
-  renderFilesTable(filtered);
-}
-
-function viewUserFiles(userId) {
-  showPage('files');
-  const u = _files.find(f => String(f.user_id || f.id) === String(userId));
-  if (u) {
-    document.getElementById('fileSearch').value = u.email || String(userId);
-    filterFiles(u.email || String(userId));
-  }
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────────
 function renderDashboard() {
-  // Stats
-  const activeCount = _users.filter(u => u.is_active !== false && (u.plan_name || u.plan)).length;
-  document.getElementById('statActive').textContent = activeCount;
-
   // Plan distribution
-  const dist = {};
-  _users.forEach(u => { const p = u.plan_name || u.plan || 'None'; dist[p] = (dist[p] || 0) + 1; });
+  const dist  = {};
+  _users.forEach(u => { const p = u.plan_name||u.plan||'None'; dist[p]=(dist[p]||0)+1; });
   const total = _users.length || 1;
-  const colors = { Starter:'#6366f1', Business:'var(--blue)', Pro:'var(--accent)', Enterprise:'var(--text)', None:'var(--border)' };
+  const colors = { Starter:'#8b5cf6', Business:'#3b82f6', Pro:'#d4af37', Enterprise:'#0d0d0d', None:'#d1d5db' };
   const distEl = document.getElementById('planDistribution');
-  if (!Object.keys(dist).length) { distEl.innerHTML = `<p style="color:var(--text-3);font-size:.82rem">No data yet</p>`; return; }
-  distEl.innerHTML = Object.entries(dist).sort((a,b) => b[1]-a[1]).map(([name, count]) => `
-    <div class="plan-dist-item">
-      <div class="plan-dist-label"><span>${name}</span><span>${count} user${count!==1?'s':''}</span></div>
-      <div class="plan-dist-bar"><div class="plan-dist-fill" style="width:${Math.round(count/total*100)}%;background:${colors[name]||'var(--accent)'}"></div></div>
-    </div>`).join('');
+  distEl.innerHTML = Object.keys(dist).length
+    ? Object.entries(dist).sort((a,b)=>b[1]-a[1]).map(([n,c]) => `
+      <div class="plan-dist-item">
+        <div class="plan-dist-label"><span>${n}</span><span>${c} user${c!==1?'s':''}</span></div>
+        <div class="plan-dist-bar"><div class="plan-dist-fill" style="width:${Math.round(c/total*100)}%;background:${colors[n]||'var(--accent)'}"></div></div>
+      </div>`).join('')
+    : '<p style="color:var(--text-3);font-size:.82rem">No user data yet</p>';
 
-  // Recent signups (last 5)
-  const sorted = [..._users].sort((a, b) => new Date(b.date_joined || b.created_at || 0) - new Date(a.date_joined || a.created_at || 0)).slice(0, 5);
+  // Recent signups
+  const sorted = [..._users].sort((a,b) => new Date(b.date_joined||b.created_at||0)-new Date(a.date_joined||a.created_at||0)).slice(0,5);
   const recentEl = document.getElementById('recentSignups');
-  if (!sorted.length) { recentEl.innerHTML = `<p style="color:var(--text-3);font-size:.82rem">No users yet</p>`; return; }
-  recentEl.innerHTML = sorted.map(u => {
-    const initials = [u.first_name?.[0], u.last_name?.[0]].filter(Boolean).join('').toUpperCase() || (u.email?.[0]||'?').toUpperCase();
-    const plan = u.plan_name || u.plan || 'None';
-    const time = u.date_joined || u.created_at ? new Date(u.date_joined || u.created_at).toLocaleDateString('en-GB') : '—';
-    return `<div class="recent-user">
-      <div class="recent-avatar">${initials}</div>
-      <div style="flex:1;min-width:0">
-        <div class="recent-email">${u.email || '—'}</div>
-        <div style="font-size:.73rem;color:var(--text-3)">${time}</div>
-      </div>
-      <span class="plan-pill ${planClass(plan)} recent-plan">${plan}</span>
-    </div>`;
-  }).join('');
+  recentEl.innerHTML = sorted.length
+    ? sorted.map(u => {
+        const n = [u.first_name,u.last_name].filter(Boolean).join(' ') || (u.email||'?');
+        const initials = n.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+        const plan = u.plan_name||u.plan||'None';
+        return `<div class="recent-row">
+          <div class="recent-avatar">${initials}</div>
+          <div class="recent-info"><div class="recent-name">${u.email||n}</div><div class="recent-time">${fmtDate(u.date_joined||u.created_at)}</div></div>
+          <span class="plan-pill ${planClass(plan)}">${plan}</span>
+        </div>`;
+      }).join('')
+    : '<p style="color:var(--text-3);font-size:.82rem">No users yet</p>';
+
+  // Pending requests widget
+  const pending = _requests.filter(r => r.status === 'pending').slice(0, 5);
+  const pendEl = document.getElementById('dashPendingList');
+  pendEl.innerHTML = pending.length
+    ? pending.map(req => {
+        const user = req.user || {};
+        const type = req.request_type || req.type || 'unknown';
+        const name = user.email || user.full_name || `User #${user.id}`;
+        return `<div class="pending-req-row">
+          <div class="pending-req-type">
+            <div class="pending-req-email">${name}</div>
+            <div class="pending-req-meta">${type==='partnership'?'Operational Partnership':'Feasibility Study'} · ${fmtDate(req.created_at)}</div>
+          </div>
+          <div class="pending-req-actions">
+            <button class="btn-icon approve btn-xs" onclick="approveRequest(${req.id})" title="Approve">
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+            </button>
+            <button class="btn-icon reject btn-xs" onclick="openRejectModal(${req.id})" title="Reject">
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('')
+    : `<div style="text-align:center;padding:24px 0;color:var(--text-3)">
+        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block"><polyline points="20,6 9,17 4,12"/></svg>
+        <p style="font-size:.82rem">All caught up — no pending requests</p>
+      </div>`;
 }
 
 // ── Search global ────────────────────────────────────────────────
 function handleGlobalSearch(q) {
   if (!q) return;
-  if (_currentPage === 'users') { document.getElementById('userSearch').value = q; filterUsers(q); }
-  if (_currentPage === 'files') { document.getElementById('fileSearch').value = q; filterFiles(q); }
+  if (_currentPage === 'users')    { document.getElementById('userSearch').value = q; filterUsers(q); }
+  if (_currentPage === 'requests') { document.getElementById('reqSearch').value  = q; filterRequests(); }
 }
 
-// ── Refresh ───────────────────────────────────────────────────────
-function refreshAll() {
-  toast('Refreshing data…', 'info');
-  loadAll();
-}
+// ── Refresh ──────────────────────────────────────────────────────
+function refreshAll() { toast('Refreshing data…', 'info'); loadAll(); }
 
-// ── Settings ──────────────────────────────────────────────────────
+// ── Settings ─────────────────────────────────────────────────────
 function saveSettings() {
   API = document.getElementById('settingsApiBase').value.trim().replace(/\/$/, '');
   localStorage.setItem('badia_admin_api', API);
-  toast('Settings saved ✓', 'success');
+  toast('Settings saved', 'success');
 }
 
-// ── Logout ────────────────────────────────────────────────────────
+// ── Logout ───────────────────────────────────────────────────────
 function handleLogout() {
-  if (confirm('Log out of admin dashboard?')) {
+  if (confirm('Log out of the admin dashboard?')) {
     localStorage.removeItem('access_token');
     window.location.href = 'Signin.html';
   }
 }
 
-// ── Init ──────────────────────────────────────────────────────────
+// ── Init ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settingsApiBase').value = API;
   loadAll();
