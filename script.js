@@ -1,5 +1,5 @@
 // ===== API Base URL =====
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = 'https://badia-backend.onrender.com';
 
 // ===== Plans State =====
 let _cachedPlans = null;

@@ -202,7 +202,7 @@
     </div>
 
     <script>
-        const API_BASE = 'http://127.0.0.1:8000';
+        const API_BASE = 'https://badia-backend.onrender.com';
 
         // ===== Language for auth page =====
         function initAuthLang() {
@@ -343,7 +343,22 @@
                 showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
                 // Clean URL query parameters
                 window.history.replaceState({}, document.title, window.location.pathname);
-                setTimeout(() => window.location.href = 'account.html', 1000);
+                // Fetch user profile to determine role for redirect
+                try {
+                    const res = await fetch(`${API_BASE}/api/v1/users/me`, {
+                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const role = data.user_info?.role;
+                        if (role) localStorage.setItem('user_role', role);
+                        setTimeout(() => window.location.href = role === 'admin' ? 'admin.html' : 'account.html', 1000);
+                    } else {
+                        setTimeout(() => window.location.href = 'account.html', 1000);
+                    }
+                } catch {
+                    setTimeout(() => window.location.href = 'account.html', 1000);
+                }
                 return;
             }
 
@@ -358,11 +373,15 @@
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        localStorage.setItem('access_token', data.access_token);
+                        const authHeader = res.headers.get('Authorization') || res.headers.get('authorization');
+                        const token = authHeader ? authHeader.replace('Bearer ', '') : data.access_token;
+                        if (token) localStorage.setItem('access_token', token);
                         if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
+                        const role = data.user_info?.role;
+                        if (role) localStorage.setItem('user_role', role);
                         showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
                         window.history.replaceState({}, document.title, window.location.pathname);
-                        setTimeout(() => window.location.href = 'account.html', 1000);
+                        setTimeout(() => window.location.href = role === 'admin' ? 'admin.html' : 'account.html', 1000);
                     } else {
                         const err = await res.json();
                         showToast(err.detail || (lang === 'ar' ? 'فشل تسجيل الدخول باستخدام Google' : 'Google sign-in failed'), 'error');
@@ -457,10 +476,37 @@
 
                 if (res.ok) {
                     const data = await res.json();
-                    localStorage.setItem('access_token', data.access_token);
+                    const authHeader = res.headers.get('Authorization') || res.headers.get('authorization');
+                    const token = authHeader ? authHeader.replace('Bearer ', '') : data.access_token;
+                    if (token) localStorage.setItem('access_token', token);
                     if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
+
+                    // Try to get role from login response first
+                    let role = data.user_info?.role;
+
+                    // If login response doesn't include role, fetch it from /users/me
+                    if (!role && token) {
+                        try {
+                            const meRes = await fetch(`${API_BASE}/api/v1/users/me`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (meRes.ok) {
+                                const meData = await meRes.json();
+                                role = meData.user_info?.role;
+                            }
+                        } catch { /* ignore, will default to account.html */ }
+                    }
+
+                    if (role) localStorage.setItem('user_role', role);
                     showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح! جاري التحويل...' : 'Signed in successfully! Redirecting...', 'success');
-                    setTimeout(() => window.location.href = 'account.html', 1500);
+                    setTimeout(() => window.location.href = role === 'admin' ? 'admin.html' : 'account.html', 1500);
+
+
+
+
+
+
+
                 } else {
                     const err = await res.json();
                     showToast(err.detail || (lang === 'ar' ? 'بيانات الدخول غير صحيحة' : 'Invalid credentials'), 'error');
@@ -644,7 +690,8 @@
             if (verifyToken) {
                 window.location.href = `account.html?verify_token=${verifyToken}`;
             } else {
-                window.location.href = 'account.html';
+                const storedRole = localStorage.getItem('user_role');
+                window.location.href = storedRole === 'admin' ? 'admin.html' : 'account.html';
             }
         }
     </script>

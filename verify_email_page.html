@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Email | BADIA</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap');
+
+    :root {
+      --bg-page: #f6f7f9;
+      --bg-card: #ffffff;
+      --bg-secondary: #f0f1f4;
+      --bg-success: rgba(16,185,129,.1);
+      --bg-danger: rgba(239,68,68,.1);
+      --border-light: #e4e6ea;
+      --border-mid: #d1d5db;
+      --text-primary: #0d0d0d;
+      --text-secondary: #5a5f6b;
+      --text-tertiary: #a0a5b1;
+      --text-success: #10b981;
+      --text-danger: #ef4444;
+      --radius: 12px;
+      --radius-md: 8px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg-page);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+    .card{background:var(--bg-card);border:0.5px solid var(--border-light);border-radius:var(--radius);padding:2.5rem 2rem;max-width:420px;width:100%;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.05)}
+    .icon-wrap{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:24px}
+    .icon-pending{background:var(--bg-secondary);color:var(--text-secondary)}
+    .icon-success{background:var(--bg-success);color:var(--text-success)}
+    .icon-error{background:var(--bg-danger);color:var(--text-danger)}
+    h2{font-size:18px;font-weight:500;color:var(--text-primary);margin-bottom:8px}
+    p{font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:1.5rem}
+    .token-badge{font-family:'DM Mono',monospace;font-size:11px;background:var(--bg-secondary);color:var(--text-tertiary);padding:6px 12px;border-radius:var(--radius-md);border:0.5px solid var(--border-light);display:inline-block;margin-bottom:1.5rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .btn{display:inline-block;padding:10px 28px;border-radius:var(--radius-md);font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;text-decoration:none;transition:opacity .15s}
+    .btn-primary{background:var(--text-primary);color:var(--bg-card)}
+    .btn-primary:hover{opacity:.85}
+    .btn-ghost{background:transparent;color:var(--text-secondary);border:0.5px solid var(--border-mid);margin-top:8px}
+    .btn-ghost:hover{background:var(--bg-secondary)}
+    .spinner{width:20px;height:20px;border:2px solid var(--border-light);border-top-color:var(--text-primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .state{display:none}
+    .state.active{display:block}
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div id="state-loading" class="state active">
+    <div class="icon-wrap icon-pending"><div class="spinner"></div></div>
+    <h2>Verifying your email</h2>
+    <p>Hold on a moment…</p>
+  </div>
+
+  <div id="state-success" class="state">
+    <div class="icon-wrap icon-success"><i class="ti ti-check" aria-hidden="true"></i></div>
+    <h2>Email verified</h2>
+    <p>Your account is now active. You can sign in.</p>
+    <a href="Signin.html" class="btn btn-primary">Go to login</a>
+  </div>
+
+  <div id="state-expired" class="state">
+    <div class="icon-wrap icon-error"><i class="ti ti-clock" aria-hidden="true"></i></div>
+    <h2>Link expired</h2>
+    <p>This verification link has expired. Request a new one and check your inbox.</p>
+    <button class="btn btn-primary" onclick="resendVerification()">Resend verification</button>
+    <br>
+    <a href="Signin.html" class="btn btn-ghost">Back to login</a>
+  </div>
+
+  <div id="state-invalid" class="state">
+    <div class="icon-wrap icon-error"><i class="ti ti-x" aria-hidden="true"></i></div>
+    <h2>Invalid link</h2>
+    <p>This verification link is invalid or has already been used.</p>
+    <a href="Signin.html" class="btn btn-primary">Back to login</a>
+  </div>
+
+  <div id="state-resent" class="state">
+    <div class="icon-wrap icon-success"><i class="ti ti-mail" aria-hidden="true"></i></div>
+    <h2>New link sent</h2>
+    <p>Check your inbox for a fresh verification link.</p>
+    <a href="Signin.html" class="btn btn-ghost">Back to login</a>
+  </div>
+</div>
+
+<script>
+function show(id){document.querySelectorAll('.state').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+
+async function verifyEmail(token){
+  try{
+    const res = await fetch('http://127.0.0.1:8000/api/v1/email/auth/verify-email',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token})
+    });
+    const data = await res.json();
+    if(res.ok) show('state-success');
+    else if(data.detail==='Token expired') show('state-expired');
+    else show('state-invalid');
+  }catch(e){show('state-invalid')}
+}
+
+async function resendVerification(){
+  // Extract email from itsdangerous token payload (base64-encoded first segment)
+  let email = null;
+  try{
+    const tokenParam = new URLSearchParams(window.location.search).get('token');
+    if(tokenParam){
+      const seg = tokenParam.split('.')[0];
+      const padded = seg + '==='.slice((seg.length + 3) % 4);
+      email = atob(padded.replace(/-/g,'+').replace(/_/g,'/'));
+    }
+  }catch(e){}
+  if(!email){show('state-invalid');return}
+  try{
+    await fetch('http://127.0.0.1:8000/api/v1/email/auth/request-verification',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email})
+    });
+    show('state-resent');
+  }catch(e){show('state-invalid')}
+}
+
+const token = new URLSearchParams(window.location.search).get('token');
+if(token) verifyEmail(token);
+else show('state-invalid');
+</script>
+
+</body>
+</html>
