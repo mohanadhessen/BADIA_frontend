@@ -97,10 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== Nav Auth =====
 function updateNavAuthLink() {
-    const desktopAuth  = document.getElementById('navAuthDesktop');
-    const mobileAuth   = document.getElementById('navMobileAuth');
+    const desktopAuth = document.getElementById('navAuthDesktop');
+    const mobileAuth = document.getElementById('navMobileAuth');
     const token = localStorage.getItem('access_token');
-    const lang  = getCurrentLang();
+    const lang = getCurrentLang();
 
     if (token) {
         const role = localStorage.getItem('user_role');
@@ -121,9 +121,9 @@ function updateNavAuthLink() {
         }
     } else {
         // Not logged in → show Sign In + Register
-        const siEN='Sign In', siAR='تسجيل الدخول', rgEN='Register', rgAR='إنشاء حساب';
-        const si = lang==='ar' ? siAR : siEN;
-        const rg = lang==='ar' ? rgAR : rgEN;
+        const siEN = 'Sign In', siAR = 'تسجيل الدخول', rgEN = 'Register', rgAR = 'إنشاء حساب';
+        const si = lang === 'ar' ? siAR : siEN;
+        const rg = lang === 'ar' ? rgAR : rgEN;
 
         if (desktopAuth) {
             desktopAuth.innerHTML = `
@@ -160,8 +160,8 @@ document.querySelectorAll('.nav-links a, .footer-links a').forEach(link => {
 
 // ===== Mobile Menu Toggle =====
 const mobileToggle = document.getElementById('mobileToggle');
-const navLinks     = document.getElementById('navLinks');
-const navBackdrop  = document.getElementById('navBackdrop');
+const navLinks = document.getElementById('navLinks');
+const navBackdrop = document.getElementById('navBackdrop');
 
 function closeMobileMenu() {
     navLinks?.classList.remove('open');
@@ -179,7 +179,7 @@ if (mobileToggle && navLinks) {
 navBackdrop?.addEventListener('click', closeMobileMenu);
 
 // ===== Form Submission =====
-document.getElementById('contactForm')?.addEventListener('submit', function(e) {
+document.getElementById('contactForm')?.addEventListener('submit', function (e) {
     e.preventDefault();
     const data = {
         name: document.getElementById('contactName').value,
@@ -396,13 +396,13 @@ async function tryRefreshToken() {
 }
 
 // ===== Testimonial Carousel =====
-(function() {
+(function () {
     let current = 0;
     let timer = null;
 
     function goTo(idx) {
         const slides = document.querySelectorAll('.tq-slide');
-        const dots   = document.querySelectorAll('.tq-dot');
+        const dots = document.querySelectorAll('.tq-dot');
         if (!slides.length) return;
         slides[current].classList.remove('active');
         dots[current].classList.remove('active');
@@ -507,33 +507,33 @@ async function fetchPlans() {
 // Translates the structured plan_details object into a human-readable feature list.
 const FEATURE_LABELS = {
     en: {
-        accounts:          'Chart of accounts',
-        invoices:          'Invoicing',
-        purchasing:        'Purchase orders',
-        basic_reports:     'Basic reports',
-        advanced_reports:  'Advanced reports',
-        inventory:         'Inventory management',
-        assets:            'Fixed assets',
-        payroll:           'Payroll',
-        kpi:               'KPI dashboard',
-        api:               'API access',
-        multi_branch:      'Multi-branch',
-        white_label:       'White label',
+        accounts: 'Chart of accounts',
+        invoices: 'Invoicing',
+        purchasing: 'Purchase orders',
+        basic_reports: 'Basic reports',
+        advanced_reports: 'Advanced reports',
+        inventory: 'Inventory management',
+        assets: 'Fixed assets',
+        payroll: 'Payroll',
+        kpi: 'KPI dashboard',
+        api: 'API access',
+        multi_branch: 'Multi-branch',
+        white_label: 'White label',
         bank_integrations: 'Bank integrations',
     },
     ar: {
-        accounts:          'شجرة الحسابات',
-        invoices:          'الفواتير',
-        purchasing:        'أوامر الشراء',
-        basic_reports:     'التقارير الأساسية',
-        advanced_reports:  'التقارير المتقدمة',
-        inventory:         'إدارة المخزون',
-        assets:            'الأصول الثابتة',
-        payroll:           'الرواتب',
-        kpi:               'لوحة KPI',
-        api:               'وصول API',
-        multi_branch:      'متعدد الفروع',
-        white_label:       'العلامة البيضاء',
+        accounts: 'شجرة الحسابات',
+        invoices: 'الفواتير',
+        purchasing: 'أوامر الشراء',
+        basic_reports: 'التقارير الأساسية',
+        advanced_reports: 'التقارير المتقدمة',
+        inventory: 'إدارة المخزون',
+        assets: 'الأصول الثابتة',
+        payroll: 'الرواتب',
+        kpi: 'لوحة KPI',
+        api: 'وصول API',
+        multi_branch: 'متعدد الفروع',
+        white_label: 'العلامة البيضاء',
         bank_integrations: 'تكاملات بنكية',
     }
 };
@@ -605,11 +605,11 @@ function renderPlans(plans, billing) {
 
     // Mark Pro (idx=2) as featured — it's the mid-tier with most value
     grid.innerHTML = plans.map((plan, idx) => {
-        const name          = plan.name || `Plan ${idx + 1}`;
-        const monthlyPrice  = plan.price_monthly ?? plan.monthly_price ?? 0;
-        const yearlyPrice   = plan.price_yearly  ?? plan.yearly_price  ?? (monthlyPrice * 12);
-        const displayPrice  = isYearly ? yearlyPrice : monthlyPrice;
-        const isFeatured    = plan.name === 'Pro'; // Pro is the hero plan
+        const name = plan.name || `Plan ${idx + 1}`;
+        const monthlyPrice = plan.price_monthly ?? plan.monthly_price ?? 0;
+        const yearlyPrice = plan.price_yearly ?? plan.yearly_price ?? (monthlyPrice * 12);
+        const displayPrice = isYearly ? yearlyPrice : monthlyPrice;
+        const isFeatured = plan.name === 'Pro'; // Pro is the hero plan
 
         const periodLabel = isYearly
             ? (lang === 'ar' ? 'د.ك / سنة' : 'KWD / year')
@@ -625,12 +625,12 @@ function renderPlans(plans, billing) {
         const MAX_VIS = 6;
         const vis = features.slice(0, MAX_VIS);
         const hid = features.slice(MAX_VIS);
-        const moreText  = lang === 'ar' ? `+ ${hid.length} ميزة إضافية` : `+ ${hid.length} more`;
-        const lessText  = lang === 'ar' ? '↑ عرض أقل' : '↑ Less';
+        const moreText = lang === 'ar' ? `+ ${hid.length} ميزة إضافية` : `+ ${hid.length} more`;
+        const lessText = lang === 'ar' ? '↑ عرض أقل' : '↑ Less';
         const featureHTML = vis.length
             ? vis.map(f => `<li>${f}</li>`).join('')
-              + hid.map(f => `<li class="plan-feat-extra">${f}</li>`).join('')
-              + (hid.length ? `<li class="plan-feat-toggle" data-more="${moreText}" data-less="${lessText}"><span>${moreText}</span></li>` : '')
+            + hid.map(f => `<li class="plan-feat-extra">${f}</li>`).join('')
+            + (hid.length ? `<li class="plan-feat-toggle" data-more="${moreText}" data-less="${lessText}"><span>${moreText}</span></li>` : '')
             : `<li>${lang === 'ar' ? 'تفاصيل عبر الاتصال بنا' : 'Details via consultation'}</li>`;
 
         // Yearly savings badge
@@ -645,7 +645,7 @@ function renderPlans(plans, billing) {
             <span class="plan-badge">${badgeText}</span>
             <div class="plan-name">${name}</div>
             <div class="plan-price-box">
-                <span class="plan-price">${Number(displayPrice).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 1})}</span>
+                <span class="plan-price">${Number(displayPrice).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 })}</span>
                 <span class="plan-price-period"> ${periodLabel}</span>
             </div>
             ${savingsHTML}
@@ -678,9 +678,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('plansGrid')?.addEventListener('click', e => {
         const btn = e.target.closest('.plan-feat-toggle');
         if (!btn) return;
-        const card   = btn.closest('.plan-card');
+        const card = btn.closest('.plan-card');
         const extras = card.querySelectorAll('.plan-feat-extra');
-        const exp    = btn.dataset.expanded === '1';
+        const exp = btn.dataset.expanded === '1';
         extras.forEach(li => li.style.display = exp ? 'none' : 'block');
         btn.dataset.expanded = exp ? '0' : '1';
         btn.querySelector('span').textContent = exp ? btn.dataset.more : btn.dataset.less;
@@ -703,12 +703,12 @@ function updateServiceGates() {
             gate.classList.add('gate-open');
             gate.classList.remove('gate-locked');
 
-            const btnEN  = serviceType === 'partnership' ? 'Request Operational Partnership' : 'Request Feasibility Study';
-            const btnAR  = serviceType === 'partnership' ? 'اطلب الشراكة التشغيلية'          : 'اطلب دراسة الجدوى';
-            const msgEN  = serviceType === 'partnership'
+            const btnEN = serviceType === 'partnership' ? 'Request Operational Partnership' : 'Request Feasibility Study';
+            const btnAR = serviceType === 'partnership' ? 'اطلب الشراكة التشغيلية' : 'اطلب دراسة الجدوى';
+            const msgEN = serviceType === 'partnership'
                 ? "You're all set. Submit your request and our team will follow up within 24 hours."
                 : "You're all set. Submit your request and we'll reach out to start your study.";
-            const msgAR  = serviceType === 'partnership'
+            const msgAR = serviceType === 'partnership'
                 ? 'أنت جاهز. أرسل طلبك وسيتواصل معك فريقنا خلال 24 ساعة.'
                 : 'أنت جاهز. أرسل طلبك وسنتواصل معك للبدء في دراستك.';
             const labelEN = 'Account Connected';
@@ -731,14 +731,14 @@ function updateServiceGates() {
 
             // Restore original lock CTA if it was replaced
             if (!cta.querySelector('.gate-lock-icon')) {
-                const msgEN  = serviceType === 'partnership'
+                const msgEN = serviceType === 'partnership'
                     ? 'Sign in or create an account to request this service and access your partnership dashboard.'
                     : 'Sign in or create an account to request a feasibility study and track your project through your dashboard.';
-                const msgAR  = serviceType === 'partnership'
+                const msgAR = serviceType === 'partnership'
                     ? 'سجّل دخولك أو أنشئ حساباً لطلب هذه الخدمة والوصول إلى لوحة الشراكة.'
                     : 'سجّل دخولك أو أنشئ حساباً لطلب دراسة الجدوى ومتابعة مشروعك عبر لوحة التحكم.';
-                const btnEN  = serviceType === 'partnership' ? 'Request Operational Partnership' : 'Request Feasibility Study';
-                const btnAR  = serviceType === 'partnership' ? 'اطلب الشراكة التشغيلية'          : 'اطلب دراسة الجدوى';
+                const btnEN = serviceType === 'partnership' ? 'Request Operational Partnership' : 'Request Feasibility Study';
+                const btnAR = serviceType === 'partnership' ? 'اطلب الشراكة التشغيلية' : 'اطلب دراسة الجدوى';
 
                 cta.innerHTML = `
                     <div class="gate-lock-icon">
