@@ -1,4 +1,4 @@
-let API = localStorage.getItem('badia_admin_api') || 'http://127.0.0.1:8000';
+let API = localStorage.getItem('badia_admin_api') || 'https://badia-backend.onrender.com';
 const TOKEN = () => localStorage.getItem('access_token') || '';
 
 // ── State ───────────────────────────────────────────────────────
