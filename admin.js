@@ -228,21 +228,6 @@ async function loadAll() {
   renderDashboard();
 }
 
-let _pollInterval;
-function startPolling() {
-  if (_pollInterval) clearInterval(_pollInterval);
-  _pollInterval = setInterval(async () => {
-    // Refresh all GET endpoints except loadPlans()
-    await Promise.allSettled([
-      loadUsers(_userPage), 
-      loadRequests(_reqPage), 
-      loadReviews(_revPage), 
-      loadStorageUsage(), 
-      loadPlanDistribution()
-    ]);
-    renderDashboard();
-  }, 5000);
-}
 
 
 async function loadStorageUsage() {
@@ -1521,5 +1506,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Init
-  loadAll().then(startPolling);
+  loadAll();
 });
