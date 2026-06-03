@@ -103,17 +103,20 @@ function updateNavAuthLink() {
     const lang  = getCurrentLang();
 
     if (token) {
-        // Logged in → replace both auth zones with a single "My Account" link
-        const accountLabelEN = 'My Account';
-        const accountLabelAR = 'حسابي';
+        const role = localStorage.getItem('user_role');
+        const targetUrl = role === 'admin' ? 'admin.html' : 'account.html';
+
+        // Logged in → replace both auth zones with a single link
+        const accountLabelEN = role === 'admin' ? 'Admin Dashboard' : 'My Account';
+        const accountLabelAR = role === 'admin' ? 'لوحة الإدارة' : 'حسابي';
         const label = lang === 'ar' ? accountLabelAR : accountLabelEN;
 
         if (desktopAuth) {
-            desktopAuth.innerHTML = `<a href="account.html" class="nav-btn-account"
+            desktopAuth.innerHTML = `<a href="${targetUrl}" class="nav-btn-account"
                 data-en="${accountLabelEN}" data-ar="${accountLabelAR}"><i class="fa-solid fa-user-gear"></i> ${label}</a>`;
         }
         if (mobileAuth) {
-            mobileAuth.innerHTML = `<a href="account.html" class="nav-btn-register" style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:.4rem"
+            mobileAuth.innerHTML = `<a href="${targetUrl}" class="nav-btn-register" style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:.4rem"
                 data-en="${accountLabelEN}" data-ar="${accountLabelAR}"><i class="fa-solid fa-user-gear"></i> ${label}</a>`;
         }
     } else {
@@ -323,7 +326,7 @@ document.head.appendChild(style);
 
 // ===== LocalStorage Helpers for User Data & Reviews =====
 function getCachedUser() {
-    const user = localStorage.getItem('currentUser');
+    const user = localStorage.getItem('badia_user');
     return user ? JSON.parse(user) : null;
 }
 
