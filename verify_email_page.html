@@ -59,8 +59,8 @@
   <div id="state-success" class="state">
     <div class="icon-wrap icon-success"><i class="ti ti-check" aria-hidden="true"></i></div>
     <h2>Email verified</h2>
-    <p>Your account is now active. You can sign in.</p>
-    <a href="Signin.html" class="btn btn-primary">Go to login</a>
+    <p>Your account is now active. Redirecting to your account...</p>
+    <a href="account.html" class="btn btn-primary">Go to Account</a>
   </div>
 
   <div id="state-expired" class="state">
@@ -98,14 +98,16 @@ async function verifyEmail(token){
       body:JSON.stringify({token})
     });
     const data = await res.json();
-    if(res.ok) show('state-success');
+    if(res.ok) {
+      show('state-success');
+      setTimeout(() => window.location.href = 'account.html', 3000);
+    }
     else if(data.detail==='Token expired') show('state-expired');
     else show('state-invalid');
   }catch(e){show('state-invalid')}
 }
 
 async function resendVerification(){
-  // Extract email from itsdangerous token payload (base64-encoded first segment)
   let email = null;
   try{
     const tokenParam = new URLSearchParams(window.location.search).get('token');

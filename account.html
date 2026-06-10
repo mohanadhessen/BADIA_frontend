@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,952 +10,1536 @@
     <meta name="description" content="BADIA – Manage your account, profile, and services.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="account-styles.css">
     <style>
-      body { font-family: 'Plus Jakarta Sans', 'Tajawal', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-      .danger-input { width:100%; padding:.72rem .95rem; border:1.5px solid #fecaca; border-radius:9px; font-family:inherit; font-size:.88rem; outline:none; transition:border-color .2s; }
-      .danger-input:focus { border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,.15); }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Tajawal', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .danger-input {
+            width: 100%;
+            padding: .72rem .95rem;
+            border: 1.5px solid #fecaca;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: .88rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .danger-input:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, .15);
+        }
     </style>
 </head>
+
 <body>
 
-<div class="account-layout">
-    <!-- Sidebar -->
-    <aside class="account-sidebar">
-        <div class="sidebar-logo">
-            <a href="index.html"><img src="assets/logo.png" alt="BADIA"></a>
-            <span>BADIA</span>
-        </div>
-        <div class="sidebar-user">
-            <div class="sidebar-avatar-placeholder" id="sidebarAvatar">👤</div>
-            <div class="sidebar-user-info">
-                <h4 id="sidebarName" data-en="Loading..." data-ar="جاري التحميل...">Loading...</h4>
-                <p id="sidebarEmail">—</p>
+    <div class="account-layout">
+        <!-- Sidebar -->
+        <aside class="account-sidebar">
+            <div class="sidebar-logo">
+                <a href="index.html"><img src="assets/logo.png" alt="BADIA"></a>
+                <span>BADIA</span>
             </div>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="#" class="active" data-section="profile" onclick="showSection('profile', this)">
-                <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5.5" r="2.5"/><path d="M2.5 14c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5"/></svg></span>
-                <span data-en="Profile" data-ar="الملف الشخصي">Profile</span>
-            </a>
-            <a href="#" data-section="edit-profile" onclick="showSection('edit-profile', this)">
-                <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5L11 2.5z"/><path d="M9.5 4l2 2"/></svg></span>
-                <span data-en="Edit Profile" data-ar="تعديل الملف">Edit Profile</span>
-            </a>
-            <a href="#" data-section="change-password" onclick="showSection('change-password', this)">
-                <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7.5" width="11" height="7" rx="1.5"/><path d="M5 7.5V5.5a3 3 0 016 0v2"/></svg></span>
-                <span data-en="Change Password" data-ar="تغيير كلمة المرور">Change Password</span>
-            </a>
-            <a href="#" data-section="partnership" onclick="showSection('partnership', this)">
-                <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 11l3.5-2.5h6L14.5 11M5 8V6h6v2"/></svg></span>
-                <span data-en="Operational Partnership" data-ar="الشراكة التشغيلية">Operational Partnership</span>
-            </a>
-            <a href="#" data-section="feasibility" onclick="showSection('feasibility', this)">
-                <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13l3.5-5 3 2.5L12 5"/><path d="M2 13h12"/></svg></span>
-                <span data-en="Feasibility Study" data-ar="دراسة الجدوى">Feasibility Study</span>
-            </a>
-            <a href="#" data-section="reviews" onclick="showSection('reviews', this)">
-                <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5l1.8 3.8 4.2.6-3 3 .7 4.2L8 11l-3.7 2.1.7-4.2-3-3 4.2-.6z"/></svg></span>
-                <span data-en="Reviews" data-ar="التقييمات">Reviews</span>
-            </a>
-            <a href="#" data-section="delete-account" onclick="showSection('delete-account', this)">
-                <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5h10M6 4.5V3h4v1.5M5 4.5l.75 8.5h4.5L11 4.5"/></svg></span>
-                <span data-en="Delete Account" data-ar="حذف الحساب">Delete Account</span>
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <a href="#" onclick="handleLogout()" id="logoutLink">
-                <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10.5 11l3.5-3m0 0l-3.5-3m3.5 3H6"/></svg></span>
-                <span data-en="Sign Out" data-ar="تسجيل الخروج">Sign Out</span>
-            </a>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="account-main">
-        <div class="account-topbar">
-            <h1 id="sectionTitle" data-en="Profile" data-ar="الملف الشخصي">Profile</h1>
-            <div class="account-topbar-actions">
-                <button class="lang-toggle" id="accountLangToggle" onclick="toggleAccountLang()">
-                    <span class="lang-toggle-text">عربي</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Verification Banner -->
-        <div class="verification-banner" id="verificationBanner" style="display:none;">
-            <span class="vb-icon">⚠️</span>
-            <div class="vb-text">
-                <h4 data-en="Email Not Verified" data-ar="البريد الإلكتروني غير مُفعّل">Email Not Verified</h4>
-                <p data-en="Please verify your email to access all features including partnership and feasibility applications." data-ar="يرجى تفعيل بريدك الإلكتروني للوصول إلى جميع الميزات بما في ذلك طلبات الشراكة ودراسة الجدوى.">Please verify your email to access all features including partnership and feasibility applications.</p>
-            </div>
-            <button class="btn btn-primary" onclick="resendVerification()" style="padding:.6rem 1.5rem;font-size:.9rem;" data-en="Resend Verification" data-ar="إعادة إرسال التفعيل">Resend Verification</button>
-        </div>
-
-        <!-- ===== PROFILE SECTION ===== -->
-        <div class="account-section active" id="section-profile">
-            <div class="account-card">
-                <h3 data-en="Profile Information" data-ar="معلومات الملف الشخصي">Profile Information</h3>
-                <div class="profile-avatar-section">
-                    <div class="profile-avatar-lg-placeholder" id="profileAvatarLg">👤</div>
-                    <div>
-                        <h3 id="profileFullName" style="margin-bottom:.2rem;">—</h3>
-                        <p id="profileRole" style="color:var(--gray-500);font-size:.9rem;">—</p>
-                    </div>
-                </div>
-                <div class="profile-grid">
-                    <div class="profile-field">
-                        <label data-en="First Name" data-ar="الاسم الأول">First Name</label>
-                        <span id="profileFirstName">—</span>
-                    </div>
-                    <div class="profile-field">
-                        <label data-en="Last Name" data-ar="اسم العائلة">Last Name</label>
-                        <span id="profileLastName">—</span>
-                    </div>
-                    <div class="profile-field">
-                        <label data-en="Company" data-ar="الشركة">Company</label>
-                        <span id="profileCompany">—</span>
-                    </div>
-                    <div class="profile-field">
-                        <label data-en="Email" data-ar="البريد الإلكتروني">Email</label>
-                        <span id="profileEmail">—</span>
-                    </div>
-                    <div class="profile-field">
-                        <label data-en="Phone" data-ar="الهاتف">Phone</label>
-                        <span id="profilePhone">—</span>
-                    </div>
-                    <div class="profile-field">
-                        <label data-en="Auth Provider" data-ar="طريقة التسجيل">Auth Provider</label>
-                        <span id="profileProvider">—</span>
-                    </div>
-                    <div class="profile-field">
-                        <label data-en="Member Since" data-ar="تاريخ الانضمام">Member Since</label>
-                        <span id="profileCreatedAt">—</span>
-                    </div>
-                    <div class="profile-field">
-                        <label data-en="Verification Status" data-ar="حالة التفعيل">Verification Status</label>
-                        <span id="profileVerified">—</span>
-                    </div>
+            <div class="sidebar-user">
+                <div class="sidebar-avatar-placeholder" id="sidebarAvatar">👤</div>
+                <div class="sidebar-user-info">
+                    <h4 id="sidebarName" data-en="Loading..." data-ar="جاري التحميل...">Loading...</h4>
+                    <p id="sidebarEmail">—</p>
                 </div>
             </div>
-        </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="active" data-section="profile" onclick="showSection('profile', this)">
+                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="8" cy="5.5" r="2.5" />
+                            <path d="M2.5 14c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5" />
+                        </svg></span>
+                    <span data-en="Profile" data-ar="الملف الشخصي">Profile</span>
+                </a>
+                <a href="#" data-section="edit-profile" onclick="showSection('edit-profile', this)">
+                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5L11 2.5z" />
+                            <path d="M9.5 4l2 2" />
+                        </svg></span>
+                    <span data-en="Edit Profile" data-ar="تعديل الملف">Edit Profile</span>
+                </a>
+                <a href="#" data-section="change-password" onclick="showSection('change-password', this)">
+                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2.5" y="7.5" width="11" height="7" rx="1.5" />
+                            <path d="M5 7.5V5.5a3 3 0 016 0v2" />
+                        </svg></span>
+                    <span data-en="Change Password" data-ar="تغيير كلمة المرور">Change Password</span>
+                </a>
+                <a href="#" data-section="partnership" onclick="showSection('partnership', this)">
+                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1.5 11l3.5-2.5h6L14.5 11M5 8V6h6v2" />
+                        </svg></span>
+                    <span data-en="Operational Partnership" data-ar="الشراكة التشغيلية">Operational Partnership</span>
+                </a>
+                <a href="#" data-section="feasibility" onclick="showSection('feasibility', this)">
+                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 13l3.5-5 3 2.5L12 5" />
+                            <path d="M2 13h12" />
+                        </svg></span>
+                    <span data-en="Feasibility Study" data-ar="دراسة الجدوى">Feasibility Study</span>
+                </a>
 
-        <!-- ===== EDIT PROFILE SECTION ===== -->
-        <div class="account-section" id="section-edit-profile">
-            <div class="account-card">
-                <h3 data-en="Edit Profile" data-ar="تعديل الملف الشخصي">Edit Profile</h3>
-                <form class="account-form" id="editProfileForm">
-                    <div class="account-form form-row">
+                <a href="#" data-section="reviews" onclick="showSection('reviews', this)">
+                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 1.5l1.8 3.8 4.2.6-3 3 .7 4.2L8 11l-3.7 2.1.7-4.2-3-3 4.2-.6z" />
+                        </svg></span>
+                    <span data-en="Reviews" data-ar="التقييمات">Reviews</span>
+                </a>
+                <a href="#" data-section="delete-account" onclick="showSection('delete-account', this)">
+                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 4.5h10M6 4.5V3h4v1.5M5 4.5l.75 8.5h4.5L11 4.5" />
+                        </svg></span>
+                    <span data-en="Delete Account" data-ar="حذف الحساب">Delete Account</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" onclick="handleLogout()" id="logoutLink">
+                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10.5 11l3.5-3m0 0l-3.5-3m3.5 3H6" />
+                        </svg></span>
+                    <span data-en="Sign Out" data-ar="تسجيل الخروج">Sign Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="account-main">
+            <div class="account-topbar">
+                <h1 id="sectionTitle" data-en="Profile" data-ar="الملف الشخصي">Profile</h1>
+                <div class="account-topbar-actions">
+                    <button class="lang-toggle" id="accountLangToggle" onclick="toggleAccountLang()">
+                        <span class="lang-toggle-text">عربي</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Verification Banner -->
+            <div class="verification-banner" id="verificationBanner" style="display:none;">
+                <span class="vb-icon">⚠️</span>
+                <div class="vb-text">
+                    <h4 data-en="Email Not Verified" data-ar="البريد الإلكتروني غير مُفعّل">Email Not Verified</h4>
+                    <p data-en="Please verify your email to access all features including partnership and feasibility applications."
+                        data-ar="يرجى تفعيل بريدك الإلكتروني للوصول إلى جميع الميزات بما في ذلك طلبات الشراكة ودراسة الجدوى.">
+                        Please verify your email to access all features including partnership and feasibility
+                        applications.</p>
+                </div>
+                <button class="btn btn-primary" onclick="resendVerification()"
+                    style="padding:.6rem 1.5rem;font-size:.9rem;" data-en="Resend Verification"
+                    data-ar="إعادة إرسال التفعيل">Resend Verification</button>
+            </div>
+
+            <!-- ===== PROFILE SECTION ===== -->
+            <div class="account-section active" id="section-profile">
+                <div class="account-card">
+                    <h3 data-en="Profile Information" data-ar="معلومات الملف الشخصي">Profile Information</h3>
+                    <div class="profile-avatar-section">
+                        <div class="profile-avatar-lg-placeholder" id="profileAvatarLg">👤</div>
+                        <div>
+                            <h3 id="profileFullName" style="margin-bottom:.2rem;">—</h3>
+                            <p id="profileRole" style="color:var(--gray-500);font-size:.9rem;">—</p>
+                        </div>
+                    </div>
+                    <div class="profile-grid">
+                        <div class="profile-field">
+                            <label data-en="First Name" data-ar="الاسم الأول">First Name</label>
+                            <span id="profileFirstName">—</span>
+                        </div>
+                        <div class="profile-field">
+                            <label data-en="Last Name" data-ar="اسم العائلة">Last Name</label>
+                            <span id="profileLastName">—</span>
+                        </div>
+                        <div class="profile-field">
+                            <label data-en="Company" data-ar="الشركة">Company</label>
+                            <span id="profileCompany">—</span>
+                        </div>
+                        <div class="profile-field">
+                            <label data-en="Email" data-ar="البريد الإلكتروني">Email</label>
+                            <span id="profileEmail">—</span>
+                        </div>
+                        <div class="profile-field">
+                            <label data-en="Phone" data-ar="الهاتف">Phone</label>
+                            <span id="profilePhone">—</span>
+                        </div>
+                        <div class="profile-field">
+                            <label data-en="Auth Provider" data-ar="طريقة التسجيل">Auth Provider</label>
+                            <span id="profileProvider">—</span>
+                        </div>
+                        <div class="profile-field">
+                            <label data-en="Member Since" data-ar="تاريخ الانضمام">Member Since</label>
+                            <span id="profileCreatedAt">—</span>
+                        </div>
+                        <div class="profile-field">
+                            <label data-en="Verification Status" data-ar="حالة التفعيل">Verification Status</label>
+                            <span id="profileVerified">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== EDIT PROFILE SECTION ===== -->
+            <div class="account-section" id="section-edit-profile">
+                <div class="account-card">
+                    <h3 data-en="Edit Profile" data-ar="تعديل الملف الشخصي">Edit Profile</h3>
+                    <form class="account-form" id="editProfileForm">
+                        <div class="account-form form-row">
+                            <div class="form-group">
+                                <label for="editFirstName" data-en="First Name" data-ar="الاسم الأول">First Name</label>
+                                <input type="text" id="editFirstName">
+                            </div>
+                            <div class="form-group">
+                                <label for="editLastName" data-en="Last Name" data-ar="اسم العائلة">Last Name</label>
+                                <input type="text" id="editLastName">
+                            </div>
+                        </div>
                         <div class="form-group">
-                            <label for="editFirstName" data-en="First Name" data-ar="الاسم الأول">First Name</label>
-                            <input type="text" id="editFirstName">
+                            <label for="editCompany" data-en="Company Name" data-ar="اسم الشركة">Company Name</label>
+                            <input type="text" id="editCompany">
                         </div>
                         <div class="form-group">
-                            <label for="editLastName" data-en="Last Name" data-ar="اسم العائلة">Last Name</label>
-                            <input type="text" id="editLastName">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editCompany" data-en="Company Name" data-ar="اسم الشركة">Company Name</label>
-                        <input type="text" id="editCompany">
-                    </div>
-                    <div class="form-group">
-                        <label for="editPhone" data-en="Phone Number" data-ar="رقم الهاتف">Phone Number</label>
-                        <input type="tel" id="editPhone">
-                    </div>
-                    <div class="form-group">
-                        <label for="editAvatar" data-en="Avatar URL" data-ar="رابط الصورة الشخصية">Avatar URL</label>
-                        <input type="url" id="editAvatar" data-placeholder-en="https://example.com/avatar.jpg" data-placeholder-ar="https://example.com/avatar.jpg" placeholder="https://example.com/avatar.jpg">
-                    </div>
-                    <button type="submit" class="btn-save" data-en="Save Changes" data-ar="حفظ التعديلات">Save Changes</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ===== CHANGE PASSWORD SECTION ===== -->
-        <div class="account-section" id="section-change-password">
-            <div class="account-card">
-                <h3 data-en="Change Password" data-ar="تغيير كلمة المرور">Change Password</h3>
-                <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;" data-en="A password reset link will be sent to your registered email address." data-ar="سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني المسجل.">A password reset link will be sent to your registered email address.</p>
-                <form class="account-form" id="changePasswordForm">
-                    <div class="form-group">
-                        <label data-en="Your Email" data-ar="بريدك الإلكتروني">Your Email</label>
-                        <input type="email" id="changePassEmail" readonly style="background:var(--soft);cursor:not-allowed;color:var(--muted);">
-                    </div>
-                    <button type="submit" class="btn-save" data-en="Send Password Reset Link" data-ar="إرسال رابط إعادة التعيين">Send Password Reset Link</button>
-                </form>
-            </div>
-
-            <div class="account-card" style="margin-top:2rem;">
-                <h3 data-en="Reset Password with Token" data-ar="إعادة تعيين كلمة المرور باستخدام الرمز">Reset Password with Token</h3>
-                <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;" data-en="If you have already received a password reset token in your email, enter it below along with your new password to reset it." data-ar="إذا كنت قد تلقيت بالفعل رمز إعادة تعيين كلمة المرور في بريدك الإلكتروني، فأدخله أدناه مع كلمة المرور الجديدة لإعادة تعيينها.">If you have already received a password reset token in your email, enter it below along with your new password to reset it.</p>
-                <form class="account-form" id="resetPasswordWithTokenForm">
-                    <div class="form-group">
-                        <label for="resetTokenInput" data-en="Reset Token" data-ar="رمز إعادة التعيين">Reset Token</label>
-                        <input type="text" id="resetTokenInput" data-placeholder-en="Enter the token from your email" data-placeholder-ar="أدخل الرمز المرسل إلى بريدك الإلكتروني" placeholder="Enter the token from your email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="resetNewPassInput" data-en="New Password" data-ar="كلمة المرور الجديدة">New Password</label>
-                        <input type="password" id="resetNewPassInput" data-placeholder-en="At least 8 characters" data-placeholder-ar="8 أحرف على الأقل" placeholder="At least 8 characters" required>
-                    </div>
-                    <button type="submit" class="btn-save" data-en="Reset Password" data-ar="إعادة تعيين كلمة المرور">Reset Password</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ===== OPERATIONAL PARTNERSHIP SECTION ===== -->
-        <div class="account-section" id="section-partnership">
-            <div class="account-card" id="partnershipCard">
-                <h3 data-en="Operational Partnership Application" data-ar="طلب الشراكة التشغيلية">Operational Partnership Application</h3>
-                <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;" data-en="Upload the required documents below. All files must be in PDF format." data-ar="ارفع المستندات المطلوبة أدناه. جميع الملفات يجب أن تكون بصيغة PDF.">Upload the required documents below. All files must be in PDF format.</p>
-                <form class="account-form" id="partnershipForm">
-                    <div class="upload-grid">
-                        <div class="upload-zone" id="zone-articles">
-                            <div class="upload-icon">📄</div>
-                            <div class="upload-label" data-en="Articles of Incorporation & Commercial License" data-ar="عقد التأسيس والرخصة التجارية">Articles of Incorporation & Commercial License</div>
-                            <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
-                            <div class="upload-filename" id="file-articles"></div>
-                            <input type="file" accept="application/pdf" data-field="articles_incorporation" onchange="handleFileSelect(this, 'file-articles', 'zone-articles')">
-                        </div>
-                        <div class="upload-zone" id="zone-org">
-                            <div class="upload-icon">🏢</div>
-                            <div class="upload-label" data-en="Current & Future Organizational Structure" data-ar="الهيكل التنظيمي الحالي والمستقبلي">Current & Future Organizational Structure</div>
-                            <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
-                            <div class="upload-filename" id="file-org"></div>
-                            <input type="file" accept="application/pdf" data-field="org_structure" onchange="handleFileSelect(this, 'file-org', 'zone-org')">
-                        </div>
-                        <div class="upload-zone" id="zone-signature">
-                            <div class="upload-icon">✍️</div>
-                            <div class="upload-label" data-en="Signature Authorization" data-ar="تفويض التوقيع">Signature Authorization</div>
-                            <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
-                            <div class="upload-filename" id="file-signature"></div>
-                            <input type="file" accept="application/pdf" data-field="signature_auth" onchange="handleFileSelect(this, 'file-signature', 'zone-signature')">
-                        </div>
-                        <div class="upload-zone" id="zone-revenue">
-                            <div class="upload-icon">💰</div>
-                            <div class="upload-label" data-en="Revenue Model & Pricing Policy" data-ar="نموذج الإيرادات وسياسة التسعير">Revenue Model & Pricing Policy</div>
-                            <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
-                            <div class="upload-filename" id="file-revenue"></div>
-                            <input type="file" accept="application/pdf" data-field="revenue_model" onchange="handleFileSelect(this, 'file-revenue', 'zone-revenue')">
-                        </div>
-                        <div class="upload-zone" id="zone-opex">
-                            <div class="upload-icon">📊</div>
-                            <div class="upload-label" data-en="OPEX Breakdown (Salaries, Rent, Materials, Marketing)" data-ar="تفصيل التكاليف التشغيلية (الرواتب، الإيجار، المواد، التسويق)">OPEX Breakdown (Salaries, Rent, Materials, Marketing)</div>
-                            <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
-                            <div class="upload-filename" id="file-opex"></div>
-                            <input type="file" accept="application/pdf" data-field="opex_breakdown" onchange="handleFileSelect(this, 'file-opex', 'zone-opex')">
-                        </div>
-                        <div class="upload-zone" id="zone-risk">
-                            <div class="upload-icon">⚠️</div>
-                            <div class="upload-label" data-en="Operational Risk Register & Contingency Plans" data-ar="سجل المخاطر التشغيلية وخطط الطوارئ">Operational Risk Register & Contingency Plans</div>
-                            <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
-                            <div class="upload-filename" id="file-risk"></div>
-                            <input type="file" accept="application/pdf" data-field="risk_register" onchange="handleFileSelect(this, 'file-risk', 'zone-risk')">
-                        </div>
-                        <div class="upload-zone" id="zone-insurance">
-                            <div class="upload-icon">🛡️</div>
-                            <div class="upload-label" data-en="Insurance & Special Licenses" data-ar="التأمين والتراخيص الخاصة">Insurance & Special Licenses</div>
-                            <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
-                            <div class="upload-filename" id="file-insurance"></div>
-                            <input type="file" accept="application/pdf" data-field="insurance_licenses" onchange="handleFileSelect(this, 'file-insurance', 'zone-insurance')">
-                        </div>
-                        <div class="upload-zone" id="zone-bank">
-                            <div class="upload-icon">🏦</div>
-                            <div class="upload-label" data-en="Bank Statement – Last 9 Months" data-ar="كشف حساب بنكي – آخر 9 أشهر">Bank Statement – Last 9 Months</div>
-                            <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
-                            <div class="upload-filename" id="file-bank"></div>
-                            <input type="file" accept="application/pdf" data-field="bank_statement" onchange="handleFileSelect(this, 'file-bank', 'zone-bank')">
-                        </div>
-                    </div>
-                    <div style="margin-top:1.5rem;">
-                        <button type="submit" class="btn-save" data-en="Submit Application" data-ar="إرسال الطلب">Submit Application</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- ===== FEASIBILITY STUDY SECTION ===== -->
-        <div class="account-section" id="section-feasibility">
-            <div class="account-card" id="feasibilityCard">
-                <h3 data-en="Feasibility Study Application" data-ar="طلب دراسة الجدوى">Feasibility Study Application</h3>
-                <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;" data-en="Fill in the details below for your feasibility study request." data-ar="أدخل التفاصيل أدناه لطلب دراسة الجدوى.">Fill in the details below for your feasibility study request.</p>
-                <form class="account-form" id="feasibilityForm">
-                    <div class="form-group">
-                        <label for="feasProjectDesc" data-en="Detailed Project Description" data-ar="وصف المشروع التفصيلي">Detailed Project Description</label>
-                        <textarea id="feasProjectDesc" rows="6" data-placeholder-en="Describe your project in detail including the industry, target market, and your goals..." data-placeholder-ar="صف مشروعك بالتفصيل بما في ذلك الصناعة والسوق المستهدف وأهدافك..." placeholder="Describe your project in detail including the industry, target market, and your goals..."></textarea>
-                    </div>
-                    <div class="account-form form-row">
-                        <div class="form-group">
-                            <label for="feasEstCost" data-en="Estimated Project Cost (KWD)" data-ar="التكلفة التقديرية للمشروع (د.ك)">Estimated Project Cost (KWD)</label>
-                            <input type="text" id="feasEstCost" data-placeholder-en="e.g. 50,000" data-placeholder-ar="مثال: 50,000" placeholder="e.g. 50,000">
+                            <label for="editPhone" data-en="Phone Number" data-ar="رقم الهاتف">Phone Number</label>
+                            <input type="tel" id="editPhone">
                         </div>
                         <div class="form-group">
-                            <label for="feasFunding" data-en="Funding Source" data-ar="مصدر التمويل">Funding Source</label>
-                            <input type="text" id="feasFunding" data-placeholder-en="e.g. Self-funded, Bank loan, Investor" data-placeholder-ar="مثال: تمويل ذاتي، قرض بنكي، مستثمر" placeholder="e.g. Self-funded, Bank loan, Investor">
+                            <label for="editAvatar" data-en="Avatar URL" data-ar="رابط الصورة الشخصية">Avatar
+                                URL</label>
+                            <input type="url" id="editAvatar" data-placeholder-en="https://example.com/avatar.jpg"
+                                data-placeholder-ar="https://example.com/avatar.jpg"
+                                placeholder="https://example.com/avatar.jpg">
+                        </div>
+                        <button type="submit" class="btn-save" data-en="Save Changes" data-ar="حفظ التعديلات">Save
+                            Changes</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== CHANGE PASSWORD SECTION ===== -->
+            <div class="account-section" id="section-change-password">
+                <div class="account-card">
+                    <h3 data-en="Change Password" data-ar="تغيير كلمة المرور">Change Password</h3>
+                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;"
+                        data-en="A password reset link will be sent to your registered email address."
+                        data-ar="سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني المسجل.">A password reset
+                        link will be sent to your registered email address.</p>
+                    <form class="account-form" id="changePasswordForm">
+                        <div class="form-group">
+                            <label data-en="Your Email" data-ar="بريدك الإلكتروني">Your Email</label>
+                            <input type="email" id="changePassEmail" readonly
+                                style="background:var(--soft);cursor:not-allowed;color:var(--muted);">
+                        </div>
+                        <button type="submit" class="btn-save" data-en="Send Password Reset Link"
+                            data-ar="إرسال رابط إعادة التعيين">Send Password Reset Link</button>
+                    </form>
+                </div>
+
+                <div class="account-card" style="margin-top:2rem;">
+                    <h3 data-en="Reset Password with Token" data-ar="إعادة تعيين كلمة المرور باستخدام الرمز">Reset
+                        Password with Token</h3>
+                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;"
+                        data-en="If you have already received a password reset token in your email, enter it below along with your new password to reset it."
+                        data-ar="إذا كنت قد تلقيت بالفعل رمز إعادة تعيين كلمة المرور في بريدك الإلكتروني، فأدخله أدناه مع كلمة المرور الجديدة لإعادة تعيينها.">
+                        If you have already received a password reset token in your email, enter it below along with
+                        your new password to reset it.</p>
+                    <form class="account-form" id="resetPasswordWithTokenForm">
+                        <div class="form-group">
+                            <label for="resetTokenInput" data-en="Reset Token" data-ar="رمز إعادة التعيين">Reset
+                                Token</label>
+                            <input type="text" id="resetTokenInput"
+                                data-placeholder-en="Enter the token from your email"
+                                data-placeholder-ar="أدخل الرمز المرسل إلى بريدك الإلكتروني"
+                                placeholder="Enter the token from your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="resetNewPassInput" data-en="New Password" data-ar="كلمة المرور الجديدة">New
+                                Password</label>
+                            <input type="password" id="resetNewPassInput" data-placeholder-en="At least 8 characters"
+                                data-placeholder-ar="8 أحرف على الأقل" placeholder="At least 8 characters" required>
+                        </div>
+                        <button type="submit" class="btn-save" data-en="Reset Password"
+                            data-ar="إعادة تعيين كلمة المرور">Reset Password</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== OPERATIONAL PARTNERSHIP SECTION ===== -->
+            <div class="account-section" id="section-partnership">
+                <div class="account-card" id="partnershipCard">
+                    <h3 data-en="Operational Partnership Application" data-ar="طلب الشراكة التشغيلية">Operational
+                        Partnership Application</h3>
+                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;"
+                        data-en="Upload the required documents below. All files must be in PDF format."
+                        data-ar="ارفع المستندات المطلوبة أدناه. جميع الملفات يجب أن تكون بصيغة PDF.">Upload the required
+                        documents below. All files must be in PDF format.</p>
+                    <div id="partnershipFormContainer">
+                        <form class="account-form" id="partnershipForm">
+                            <div class="upload-grid">
+                                <div class="upload-zone" id="zone-articles">
+                                    <div class="upload-icon">📄</div>
+                                    <div class="upload-label" data-en="Articles of Incorporation & Commercial License"
+                                        data-ar="عقد التأسيس والرخصة التجارية">Articles of Incorporation & Commercial
+                                        License</div>
+                                    <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
+                                    <div class="upload-filename" id="file-articles"></div>
+                                    <input type="file" accept="application/pdf" data-field="articles_incorporation"
+                                        onchange="handleFileSelect(this, 'file-articles', 'zone-articles')">
+                                </div>
+                                <div class="upload-zone" id="zone-org">
+                                    <div class="upload-icon">🏢</div>
+                                    <div class="upload-label" data-en="Current & Future Organizational Structure"
+                                        data-ar="الهيكل التنظيمي الحالي والمستقبلي">Current & Future Organizational
+                                        Structure</div>
+                                    <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
+                                    <div class="upload-filename" id="file-org"></div>
+                                    <input type="file" accept="application/pdf" data-field="org_structure"
+                                        onchange="handleFileSelect(this, 'file-org', 'zone-org')">
+                                </div>
+                                <div class="upload-zone" id="zone-signature">
+                                    <div class="upload-icon">✍️</div>
+                                    <div class="upload-label" data-en="Signature Authorization" data-ar="تفويض التوقيع">
+                                        Signature Authorization</div>
+                                    <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
+                                    <div class="upload-filename" id="file-signature"></div>
+                                    <input type="file" accept="application/pdf" data-field="signature_auth"
+                                        onchange="handleFileSelect(this, 'file-signature', 'zone-signature')">
+                                </div>
+                                <div class="upload-zone" id="zone-revenue">
+                                    <div class="upload-icon">💰</div>
+                                    <div class="upload-label" data-en="Revenue Model & Pricing Policy"
+                                        data-ar="نموذج الإيرادات وسياسة التسعير">Revenue Model & Pricing Policy</div>
+                                    <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
+                                    <div class="upload-filename" id="file-revenue"></div>
+                                    <input type="file" accept="application/pdf" data-field="revenue_model"
+                                        onchange="handleFileSelect(this, 'file-revenue', 'zone-revenue')">
+                                </div>
+                                <div class="upload-zone" id="zone-opex">
+                                    <div class="upload-icon">📊</div>
+                                    <div class="upload-label"
+                                        data-en="OPEX Breakdown (Salaries, Rent, Materials, Marketing)"
+                                        data-ar="تفصيل التكاليف التشغيلية (الرواتب، الإيجار، المواد، التسويق)">OPEX
+                                        Breakdown (Salaries, Rent, Materials, Marketing)</div>
+                                    <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
+                                    <div class="upload-filename" id="file-opex"></div>
+                                    <input type="file" accept="application/pdf" data-field="opex_breakdown"
+                                        onchange="handleFileSelect(this, 'file-opex', 'zone-opex')">
+                                </div>
+                                <div class="upload-zone" id="zone-risk">
+                                    <div class="upload-icon">⚠️</div>
+                                    <div class="upload-label" data-en="Operational Risk Register & Contingency Plans"
+                                        data-ar="سجل المخاطر التشغيلية وخطط الطوارئ">Operational Risk Register &
+                                        Contingency Plans</div>
+                                    <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
+                                    <div class="upload-filename" id="file-risk"></div>
+                                    <input type="file" accept="application/pdf" data-field="risk_register"
+                                        onchange="handleFileSelect(this, 'file-risk', 'zone-risk')">
+                                </div>
+                                <div class="upload-zone" id="zone-insurance">
+                                    <div class="upload-icon">🛡️</div>
+                                    <div class="upload-label" data-en="Insurance & Special Licenses"
+                                        data-ar="التأمين والتراخيص الخاصة">Insurance & Special Licenses</div>
+                                    <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
+                                    <div class="upload-filename" id="file-insurance"></div>
+                                    <input type="file" accept="application/pdf" data-field="insurance_licenses"
+                                        onchange="handleFileSelect(this, 'file-insurance', 'zone-insurance')">
+                                </div>
+                                <div class="upload-zone" id="zone-bank">
+                                    <div class="upload-icon">🏦</div>
+                                    <div class="upload-label" data-en="Bank Statement – Last 9 Months"
+                                        data-ar="كشف حساب بنكي – آخر 9 أشهر">Bank Statement – Last 9 Months</div>
+                                    <div class="upload-hint" data-en="PDF only" data-ar="PDF فقط">PDF only</div>
+                                    <div class="upload-filename" id="file-bank"></div>
+                                    <input type="file" accept="application/pdf" data-field="bank_statement"
+                                        onchange="handleFileSelect(this, 'file-bank', 'zone-bank')">
+                                </div>
+                            </div>
+                            <div style="margin-top:1.5rem;">
+                                <button type="submit" class="btn-save" data-en="Submit Application"
+                                    data-ar="إرسال الطلب">Submit Application</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="partnershipRequestContainer" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- ===== FEASIBILITY STUDY SECTION ===== -->
+            <div class="account-section" id="section-feasibility">
+                <div class="account-card" id="feasibilityCard">
+                    <h3 data-en="Feasibility Study Application" data-ar="طلب دراسة الجدوى">Feasibility Study Application
+                    </h3>
+                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;"
+                        data-en="Fill in the details below for your feasibility study request."
+                        data-ar="أدخل التفاصيل أدناه لطلب دراسة الجدوى.">Fill in the details below for your feasibility
+                        study request.</p>
+                    <div id="feasibilityFormContainer">
+                        <form class="account-form" id="feasibilityForm">
+                            <div class="form-group">
+                                <label for="feasProjectDesc" data-en="Detailed Project Description"
+                                    data-ar="وصف المشروع التفصيلي">Detailed Project Description</label>
+                                <textarea id="feasProjectDesc" rows="6"
+                                    data-placeholder-en="Describe your project in detail including the industry, target market, and your goals..."
+                                    data-placeholder-ar="صف مشروعك بالتفصيل بما في ذلك الصناعة والسوق المستهدف وأهدافك..."
+                                    placeholder="Describe your project in detail including the industry, target market, and your goals..."></textarea>
+                            </div>
+                            <div class="account-form form-row">
+                                <div class="form-group">
+                                    <label for="feasEstCost" data-en="Estimated Project Cost (KWD)"
+                                        data-ar="التكلفة التقديرية للمشروع (د.ك)">Estimated Project Cost (KWD)</label>
+                                    <input type="text" id="feasEstCost" data-placeholder-en="e.g. 50,000"
+                                        data-placeholder-ar="مثال: 50,000" placeholder="e.g. 50,000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="feasFunding" data-en="Funding Source" data-ar="مصدر التمويل">Funding
+                                        Source</label>
+                                    <input type="text" id="feasFunding"
+                                        data-placeholder-en="e.g. Self-funded, Bank loan, Investor"
+                                        data-placeholder-ar="مثال: تمويل ذاتي، قرض بنكي، مستثمر"
+                                        placeholder="e.g. Self-funded, Bank loan, Investor">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-save" data-en="Submit Study Request"
+                                data-ar="إرسال طلب الدراسة">Submit Study Request</button>
+                        </form>
+                    </div>
+                    <div id="feasibilityRequestContainer" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- ===== REVIEWS SECTION ===== -->
+            <div class="account-section" id="section-reviews">
+                    <div class="account-card review-form-card">
+                        <h3 data-en="Write a Review" data-ar="اكتب تقييماً">Write a Review</h3>
+                        <form class="account-form" id="reviewForm">
+                            <div class="review-stars" id="reviewStars">
+                                <span class="star" data-value="1" onclick="setStarRating(1)">★</span>
+                                <span class="star" data-value="2" onclick="setStarRating(2)">★</span>
+                                <span class="star" data-value="3" onclick="setStarRating(3)">★</span>
+                                <span class="star" data-value="4" onclick="setStarRating(4)">★</span>
+                                <span class="star" data-value="5" onclick="setStarRating(5)">★</span>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="reviewText" rows="3" data-placeholder-en="Share your experience..."
+                                    data-placeholder-ar="شاركنا تجربتك..."
+                                    placeholder="Share your experience..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-save" data-en="Submit Review"
+                                data-ar="إرسال التقييم">Submit Review</button>
+                        </form>
+                    </div>
+                    <div class="account-card">
+                        <h3 data-en="Your Reviews" data-ar="تقييماتك">Your Reviews</h3>
+                        <div class="reviews-list" id="reviewsList">
+                            <p style="color:var(--gray-500);text-align:center;" data-en="No reviews yet."
+                                data-ar="لا توجد تقييمات بعد.">No reviews yet.</p>
                         </div>
                     </div>
-                    <button type="submit" class="btn-save" data-en="Submit Study Request" data-ar="إرسال طلب الدراسة">Submit Study Request</button>
-                </form>
-            </div>
-        </div>
+                </div>
 
-        <!-- ===== REVIEWS SECTION ===== -->
-        <div class="account-section" id="section-reviews">
-            <div class="account-card review-form-card">
-                <h3 data-en="Write a Review" data-ar="اكتب تقييماً">Write a Review</h3>
-                <form class="account-form" id="reviewForm">
-                    <div class="review-stars" id="reviewStars">
-                        <span class="star" data-value="1" onclick="setStarRating(1)">★</span>
-                        <span class="star" data-value="2" onclick="setStarRating(2)">★</span>
-                        <span class="star" data-value="3" onclick="setStarRating(3)">★</span>
-                        <span class="star" data-value="4" onclick="setStarRating(4)">★</span>
-                        <span class="star" data-value="5" onclick="setStarRating(5)">★</span>
+
+
+                <!-- ===== DELETE ACCOUNT SECTION ===== -->
+                <div class="account-section" id="section-delete-account">
+                    <div class="account-card danger-zone">
+                        <h3 data-en="Delete Account" data-ar="حذف الحساب">Delete Account</h3>
+                        <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1rem;"
+                            data-en="This action is permanent and cannot be undone. All your data, reviews, and submissions will be permanently deleted."
+                            data-ar="هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك وطلباتك بشكل دائم.">
+                            This action is permanent and cannot be undone. All your data, reviews, and submissions will
+                            be permanently deleted.</p>
+                        <div class="delete-confirm-input">
+                            <p data-en="To confirm, type your email address below:"
+                                data-ar="للتأكيد، اكتب بريدك الإلكتروني أدناه:">To confirm, type your email address
+                                below:</p>
+                            <p><code id="deleteEmailDisplay">—</code></p>
+                            <div class="form-group" style="margin-top:1rem;">
+                                <input type="email" id="deleteConfirmEmail"
+                                    data-placeholder-en="Type your email to confirm"
+                                    data-placeholder-ar="اكتب بريدك الإلكتروني للتأكيد"
+                                    placeholder="Type your email to confirm" oninput="checkDeleteConfirmation()"
+                                    class="danger-input">
+                            </div>
+                        </div>
+                        <button class="btn-danger" id="deleteAccountBtn" onclick="deleteAccount()"
+                            data-en="Permanently Delete My Account" data-ar="حذف حسابي نهائياً">Permanently Delete My
+                            Account</button>
                     </div>
-                    <div class="form-group">
-                        <textarea id="reviewText" rows="3" data-placeholder-en="Share your experience..." data-placeholder-ar="شاركنا تجربتك..." placeholder="Share your experience..."></textarea>
-                    </div>
-                    <button type="submit" class="btn-save" data-en="Submit Review" data-ar="إرسال التقييم">Submit Review</button>
-                </form>
-            </div>
-            <div class="account-card">
-                <h3 data-en="Your Reviews" data-ar="تقييماتك">Your Reviews</h3>
-                <div class="reviews-list" id="reviewsList">
-                    <p style="color:var(--gray-500);text-align:center;" data-en="No reviews yet." data-ar="لا توجد تقييمات بعد.">No reviews yet.</p>
+                </div>
+
+        </main>
+
+        <!-- ===== UNIVERSAL EDIT MODAL ===== -->
+        <div class="edit-modal-overlay" id="editModalOverlay" onclick="closeEditModal()">
+            <div class="edit-modal" id="editModal" onclick="event.stopPropagation()">
+                <div class="edit-modal-header">
+                    <h3 id="editModalTitle">Edit</h3>
+                    <button class="edit-modal-close" onclick="closeEditModal()" aria-label="Close">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round">
+                            <path d="M3 3l10 10M13 3L3 13" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="edit-modal-body" id="editModalBody">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
         </div>
 
-        <!-- ===== DELETE ACCOUNT SECTION ===== -->
-        <div class="account-section" id="section-delete-account">
-            <div class="account-card danger-zone">
-                <h3 data-en="Delete Account" data-ar="حذف الحساب">Delete Account</h3>
-                <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1rem;" data-en="This action is permanent and cannot be undone. All your data, reviews, and submissions will be permanently deleted." data-ar="هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك وطلباتك بشكل دائم.">This action is permanent and cannot be undone. All your data, reviews, and submissions will be permanently deleted.</p>
-                <div class="delete-confirm-input">
-                    <p data-en="To confirm, type your email address below:" data-ar="للتأكيد، اكتب بريدك الإلكتروني أدناه:">To confirm, type your email address below:</p>
-                    <p><code id="deleteEmailDisplay">—</code></p>
-                    <div class="form-group" style="margin-top:1rem;">
-                        <input type="email" id="deleteConfirmEmail" data-placeholder-en="Type your email to confirm" data-placeholder-ar="اكتب بريدك الإلكتروني للتأكيد" placeholder="Type your email to confirm" oninput="checkDeleteConfirmation()" class="danger-input">
+        <!-- ===== REVIEW EDIT MODAL ===== -->
+        <div class="edit-modal-overlay" id="reviewModalOverlay" onclick="closeReviewModal()">
+            <div class="edit-modal" id="reviewModal" onclick="event.stopPropagation()">
+                <div class="edit-modal-header">
+                    <h3 id="reviewModalTitle" data-en="Edit Review" data-ar="تعديل التقييم">Edit Review</h3>
+                    <button class="edit-modal-close" onclick="closeReviewModal()" aria-label="Close">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round">
+                            <path d="M3 3l10 10M13 3L3 13" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="edit-modal-body">
+                    <div class="review-stars" id="reviewModalStars">
+                        <span class="star" data-value="1" onclick="setModalStarRating(1)">★</span>
+                        <span class="star" data-value="2" onclick="setModalStarRating(2)">★</span>
+                        <span class="star" data-value="3" onclick="setModalStarRating(3)">★</span>
+                        <span class="star" data-value="4" onclick="setModalStarRating(4)">★</span>
+                        <span class="star" data-value="5" onclick="setModalStarRating(5)">★</span>
+                    </div>
+                    <div class="form-group" style="margin-top:.75rem;">
+                        <textarea id="reviewModalText" rows="4" class="edit-modal-textarea"
+                            data-placeholder-en="Share your experience..." data-placeholder-ar="شاركنا تجربتك..."
+                            placeholder="Share your experience..."></textarea>
+                    </div>
+                    <div class="edit-modal-footer">
+                        <button class="btn-modal-cancel" onclick="closeReviewModal()" data-en="Cancel"
+                            data-ar="إلغاء">Cancel</button>
+                        <button class="btn-modal-save" id="reviewModalSaveBtn" onclick="submitReviewModal()"
+                            data-en="Save Changes" data-ar="حفظ التعديلات">Save Changes</button>
                     </div>
                 </div>
-                <button class="btn-danger" id="deleteAccountBtn" onclick="deleteAccount()" data-en="Permanently Delete My Account" data-ar="حذف حسابي نهائياً">Permanently Delete My Account</button>
             </div>
         </div>
+    </div>
 
-    </main>
-</div>
+    <script src="script.js"></script>
+    <script>
+        // ===== Account Page State =====
+        let currentUser = null;
+        let currentReviews = null;
+        let currentRequests = null;
+        let selectedRating = 0;
+        let editingReviewId = null;
+        let modalSelectedRating = 0;
+        let editingRequestId = null;
 
-<script src="script.js"></script>
-<script>
-    // ===== Account Page State =====
-    let currentUser = null;
-    let currentReviews = null;
-    let selectedRating = 0;
-    let editingReviewId = null;
-
-    // ===== Auth Guard =====
-    (function() {
-        if (!localStorage.getItem('access_token')) {
-            window.location.href = 'Signin.html';
-            return;
-        }
-        initAccountPage();
-    })();
-
-    // ===== Language for account page =====
-    function initAccountLang() {
-        const saved = localStorage.getItem('badia_lang') || 'en';
-        setAccountLang(saved, false);
-    }
-
-    function setAccountLang(lang, save = true) {
-        document.documentElement.setAttribute('lang', lang);
-        document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-
-        document.querySelectorAll('[data-en][data-ar]').forEach(el => {
-            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
-            const val = el.getAttribute(`data-${lang}`);
-            if (val.includes('<') && el.children.length > 0) {
-                el.innerHTML = val;
-            } else {
-                el.textContent = val;
+        // ===== Auth Guard =====
+        (function () {
+            if (!localStorage.getItem('access_token')) {
+                window.location.href = 'Signin.html';
+                return;
             }
-        });
+            initAccountPage();
+        })();
 
-        document.querySelectorAll('[data-placeholder-en][data-placeholder-ar]').forEach(el => {
-            el.placeholder = el.getAttribute(`data-placeholder-${lang}`);
-        });
-
-        const toggleBtn = document.querySelector('.lang-toggle-text');
-        if (toggleBtn) toggleBtn.textContent = lang === 'en' ? 'عربي' : 'English';
-
-        if (save) localStorage.setItem('badia_lang', lang);
-
-        // Re-render reviews with correct lang
-        if (currentReviews) renderReviews(currentReviews);
-    }
-
-    function toggleAccountLang() {
-        const current = document.documentElement.getAttribute('lang') || 'en';
-        setAccountLang(current === 'en' ? 'ar' : 'en');
-    }
-
-    function getLang() {
-        return document.documentElement.getAttribute('lang') || 'en';
-    }
-
-    // ===== Section Navigation =====
-    function showSection(sectionId, linkEl) {
-        if (linkEl) linkEl.preventDefault && linkEl.preventDefault();
-        document.querySelectorAll('.account-section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-
-        const section = document.getElementById('section-' + sectionId);
-        if (section) section.classList.add('active');
-
-        // Highlight matching sidebar link (works even when called programmatically)
-        if (linkEl) {
-            linkEl.classList.add('active');
-        } else {
-            const matchingLink = document.querySelector(`.sidebar-nav a[data-section="${sectionId}"]`);
-            if (matchingLink) matchingLink.classList.add('active');
+        // ===== Language for account page =====
+        function initAccountLang() {
+            const saved = localStorage.getItem('badia_lang') || 'en';
+            setAccountLang(saved, false);
         }
 
-        // Update URL hash so direct links work (account.html#partnership)
-        history.replaceState(null, '', '#' + sectionId);
+        function setAccountLang(lang, save = true) {
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', 'ltr');
 
-        // Update topbar title
-        const titleMap = {
-            'profile':           { en: 'Profile',                  ar: 'الملف الشخصي' },
-            'edit-profile':      { en: 'Edit Profile',             ar: 'تعديل الملف الشخصي' },
-            'change-password':   { en: 'Change Password',          ar: 'تغيير كلمة المرور' },
-            'partnership':       { en: 'Operational Partnership',  ar: 'الشراكة التشغيلية' },
-            'feasibility':       { en: 'Feasibility Study',        ar: 'دراسة الجدوى' },
-            'reviews':           { en: 'Reviews',                  ar: 'التقييمات' },
-            'delete-account':    { en: 'Delete Account',           ar: 'حذف الحساب' }
-        };
-        const lang = getLang();
-        const title = document.getElementById('sectionTitle');
-        if (title && titleMap[sectionId]) {
-            title.textContent = titleMap[sectionId][lang];
-            title.setAttribute('data-en', titleMap[sectionId].en);
-            title.setAttribute('data-ar', titleMap[sectionId].ar);
+            document.querySelectorAll('[data-en][data-ar]').forEach(el => {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+                const val = el.getAttribute(`data-${lang}`);
+                if (val.includes('<') && el.children.length > 0) {
+                    el.innerHTML = val;
+                } else {
+                    el.textContent = val;
+                }
+            });
+
+            document.querySelectorAll('[data-placeholder-en][data-placeholder-ar]').forEach(el => {
+                el.placeholder = el.getAttribute(`data-placeholder-${lang}`);
+            });
+
+            const toggleBtn = document.querySelector('.lang-toggle-text');
+            if (toggleBtn) toggleBtn.textContent = lang === 'en' ? 'عربي' : 'English';
+
+            if (save) localStorage.setItem('badia_lang', lang);
+
+            // Re-render reviews with correct lang
+            if (currentReviews) renderReviews(currentReviews);
         }
 
-        return false;
-    }
-
-    // Click handler for sidebar links
-    document.querySelectorAll('.sidebar-nav a').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSection(link.dataset.section, link);
-        });
-    });
-
-    // ===== Initialize Account Page =====
-    async function initAccountPage() {
-        initAccountLang();
-
-        // Try cached user first
-        const cached = getCachedUser();
-        if (cached) {
-            currentUser = cached;
-            renderProfile(cached);
-            populateEditForm(cached);
-            checkVerificationGate(cached);
+        function toggleAccountLang() {
+            const current = document.documentElement.getAttribute('lang') || 'en';
+            setAccountLang(current === 'en' ? 'ar' : 'en');
         }
 
-        // Try cached reviews
-        const cachedRevs = getCachedReviews();
-        if (cachedRevs) {
-            currentReviews = cachedRevs;
-            renderReviews(cachedRevs);
+        function getLang() {
+            return document.documentElement.getAttribute('lang') || 'en';
         }
 
-        // If no cache, fetch from API
-        if (!cached) {
-            await fetchUserProfile();
-        }
+        // ===== Section Navigation =====
+        function showSection(sectionId, linkEl) {
+            if (linkEl) linkEl.preventDefault && linkEl.preventDefault();
+            document.querySelectorAll('.account-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
 
-        // Check for URL query params (like verify_token)
-        await handleAccountURLParams();
+            const section = document.getElementById('section-' + sectionId);
+            if (section) section.classList.add('active');
 
-        // ── Direct-link hash routing ──────────────────────────────────────
-        // Supports: account.html#partnership  account.html#feasibility  etc.
-        const validSections = ['profile','edit-profile','change-password','partnership','feasibility','reviews','delete-account'];
-        const hash = window.location.hash.replace('#', '');
-        if (hash && validSections.includes(hash)) {
-            showSection(hash, null);
-        }
-    }
+            // Highlight matching sidebar link (works even when called programmatically)
+            if (linkEl) {
+                linkEl.classList.add('active');
+            } else {
+                const matchingLink = document.querySelector(`.sidebar-nav a[data-section="${sectionId}"]`);
+                if (matchingLink) matchingLink.classList.add('active');
+            }
 
-    // ===== Handle URL Params on Account Page =====
-    async function handleAccountURLParams() {
-        const params = new URLSearchParams(window.location.search);
-        const verifyToken = params.get('verify_token');
-        if (verifyToken) {
+            // Update URL hash so direct links work (account.html#partnership)
+            history.replaceState(null, '', '#' + sectionId);
+
+            // Update topbar title
+            const titleMap = {
+                'profile': { en: 'Profile', ar: 'الملف الشخصي' },
+                'edit-profile': { en: 'Edit Profile', ar: 'تعديل الملف الشخصي' },
+                'change-password': { en: 'Change Password', ar: 'تغيير كلمة المرور' },
+                'partnership': { en: 'Operational Partnership', ar: 'الشراكة التشغيلية' },
+                'feasibility': { en: 'Feasibility Study', ar: 'دراسة الجدوى' },
+                'requests': { en: 'My Requests', ar: 'طلباتي' },
+                'reviews': { en: 'Reviews', ar: 'التقييمات' },
+                'delete-account': { en: 'Delete Account', ar: 'حذف الحساب' }
+            };
             const lang = getLang();
-            showNotification(lang === 'ar' ? 'جاري التحقق من بريدك الإلكتروني...' : 'Verifying your email...', 'success');
+            const title = document.getElementById('sectionTitle');
+            if (title && titleMap[sectionId]) {
+                title.textContent = titleMap[sectionId][lang];
+                title.setAttribute('data-en', titleMap[sectionId].en);
+                title.setAttribute('data-ar', titleMap[sectionId].ar);
+            }
+
+            return false;
+        }
+
+        // Click handler for sidebar links
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(link.dataset.section, link);
+            });
+        });
+
+        // ===== Initialize Account Page =====
+        async function initAccountPage() {
+            initAccountLang();
+
+            // Try cached user first
+            const cached = getCachedUser();
+            if (cached) {
+                currentUser = cached;
+                renderProfile(cached);
+                populateEditForm(cached);
+                checkVerificationGate(cached);
+            }
+
+            // Try cached reviews
+            const cachedRevs = getCachedReviews();
+            if (cachedRevs) {
+                currentReviews = cachedRevs;
+                renderReviews(cachedRevs);
+            }
+
+            // If no cache, fetch from API
+            if (!cached) {
+                await fetchUserProfile();
+            }
+
+            // Fetch requests on init
+            await fetchRequests();
+
+            // Check for URL query params (like verify_token)
+            await handleAccountURLParams();
+
+            // ── Direct-link hash routing ──────────────────────────────────────
+            // Supports: account.html#partnership  account.html#feasibility  etc.
+            const validSections = ['profile', 'edit-profile', 'change-password', 'partnership', 'feasibility', 'requests', 'reviews', 'delete-account'];
+            const hash = window.location.hash.replace('#', '');
+            if (hash && validSections.includes(hash)) {
+                showSection(hash, null);
+            }
+        }
+
+        // ===== Handle URL Params on Account Page =====
+        async function handleAccountURLParams() {
+            const params = new URLSearchParams(window.location.search);
+            const verifyToken = params.get('verify_token');
+            if (verifyToken) {
+                const lang = getLang();
+                showNotification(lang === 'ar' ? 'جاري التحقق من بريدك الإلكتروني...' : 'Verifying your email...', 'success');
+                try {
+                    const res = await fetch(`${API_BASE}/api/v1/email/auth/verify-email`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: verifyToken })
+                    });
+                    if (res.ok) {
+                        showNotification(lang === 'ar' ? 'تم تفعيل البريد الإلكتروني بنجاح!' : 'Email verified successfully!', 'success');
+                        // Clean URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        // Force refresh user profile to update verification badge & forms lock state
+                        await fetchUserProfile();
+                    } else {
+                        const err = await res.json();
+                        showNotification(err.detail || (lang === 'ar' ? 'فشل تفعيل البريد الإلكتروني' : 'Email verification failed'), 'error');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                } catch {
+                    showNotification(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        }
+
+        // ===== Fetch User Profile =====
+        async function fetchUserProfile() {
             try {
-                const res = await fetch(`${API_BASE}/api/v1/email/auth/verify-email`, {
+                const res = await apiFetch('/api/v1/users/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data.user_info;
+                    setCachedUser(currentUser);
+                    renderProfile(currentUser);
+                    populateEditForm(currentUser);
+                    checkVerificationGate(currentUser);
+                } else {
+                    const lang = getLang();
+                    showNotification(lang === 'ar' ? 'فشل في تحميل بيانات الملف الشخصي' : 'Failed to load profile', 'error');
+                }
+            } catch {
+                const lang = getLang();
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+            }
+        }
+
+        // ===== Render Profile =====
+        function renderProfile(user) {
+            const lang = getLang();
+
+            // Sidebar — overwrite text and clear stale data-* values so setAccountLang doesn't clobber it
+            const sidebarNameEl = document.getElementById('sidebarName');
+            sidebarNameEl.textContent = `${user.first_name} ${user.last_name}`;
+            sidebarNameEl.removeAttribute('data-en');
+            sidebarNameEl.removeAttribute('data-ar');
+            document.getElementById('sidebarEmail').textContent = user.email;
+
+            if (user.avatar_url) {
+                document.getElementById('sidebarAvatar').innerHTML = `<img src="${user.avatar_url}" class="sidebar-avatar" alt="avatar">`;
+                document.getElementById('sidebarAvatar').className = '';
+                document.getElementById('profileAvatarLg').innerHTML = `<img src="${user.avatar_url}" class="profile-avatar-lg" alt="avatar">`;
+                document.getElementById('profileAvatarLg').className = '';
+            }
+
+            // Profile section
+            document.getElementById('profileFullName').textContent = `${user.first_name} ${user.last_name}`;
+            document.getElementById('profileRole').textContent = user.role || 'user';
+            document.getElementById('profileFirstName').textContent = user.first_name || '—';
+            document.getElementById('profileLastName').textContent = user.last_name || '—';
+            document.getElementById('profileCompany').textContent = user.company_name || '—';
+            document.getElementById('profileEmail').textContent = user.email || '—';
+            document.getElementById('profilePhone').textContent = user.phone || '—';
+            document.getElementById('profileProvider').textContent = user.auth_provider || 'local';
+            document.getElementById('profileCreatedAt').textContent = user.created_at ? new Date(user.created_at).toLocaleDateString(lang === 'ar' ? 'ar-KW' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+
+            // Verification status
+            const verifiedEl = document.getElementById('profileVerified');
+            if (user.is_email_verified) {
+                verifiedEl.innerHTML = `<span class="verified-badge">✓ ${lang === 'ar' ? 'مفعّل' : 'Verified'}</span>`;
+            } else {
+                verifiedEl.innerHTML = `<span style="color:#dc2626;font-weight:600;">✕ ${lang === 'ar' ? 'غير مفعّل' : 'Not Verified'}</span>`;
+            }
+
+            // Delete section
+            document.getElementById('deleteEmailDisplay').textContent = user.email;
+            document.getElementById('changePassEmail').value = user.email;
+        }
+
+        // ===== Populate Edit Form =====
+        function populateEditForm(user) {
+            document.getElementById('editFirstName').value = user.first_name || '';
+            document.getElementById('editLastName').value = user.last_name || '';
+            document.getElementById('editCompany').value = user.company_name || '';
+            document.getElementById('editPhone').value = user.phone || '';
+            document.getElementById('editAvatar').value = user.avatar_url || '';
+        }
+
+        // ===== Verification Gate =====
+        function checkVerificationGate(user) {
+            const banner = document.getElementById('verificationBanner');
+            const partnershipCard = document.getElementById('partnershipCard');
+            const feasibilityCard = document.getElementById('feasibilityCard');
+
+            if (!user.is_email_verified) {
+                banner.style.display = 'flex';
+                partnershipCard.classList.add('form-locked');
+                feasibilityCard.classList.add('form-locked');
+            } else {
+                banner.style.display = 'none';
+                partnershipCard.classList.remove('form-locked');
+                feasibilityCard.classList.remove('form-locked');
+            }
+        }
+
+        // ===== Resend Verification =====
+        async function resendVerification() {
+            const lang = getLang();
+            if (!currentUser) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/email/auth/request-verification`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: verifyToken })
+                    body: JSON.stringify({ email: currentUser.email })
+                });
+                showNotification(lang === 'ar' ? 'تم إرسال رابط التفعيل إلى بريدك الإلكتروني' : 'Verification link sent to your email', 'success');
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            }
+        }
+
+        // ===== Edit Profile Submit =====
+        document.getElementById('editProfileForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const lang = getLang();
+
+            // Build only changed fields
+            const updates = {};
+            const firstName = document.getElementById('editFirstName').value.trim();
+            const lastName = document.getElementById('editLastName').value.trim();
+            const company = document.getElementById('editCompany').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const avatar = document.getElementById('editAvatar').value.trim();
+
+            if (firstName && firstName !== currentUser.first_name) updates.first_name = firstName;
+            if (lastName && lastName !== currentUser.last_name) updates.last_name = lastName;
+            if (company && company !== currentUser.company_name) updates.company_name = company;
+            if (phone !== (currentUser.phone || '')) updates.phone = phone || null;
+            if (avatar !== (currentUser.avatar_url || '')) updates.avatar_url = avatar || null;
+
+            if (Object.keys(updates).length === 0) {
+                showNotification(lang === 'ar' ? 'لا توجد تغييرات لحفظها' : 'No changes to save', 'error');
+                return;
+            }
+
+            const btn = this.querySelector('.btn-save');
+            btn.disabled = true;
+            btn.textContent = lang === 'ar' ? 'جاري الحفظ...' : 'Saving...';
+
+            try {
+                const res = await apiFetch('/api/v1/users/me', {
+                    method: 'PATCH',
+                    body: JSON.stringify(updates)
                 });
                 if (res.ok) {
-                    showNotification(lang === 'ar' ? 'تم تفعيل البريد الإلكتروني بنجاح!' : 'Email verified successfully!', 'success');
-                    // Clean URL
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    // Force refresh user profile to update verification badge & forms lock state
-                    await fetchUserProfile();
+                    const data = await res.json();
+                    currentUser = data.user_info;
+                    setCachedUser(currentUser);
+                    renderProfile(currentUser);
+                    populateEditForm(currentUser);
+                    showNotification(lang === 'ar' ? 'تم تحديث الملف الشخصي بنجاح' : 'Profile updated successfully', 'success');
                 } else {
                     const err = await res.json();
-                    showNotification(err.detail || (lang === 'ar' ? 'فشل تفعيل البريد الإلكتروني' : 'Email verification failed'), 'error');
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل التحديث' : 'Update failed'), 'error');
+                }
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes';
+        });
+
+        // ===== Change Password Submit =====
+        document.getElementById('changePasswordForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const lang = getLang();
+            const email = document.getElementById('changePassEmail').value;
+
+            const btn = this.querySelector('.btn-save');
+            btn.disabled = true;
+            btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
+
+            try {
+                await fetch(`${API_BASE}/api/v1/email/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                showNotification(lang === 'ar' ? 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك' : 'Password reset link sent to your email', 'success');
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين' : 'Send Password Reset Link';
+        });
+
+        // ===== Reset Password with Token Submit =====
+        document.getElementById('resetPasswordWithTokenForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const lang = getLang();
+            const token = document.getElementById('resetTokenInput').value.trim();
+            const newPassword = document.getElementById('resetNewPassInput').value;
+
+            if (!token) {
+                showNotification(lang === 'ar' ? 'يرجى إدخال رمز إعادة التعيين' : 'Please enter the reset token', 'error');
+                return;
+            }
+            if (newPassword.length < 8) {
+                showNotification(lang === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters', 'error');
+                return;
+            }
+
+            const btn = this.querySelector('.btn-save');
+            btn.disabled = true;
+            btn.textContent = lang === 'ar' ? 'جاري إعادة التعيين...' : 'Resetting...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/email/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, new_password: newPassword })
+                });
+
+                if (res.ok) {
+                    showNotification(lang === 'ar' ? 'تم إعادة تعيين كلمة المرور بنجاح!' : 'Password reset successfully!', 'success');
+                    document.getElementById('resetTokenInput').value = '';
+                    document.getElementById('resetNewPassInput').value = '';
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل إعادة تعيين كلمة المرور' : 'Password reset failed'), 'error');
                 }
             } catch {
                 showNotification(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
-                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            btn.disabled = false;
+            btn.textContent = lang === 'ar' ? 'إعادة تعيين كلمة المرور' : 'Reset Password';
+        });
+
+        // ===== Delete Account =====
+        function checkDeleteConfirmation() {
+            const input = document.getElementById('deleteConfirmEmail').value.trim();
+            const userEmail = currentUser ? currentUser.email : '';
+            const btn = document.getElementById('deleteAccountBtn');
+            if (input === userEmail) {
+                btn.classList.add('enabled');
+            } else {
+                btn.classList.remove('enabled');
             }
         }
-    }
 
-    // ===== Fetch User Profile =====
-    async function fetchUserProfile() {
-        try {
-            const res = await apiFetch('/api/v1/users/me');
-            if (res.ok) {
-                const data = await res.json();
-                currentUser = data.user_info;
-                setCachedUser(currentUser);
-                renderProfile(currentUser);
-                populateEditForm(currentUser);
-                checkVerificationGate(currentUser);
-            } else {
-                const lang = getLang();
-                showNotification(lang === 'ar' ? 'فشل في تحميل بيانات الملف الشخصي' : 'Failed to load profile', 'error');
-            }
-        } catch {
+        async function deleteAccount() {
             const lang = getLang();
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Connection error', 'error');
-        }
-    }
+            const btn = document.getElementById('deleteAccountBtn');
+            if (!btn.classList.contains('enabled')) return;
 
-    // ===== Render Profile =====
-    function renderProfile(user) {
-        const lang = getLang();
+            btn.disabled = true;
+            btn.textContent = lang === 'ar' ? 'جاري الحذف...' : 'Deleting...';
 
-        // Sidebar
-        document.getElementById('sidebarName').textContent = `${user.first_name} ${user.last_name}`;
-        document.getElementById('sidebarEmail').textContent = user.email;
-
-        if (user.avatar_url) {
-            document.getElementById('sidebarAvatar').innerHTML = `<img src="${user.avatar_url}" class="sidebar-avatar" alt="avatar">`;
-            document.getElementById('sidebarAvatar').className = '';
-            document.getElementById('profileAvatarLg').innerHTML = `<img src="${user.avatar_url}" class="profile-avatar-lg" alt="avatar">`;
-            document.getElementById('profileAvatarLg').className = '';
-        }
-
-        // Profile section
-        document.getElementById('profileFullName').textContent = `${user.first_name} ${user.last_name}`;
-        document.getElementById('profileRole').textContent = user.role || 'user';
-        document.getElementById('profileFirstName').textContent = user.first_name || '—';
-        document.getElementById('profileLastName').textContent = user.last_name || '—';
-        document.getElementById('profileCompany').textContent = user.company_name || '—';
-        document.getElementById('profileEmail').textContent = user.email || '—';
-        document.getElementById('profilePhone').textContent = user.phone || '—';
-        document.getElementById('profileProvider').textContent = user.auth_provider || 'local';
-        document.getElementById('profileCreatedAt').textContent = user.created_at ? new Date(user.created_at).toLocaleDateString(lang === 'ar' ? 'ar-KW' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
-
-        // Verification status
-        const verifiedEl = document.getElementById('profileVerified');
-        if (user.is_email_verified) {
-            verifiedEl.innerHTML = `<span class="verified-badge">✓ ${lang === 'ar' ? 'مفعّل' : 'Verified'}</span>`;
-        } else {
-            verifiedEl.innerHTML = `<span style="color:#dc2626;font-weight:600;">✕ ${lang === 'ar' ? 'غير مفعّل' : 'Not Verified'}</span>`;
-        }
-
-        // Delete section
-        document.getElementById('deleteEmailDisplay').textContent = user.email;
-        document.getElementById('changePassEmail').value = user.email;
-    }
-
-    // ===== Populate Edit Form =====
-    function populateEditForm(user) {
-        document.getElementById('editFirstName').value = user.first_name || '';
-        document.getElementById('editLastName').value = user.last_name || '';
-        document.getElementById('editCompany').value = user.company_name || '';
-        document.getElementById('editPhone').value = user.phone || '';
-        document.getElementById('editAvatar').value = user.avatar_url || '';
-    }
-
-    // ===== Verification Gate =====
-    function checkVerificationGate(user) {
-        const banner = document.getElementById('verificationBanner');
-        const partnershipCard = document.getElementById('partnershipCard');
-        const feasibilityCard = document.getElementById('feasibilityCard');
-
-        if (!user.is_email_verified) {
-            banner.style.display = 'flex';
-            partnershipCard.classList.add('form-locked');
-            feasibilityCard.classList.add('form-locked');
-        } else {
-            banner.style.display = 'none';
-            partnershipCard.classList.remove('form-locked');
-            feasibilityCard.classList.remove('form-locked');
-        }
-    }
-
-    // ===== Resend Verification =====
-    async function resendVerification() {
-        const lang = getLang();
-        if (!currentUser) return;
-        try {
-            const res = await fetch(`${API_BASE}/api/v1/email/auth/request-verification`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: currentUser.email })
-            });
-            showNotification(lang === 'ar' ? 'تم إرسال رابط التفعيل إلى بريدك الإلكتروني' : 'Verification link sent to your email', 'success');
-        } catch {
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
-        }
-    }
-
-    // ===== Edit Profile Submit =====
-    document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const lang = getLang();
-
-        // Build only changed fields
-        const updates = {};
-        const firstName = document.getElementById('editFirstName').value.trim();
-        const lastName = document.getElementById('editLastName').value.trim();
-        const company = document.getElementById('editCompany').value.trim();
-        const phone = document.getElementById('editPhone').value.trim();
-        const avatar = document.getElementById('editAvatar').value.trim();
-
-        if (firstName && firstName !== currentUser.first_name) updates.first_name = firstName;
-        if (lastName && lastName !== currentUser.last_name) updates.last_name = lastName;
-        if (company && company !== currentUser.company_name) updates.company_name = company;
-        if (phone !== (currentUser.phone || '')) updates.phone = phone || null;
-        if (avatar !== (currentUser.avatar_url || '')) updates.avatar_url = avatar || null;
-
-        if (Object.keys(updates).length === 0) {
-            showNotification(lang === 'ar' ? 'لا توجد تغييرات لحفظها' : 'No changes to save', 'error');
-            return;
-        }
-
-        const btn = this.querySelector('.btn-save');
-        btn.disabled = true;
-        btn.textContent = lang === 'ar' ? 'جاري الحفظ...' : 'Saving...';
-
-        try {
-            const res = await apiFetch('/api/v1/users/me', {
-                method: 'PATCH',
-                body: JSON.stringify(updates)
-            });
-            if (res.ok) {
-                const data = await res.json();
-                currentUser = data.user_info;
-                setCachedUser(currentUser);
-                renderProfile(currentUser);
-                populateEditForm(currentUser);
-                showNotification(lang === 'ar' ? 'تم تحديث الملف الشخصي بنجاح' : 'Profile updated successfully', 'success');
-            } else {
-                const err = await res.json();
-                showNotification(err.detail || (lang === 'ar' ? 'فشل التحديث' : 'Update failed'), 'error');
-            }
-        } catch {
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
-        }
-        btn.disabled = false;
-        btn.textContent = lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes';
-    });
-
-    // ===== Change Password Submit =====
-    document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const lang = getLang();
-        const email = document.getElementById('changePassEmail').value;
-
-        const btn = this.querySelector('.btn-save');
-        btn.disabled = true;
-        btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
-
-        try {
-            await fetch(`${API_BASE}/api/v1/email/auth/forgot-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-            showNotification(lang === 'ar' ? 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك' : 'Password reset link sent to your email', 'success');
-        } catch {
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
-        }
-        btn.disabled = false;
-        btn.textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين' : 'Send Password Reset Link';
-    });
-
-    // ===== Reset Password with Token Submit =====
-    document.getElementById('resetPasswordWithTokenForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const lang = getLang();
-        const token = document.getElementById('resetTokenInput').value.trim();
-        const newPassword = document.getElementById('resetNewPassInput').value;
-
-        if (!token) {
-            showNotification(lang === 'ar' ? 'يرجى إدخال رمز إعادة التعيين' : 'Please enter the reset token', 'error');
-            return;
-        }
-        if (newPassword.length < 8) {
-            showNotification(lang === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters', 'error');
-            return;
-        }
-
-        const btn = this.querySelector('.btn-save');
-        btn.disabled = true;
-        btn.textContent = lang === 'ar' ? 'جاري إعادة التعيين...' : 'Resetting...';
-
-        try {
-            const res = await fetch(`${API_BASE}/api/v1/email/auth/reset-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, new_password: newPassword })
-            });
-
-            if (res.ok) {
-                showNotification(lang === 'ar' ? 'تم إعادة تعيين كلمة المرور بنجاح!' : 'Password reset successfully!', 'success');
-                document.getElementById('resetTokenInput').value = '';
-                document.getElementById('resetNewPassInput').value = '';
-            } else {
-                const err = await res.json();
-                showNotification(err.detail || (lang === 'ar' ? 'فشل إعادة تعيين كلمة المرور' : 'Password reset failed'), 'error');
-            }
-        } catch {
-            showNotification(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
-        }
-        btn.disabled = false;
-        btn.textContent = lang === 'ar' ? 'إعادة تعيين كلمة المرور' : 'Reset Password';
-    });
-
-    // ===== Delete Account =====
-    function checkDeleteConfirmation() {
-        const input = document.getElementById('deleteConfirmEmail').value.trim();
-        const userEmail = currentUser ? currentUser.email : '';
-        const btn = document.getElementById('deleteAccountBtn');
-        if (input === userEmail) {
-            btn.classList.add('enabled');
-        } else {
-            btn.classList.remove('enabled');
-        }
-    }
-
-    async function deleteAccount() {
-        const lang = getLang();
-        const btn = document.getElementById('deleteAccountBtn');
-        if (!btn.classList.contains('enabled')) return;
-
-        btn.disabled = true;
-        btn.textContent = lang === 'ar' ? 'جاري الحذف...' : 'Deleting...';
-
-        try {
-            const res = await apiFetch('/api/v1/users/me', { method: 'DELETE' });
-            if (res.ok) {
-                clearCachedUser();
-                showNotification(lang === 'ar' ? 'تم حذف الحساب بنجاح' : 'Account deleted successfully', 'success');
-                setTimeout(() => window.location.href = 'index.html', 2000);
-            } else {
-                const err = await res.json();
-                showNotification(err.detail || (lang === 'ar' ? 'فشل حذف الحساب' : 'Delete failed'), 'error');
+            try {
+                const res = await apiFetch('/api/v1/users/me', { method: 'DELETE' });
+                if (res.ok) {
+                    clearCachedUser();
+                    showNotification(lang === 'ar' ? 'تم حذف الحساب بنجاح' : 'Account deleted successfully', 'success');
+                    setTimeout(() => window.location.href = 'index.html', 2000);
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل حذف الحساب' : 'Delete failed'), 'error');
+                    btn.disabled = false;
+                    btn.textContent = lang === 'ar' ? 'حذف حسابي نهائياً' : 'Permanently Delete My Account';
+                }
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
                 btn.disabled = false;
                 btn.textContent = lang === 'ar' ? 'حذف حسابي نهائياً' : 'Permanently Delete My Account';
             }
-        } catch {
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
-            btn.disabled = false;
-            btn.textContent = lang === 'ar' ? 'حذف حسابي نهائياً' : 'Permanently Delete My Account';
         }
-    }
 
-    // ===== File Upload Handler =====
-    function handleFileSelect(input, filenameId, zoneId) {
-        const lang = getLang();
-        const file = input.files[0];
-        const filenameEl = document.getElementById(filenameId);
-        const zoneEl = document.getElementById(zoneId);
+        // ===== File Upload Handler =====
+        function handleFileSelect(input, filenameId, zoneId) {
+            const lang = getLang();
+            const file = input.files[0];
+            const filenameEl = document.getElementById(filenameId);
+            const zoneEl = document.getElementById(zoneId);
 
-        if (file) {
-            if (file.type !== 'application/pdf') {
-                showNotification(lang === 'ar' ? 'يجب أن يكون الملف بصيغة PDF' : 'File must be PDF format', 'error');
-                input.value = '';
+            if (file) {
+                if (file.type !== 'application/pdf') {
+                    showNotification(lang === 'ar' ? 'يجب أن يكون الملف بصيغة PDF' : 'File must be PDF format', 'error');
+                    input.value = '';
+                    filenameEl.textContent = '';
+                    zoneEl.classList.remove('has-file');
+                    return;
+                }
+                filenameEl.textContent = file.name;
+                zoneEl.classList.add('has-file');
+            } else {
                 filenameEl.textContent = '';
                 zoneEl.classList.remove('has-file');
+            }
+        }
+
+        // ===== Partnership Form Submit =====
+        document.getElementById('partnershipForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const lang = getLang();
+
+            if (!currentUser || !currentUser.is_email_verified) {
+                showNotification(lang === 'ar' ? 'يجب تفعيل بريدك الإلكتروني أولاً' : 'You must verify your email first', 'error');
                 return;
             }
-            filenameEl.textContent = file.name;
-            zoneEl.classList.add('has-file');
-        } else {
-            filenameEl.textContent = '';
-            zoneEl.classList.remove('has-file');
-        }
-    }
 
-    // ===== Partnership Form Submit =====
-    document.getElementById('partnershipForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const lang = getLang();
-
-        if (!currentUser || !currentUser.is_email_verified) {
-            showNotification(lang === 'ar' ? 'يجب تفعيل بريدك الإلكتروني أولاً' : 'You must verify your email first', 'error');
-            return;
-        }
-
-        // Validate all files uploaded
-        const fileInputs = this.querySelectorAll('input[type="file"]');
-        let allFilled = true;
-        const missingFields = [];
-        fileInputs.forEach(inp => {
-            if (!inp.files || inp.files.length === 0) {
-                allFilled = false;
-                const zone = inp.closest('.upload-zone');
-                const label = zone.querySelector('.upload-label');
-                missingFields.push(label.textContent);
-            }
-        });
-
-        if (!allFilled) {
-            showNotification(
-                lang === 'ar'
-                    ? `يرجى رفع جميع المستندات المطلوبة`
-                    : `Please upload all required documents`,
-                'error'
-            );
-            return;
-        }
-
-        const btn = this.querySelector('.btn-save');
-        btn.disabled = true;
-        btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
-
-        try {
-            const formData = new FormData();
+            // Validate all files uploaded
+            const fileInputs = this.querySelectorAll('input[type="file"]');
+            let allFilled = true;
+            const missingFields = [];
             fileInputs.forEach(inp => {
-                if (inp.files && inp.files[0]) {
-                    formData.append('files', inp.files[0]);
+                if (!inp.files || inp.files.length === 0) {
+                    allFilled = false;
+                    const zone = inp.closest('.upload-zone');
+                    const label = zone.querySelector('.upload-label');
+                    missingFields.push(label.textContent);
                 }
             });
 
-            const token = localStorage.getItem('access_token');
-            const res = await fetch(`${API_BASE}/api/v1/files/Operational_Partnership/submit`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (res.ok) {
-                const data = await res.json();
+            if (!allFilled) {
                 showNotification(
-                    lang === 'ar' ? 'تم إرسال طلب الشراكة التشغيلية بنجاح!' : 'Operational Partnership application submitted successfully!',
-                    'success'
+                    lang === 'ar'
+                        ? `يرجى رفع جميع المستندات المطلوبة`
+                        : `Please upload all required documents`,
+                    'error'
                 );
-                // Reset all upload zones
+                return;
+            }
+
+            const btn = this.querySelector('.btn-save');
+            btn.disabled = true;
+            btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
+
+            try {
+                const formData = new FormData();
                 fileInputs.forEach(inp => {
-                    const zoneId = inp.closest('.upload-zone').id;
-                    const filenameId = zoneId.replace('zone-', 'file-');
-                    inp.value = '';
-                    const filenameEl = document.getElementById(filenameId);
-                    if (filenameEl) filenameEl.textContent = '';
-                    inp.closest('.upload-zone').classList.remove('has-file');
+                    if (inp.files && inp.files[0]) {
+                        formData.append('files', inp.files[0]);
+                    }
                 });
-            } else {
-                const err = await res.json();
-                showNotification(err.detail || (lang === 'ar' ? 'فشل إرسال الطلب' : 'Submission failed'), 'error');
+
+                const token = localStorage.getItem('access_token');
+                const res = await fetch(`${API_BASE}/api/v1/files/Operational_Partnership/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    showNotification(
+                        lang === 'ar' ? 'تم إرسال طلب الشراكة التشغيلية بنجاح!' : 'Operational Partnership application submitted successfully!',
+                        'success'
+                    );
+                    // Reset all upload zones
+                    fileInputs.forEach(inp => {
+                        const zoneId = inp.closest('.upload-zone').id;
+                        const filenameId = zoneId.replace('zone-', 'file-');
+                        inp.value = '';
+                        const filenameEl = document.getElementById(filenameId);
+                        if (filenameEl) filenameEl.textContent = '';
+                        inp.closest('.upload-zone').classList.remove('has-file');
+                    });
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل إرسال الطلب' : 'Submission failed'), 'error');
+                }
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Connection error', 'error');
             }
-        } catch {
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+
+            btn.disabled = false;
+            btn.textContent = lang === 'ar' ? 'إرسال الطلب' : 'Submit Application';
+        });
+
+        // ===== Feasibility Form Submit =====
+        document.getElementById('feasibilityForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const lang = getLang();
+
+            if (!currentUser || !currentUser.is_email_verified) {
+                showNotification(lang === 'ar' ? 'يجب تفعيل بريدك الإلكتروني أولاً' : 'You must verify your email first', 'error');
+                return;
+            }
+
+            const desc = document.getElementById('feasProjectDesc').value.trim();
+            const cost = document.getElementById('feasEstCost').value.trim();
+            const funding = document.getElementById('feasFunding').value.trim();
+
+            if (!desc || !cost || !funding) {
+                showNotification(lang === 'ar' ? 'جميع الحقول مطلوبة' : 'All fields are required', 'error');
+                return;
+            }
+
+            const btn = this.querySelector('.btn-save');
+            btn.disabled = true;
+            btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
+
+            try {
+                const res = await apiFetch('/api/v1/files/feasibility/submit', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        project_description: desc,
+                        estimated_cost: parseFloat(cost.replace(/,/g, '')) || 0,
+                        funding_source: funding
+                    })
+                });
+
+                if (res.ok) {
+                    showNotification(
+                        lang === 'ar' ? 'تم إرسال طلب دراسة الجدوى بنجاح!' : 'Feasibility Study request submitted successfully!',
+                        'success'
+                    );
+                    // Reset form
+                    document.getElementById('feasProjectDesc').value = '';
+                    document.getElementById('feasEstCost').value = '';
+                    document.getElementById('feasFunding').value = '';
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل إرسال الطلب' : 'Submission failed'), 'error');
+                }
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+            }
+
+            btn.disabled = false;
+            btn.textContent = lang === 'ar' ? 'إرسال طلب الدراسة' : 'Submit Study Request';
+        });
+
+        // ===== Requests =====
+        async function fetchRequests() {
+            try {
+                const res = await apiFetch('/api/v1/users/me/requests');
+                if (res.ok) {
+                    const data = await res.json();
+                    currentRequests = data.requests || data || [];
+                    renderRequests(currentRequests);
+                }
+            } catch {
+                // silently fail; empty state shows
+            }
         }
 
-        btn.disabled = false;
-        btn.textContent = lang === 'ar' ? 'إرسال الطلب' : 'Submit Application';
-    });
+        function renderRequests(requests) {
+            const lang = getLang();
 
-    // ===== Feasibility Form Submit =====
-    document.getElementById('feasibilityForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const lang = getLang();
+            const typeLabels = {
+                operational_partnership: { en: 'Operational Partnership', ar: 'الشراكة التشغيلية' },
+                partnership: { en: 'Operational Partnership', ar: 'الشراكة التشغيلية' },
+                feasibility: { en: 'Feasibility Study', ar: 'دراسة الجدوى' },
+                feasibility_study: { en: 'Feasibility Study', ar: 'دراسة الجدوى' },
+            };
 
-        if (!currentUser || !currentUser.is_email_verified) {
-            showNotification(lang === 'ar' ? 'يجب تفعيل بريدك الإلكتروني أولاً' : 'You must verify your email first', 'error');
-            return;
-        }
+            const statusColors = {
+                pending: 'var(--gold)',
+                approved: '#10b981',
+                rejected: '#dc2626',
+                reviewing: '#6366f1',
+            };
 
-        const desc = document.getElementById('feasProjectDesc').value.trim();
-        const cost = document.getElementById('feasEstCost').value.trim();
-        const funding = document.getElementById('feasFunding').value.trim();
+            const createRequestHTML = (r) => {
+                const typeKey = (r.service_type || r.request_type || r.type || '').toLowerCase();
+                const label = (typeLabels[typeKey] || {})[lang] || typeKey;
+                const status = r.status || 'pending';
+                const statusColor = statusColors[status] || 'var(--muted)';
+                const date = r.created_at ? new Date(r.created_at).toLocaleDateString(lang === 'ar' ? 'ar-KW' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
 
-        if (!desc || !cost || !funding) {
-            showNotification(lang === 'ar' ? 'جميع الحقول مطلوبة' : 'All fields are required', 'error');
-            return;
-        }
+                let summary = '';
+                if (r.project_description) summary = r.project_description.slice(0, 100) + (r.project_description.length > 100 ? '…' : '');
+                else if (r.description) summary = r.description.slice(0, 100) + (r.description.length > 100 ? '…' : '');
 
-        const btn = this.querySelector('.btn-save');
-        btn.disabled = true;
-        btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...';
+                const files = r.files || [];
+                const fileChipsHTML = files.length > 0 ? `
+                <div class="request-files-section">
+                    <div class="request-files-label">${lang === 'ar' ? 'الملفات المرفقة' : 'Attached Files'} (${files.length})</div>
+                    <div class="request-files-list">
+                        ${files.map(f => {
+                    const fname = f.filename || f.name || 'file.pdf';
+                    const fileId = f.file_id || f.id || '';
+                    const fsize = f.size ? (f.size < 1048576 ? `${(f.size / 1024).toFixed(0)} KB` : `${(f.size / 1048576).toFixed(1)} MB`) : '';
+                    return `<div class="request-file-chip">
+                                <span class="request-file-icon">📄</span>
+                                <span class="request-file-name">${fname.length > 25 ? fname.slice(0, 22) + '…' : fname}</span>
+                                ${fsize ? `<span class="request-file-size">${fsize}</span>` : ''}
+                                <button class="request-file-download" onclick="event.stopPropagation();downloadMyFile(${r.id},'${fileId}','${fname}')" title="${lang === 'ar' ? 'تحميل' : 'Download'}">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </button>
+                            </div>`;
+                }).join('')}
+                    </div>
+                </div>` : '';
 
-        try {
-            const res = await apiFetch('/api/v1/files/feasibility/submit', {
-                method: 'POST',
-                body: JSON.stringify({
-                    project_description: desc,
-                    estimated_cost: cost,
-                    funding_source: funding
-                })
+                return `
+            <div class="request-item" data-request-id="${r.id}">
+                <div class="request-item-header">
+                    <div class="request-type-badge">${label}</div>
+                    <span class="request-status" style="color:${statusColor};">● ${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                </div>
+                ${summary ? `<p class="request-summary">${summary}</p>` : ''}
+                ${fileChipsHTML}
+                <div class="request-item-footer">
+                    <span class="request-date">${lang === 'ar' ? 'تاريخ' : 'Submitted'}: ${date}</span>
+                    <div class="request-actions">
+                        <button class="btn-request-edit" onclick="openRequestEditModal(${r.id})">${lang === 'ar' ? 'تعديل' : 'Edit'}</button>
+                        <button class="btn-request-delete" onclick="deleteMyRequest(${r.id})">${lang === 'ar' ? 'حذف' : 'Delete'}</button>
+                    </div>
+                </div>
+            </div>`;
+            };
+
+            const pContainer = document.getElementById('partnershipRequestContainer');
+            const pForm = document.getElementById('partnershipFormContainer');
+            const fContainer = document.getElementById('feasibilityRequestContainer');
+            const fForm = document.getElementById('feasibilityFormContainer');
+
+            let hasPartnership = false;
+            let hasFeasibility = false;
+
+            (requests || []).forEach(r => {
+                const typeKey = (r.service_type || r.request_type || r.type || '').toLowerCase();
+                if (typeKey === 'operational_partnership' || typeKey === 'partnership') {
+                    if (pContainer) pContainer.innerHTML = createRequestHTML(r);
+                    hasPartnership = true;
+                } else if (typeKey === 'feasibility' || typeKey === 'feasibility_study') {
+                    if (fContainer) fContainer.innerHTML = createRequestHTML(r);
+                    hasFeasibility = true;
+                }
             });
 
-            if (res.ok) {
-                showNotification(
-                    lang === 'ar' ? 'تم إرسال طلب دراسة الجدوى بنجاح!' : 'Feasibility Study request submitted successfully!',
-                    'success'
-                );
-                // Reset form
-                document.getElementById('feasProjectDesc').value = '';
-                document.getElementById('feasEstCost').value = '';
-                document.getElementById('feasFunding').value = '';
-            } else {
-                const err = await res.json();
-                showNotification(err.detail || (lang === 'ar' ? 'فشل إرسال الطلب' : 'Submission failed'), 'error');
+            if (pContainer && pForm) {
+                pContainer.style.display = hasPartnership ? 'block' : 'none';
+                pForm.style.display = hasPartnership ? 'none' : 'block';
             }
-        } catch {
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+            if (fContainer && fForm) {
+                fContainer.style.display = hasFeasibility ? 'block' : 'none';
+                fForm.style.display = hasFeasibility ? 'none' : 'block';
+            }
         }
 
-        btn.disabled = false;
-        btn.textContent = lang === 'ar' ? 'إرسال طلب الدراسة' : 'Submit Study Request';
-    });
+        // ===== Download user's own file =====
+        async function downloadMyFile(requestId, fileId, filename) {
+            const lang = getLang();
+            if (!fileId) {
+                showNotification(lang === 'ar' ? 'معرف الملف غير موجود' : 'File ID missing', 'error');
+                return;
+            }
+            try {
+                // Fetch the presigned URL using the exact pattern from the admin dashboard
+                // Make sure to use the correct endpoint path without '/me/'
+                const res = await apiFetch(`/api/v1/users/requests/${requestId}/files/${fileId}`);
+                if (!res.ok) throw new Error('API Error');
+                
+                const data = await res.json();
+                const url = data.url || data.presigned_url;
 
-    // ===== Reviews =====
-    function setStarRating(n) {
-        selectedRating = n;
-        document.querySelectorAll('#reviewStars .star').forEach((s, i) => {
-            s.classList.toggle('active', i < n);
-        });
-    }
-
-    function renderReviews(reviews) {
-        const lang = getLang();
-        const list = document.getElementById('reviewsList');
-
-        if (!reviews || reviews.length === 0) {
-            list.innerHTML = `<p style="color:var(--gray-500);text-align:center;">${lang === 'ar' ? 'لا توجد تقييمات بعد.' : 'No reviews yet.'}</p>`;
-            return;
+                if (url) {
+                    window.location.href = url;
+                } else {
+                    throw new Error('No presigned URL returned');
+                }
+            } catch (err) {
+                console.error('Download error:', err);
+                showNotification(lang === 'ar' ? 'فشل تحميل الملف' : 'Failed to download file', 'error');
+            }
         }
 
-        list.innerHTML = reviews.map(r => `
+        // ===== Delete user's own request =====
+        async function deleteMyRequest(requestId) {
+            const lang = getLang();
+            if (!confirm(lang === 'ar' ? 'هل أنت متأكد من حذف هذا الطلب؟ سيتم حذف جميع الملفات المرتبطة.' : 'Are you sure you want to delete this request? All associated files will be deleted.')) return;
+
+            try {
+                const res = await apiFetch(`/api/v1/users/me/requests/${requestId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    currentRequests = currentRequests.filter(r => r.id !== requestId);
+                    renderRequests(currentRequests);
+                    showNotification(lang === 'ar' ? 'تم حذف الطلب بنجاح' : 'Request deleted successfully', 'success');
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل حذف الطلب' : 'Delete failed'), 'error');
+                }
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            }
+        }
+
+        function openRequestEditModal(id) {
+            const request = currentRequests.find(r => r.id === id);
+            if (!request) return;
+            const lang = getLang();
+            editingRequestId = id;
+
+            const typeKey = request.service_type || request.request_type || request.type || '';
+            const isFeasibility = typeKey === 'feasibility' || typeKey === 'feasibility_study';
+
+            const title = isFeasibility
+                ? (lang === 'ar' ? 'تعديل طلب دراسة الجدوى' : 'Edit Feasibility Study Request')
+                : (lang === 'ar' ? 'تعديل طلب الشراكة التشغيلية' : 'Edit Operational Partnership Request');
+
+            document.getElementById('editModalTitle').textContent = title;
+
+            let bodyHTML = '';
+            if (isFeasibility) {
+                // Feasibility: Get the file_id from the first file, then update via PUT with JSON
+                const files = request.files || [];
+                const fileId = files.length > 0 ? (files[0].file_id || files[0].id || '') : '';
+
+                bodyHTML = `
+            <div class="edit-modal-pdf-note">
+                <span class="pdf-note-icon">📄</span>
+                <span>${lang === 'ar' ? 'سيتم تحويل هذا النص إلى ملف PDF بعد الحفظ.' : 'This content will be generated as a PDF after saving.'}</span>
+            </div>
+            <input type="hidden" id="modalFeasFileId" value="${fileId}">
+            <div class="form-group">
+                <label>${lang === 'ar' ? 'وصف المشروع التفصيلي' : 'Detailed Project Description'}</label>
+                <textarea id="modalFeasDesc" rows="6" class="edit-modal-textarea">${request.project_description || request.description || ''}</textarea>
+            </div>
+            <div class="edit-modal-form-row">
+                <div class="form-group">
+                    <label>${lang === 'ar' ? 'التكلفة التقديرية (د.ك)' : 'Estimated Cost (KWD)'}</label>
+                    <input type="text" id="modalFeasCost" class="edit-modal-input" value="${request.estimated_cost || ''}">
+                </div>
+                <div class="form-group">
+                    <label>${lang === 'ar' ? 'مصدر التمويل' : 'Funding Source'}</label>
+                    <input type="text" id="modalFeasFunding" class="edit-modal-input" value="${request.funding_source || ''}">
+                </div>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn-modal-cancel" onclick="closeEditModal()">${lang === 'ar' ? 'إلغاء' : 'Cancel'}</button>
+                <button class="btn-modal-save" onclick="submitRequestEdit('feasibility')">${lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}</button>
+            </div>`;
+            } else {
+                // Operational Partnership — per-file re-upload
+                const files = request.files || [];
+                const fileListHTML = files.length > 0
+                    ? files.map((f, i) => {
+                        const fname = f.filename || f.name || f.file_name || 'file.pdf';
+                        const fileId = f.file_id || f.id || '';
+                        const fsize = f.size ? (f.size < 1048576 ? `${(f.size / 1024).toFixed(0)} KB` : `${(f.size / 1048576).toFixed(1)} MB`) : '';
+                        const fdate = f.created_at ? new Date(f.created_at).toLocaleDateString(lang === 'ar' ? 'ar-KW' : 'en-US', { month: 'short', day: 'numeric' }) : '';
+                        return `
+                    <div class="modal-reupload-item" id="modal-file-${i}" data-file-id="${fileId}">
+                        <div class="modal-reupload-info">
+                            <span class="modal-file-icon">📄</span>
+                            <div class="modal-reupload-details">
+                                <span class="modal-file-name">${fname}</span>
+                                <span class="modal-file-meta">${[fsize, fdate].filter(Boolean).join(' · ')}</span>
+                            </div>
+                        </div>
+                        <div class="modal-reupload-actions">
+                            <label class="btn-reupload" title="${lang === 'ar' ? 'استبدال هذا الملف' : 'Replace this file'}">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span>${lang === 'ar' ? 'استبدال' : 'Replace'}</span>
+                                <input type="file" accept="application/pdf" onchange="handlePerFileReupload(this, ${i}, '${fileId}')" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
+                            </label>
+                        </div>
+                        <div class="modal-reupload-status" id="reupload-status-${i}"></div>
+                    </div>`;
+                    }).join('')
+                    : `<p class="modal-no-files">${lang === 'ar' ? 'لا توجد ملفات مرفوعة.' : 'No files uploaded.'}</p>`;
+
+                bodyHTML = `
+            <div class="edit-modal-pdf-note">
+                <span class="pdf-note-icon">🔄</span>
+                <span>${lang === 'ar' ? 'اختر ملفاً لاستبداله بملف PDF جديد. كل ملف يُحدَّث على حدة.' : 'Select a file to replace it with a new PDF. Each file is updated individually.'}</span>
+            </div>
+            <div class="form-group">
+                <label>${lang === 'ar' ? 'ملفاتك المرفوعة' : 'Your Uploaded Files'} (${files.length})</label>
+                <div class="modal-files-list" id="modalFilesList">${fileListHTML}</div>
+            </div>
+            <div class="edit-modal-footer">
+                <button class="btn-modal-cancel" onclick="closeEditModal()">${lang === 'ar' ? 'إغلاق' : 'Close'}</button>
+            </div>`;
+            }
+
+            document.getElementById('editModalBody').innerHTML = bodyHTML;
+            openEditModal();
+        }
+
+        // ===== Per-file re-upload for Operational Partnership =====
+        async function handlePerFileReupload(input, index, fileId) {
+            const lang = getLang();
+            const file = input.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/pdf') {
+                showNotification(lang === 'ar' ? 'يجب أن يكون الملف بصيغة PDF' : 'File must be PDF format', 'error');
+                input.value = '';
+                return;
+            }
+
+            const statusEl = document.getElementById(`reupload-status-${index}`);
+            const itemEl = document.getElementById(`modal-file-${index}`);
+            if (statusEl) {
+                statusEl.innerHTML = `<span class="reupload-loading">${lang === 'ar' ? 'جاري الرفع...' : 'Uploading...'}</span>`;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const token = localStorage.getItem('access_token');
+                const res = await fetch(`${API_BASE}/api/v1/files/operational_partnership/files/${fileId}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (statusEl) {
+                        statusEl.innerHTML = `<span class="reupload-success">✓ ${lang === 'ar' ? 'تم الاستبدال' : 'Replaced'}</span>`;
+                    }
+                    // Update the filename display
+                    const nameEl = itemEl?.querySelector('.modal-file-name');
+                    if (nameEl) nameEl.textContent = data.filename || file.name;
+                    const metaEl = itemEl?.querySelector('.modal-file-meta');
+                    if (metaEl) {
+                        const newSize = data.size ? (data.size < 1048576 ? `${(data.size / 1024).toFixed(0)} KB` : `${(data.size / 1048576).toFixed(1)} MB`) : '';
+                        metaEl.textContent = newSize;
+                    }
+                    showNotification(lang === 'ar' ? `تم استبدال الملف بنجاح` : `File replaced successfully`, 'success');
+                    // Refresh requests list in background
+                    fetchRequests();
+                } else {
+                    const err = await res.json();
+                    if (statusEl) {
+                        statusEl.innerHTML = `<span class="reupload-error">✕ ${err.detail || (lang === 'ar' ? 'فشل' : 'Failed')}</span>`;
+                    }
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل استبدال الملف' : 'File replacement failed'), 'error');
+                }
+            } catch {
+                if (statusEl) {
+                    statusEl.innerHTML = `<span class="reupload-error">✕ ${lang === 'ar' ? 'خطأ اتصال' : 'Connection error'}</span>`;
+                }
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            }
+            input.value = '';
+        }
+
+        async function submitRequestEdit(type) {
+            const lang = getLang();
+            const saveBtn = document.querySelector('#editModal .btn-modal-save');
+            if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = lang === 'ar' ? 'جاري الحفظ...' : 'Saving...'; }
+
+            try {
+                if (type === 'feasibility') {
+                    const desc = document.getElementById('modalFeasDesc').value.trim();
+                    const cost = document.getElementById('modalFeasCost').value.trim();
+                    const funding = document.getElementById('modalFeasFunding').value.trim();
+                    const fileId = document.getElementById('modalFeasFileId').value;
+
+                    if (!desc || !cost || !funding) {
+                        showNotification(lang === 'ar' ? 'جميع الحقول مطلوبة' : 'All fields are required', 'error');
+                        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes'; }
+                        return;
+                    }
+
+                    if (!fileId) {
+                        showNotification(lang === 'ar' ? 'معرف الملف غير موجود' : 'File ID not found for this request', 'error');
+                        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes'; }
+                        return;
+                    }
+
+                    // PUT /api/v1/files/feasibility/files/{file_id} with JSON body
+                    const res = await apiFetch(`/api/v1/files/feasibility/files/${fileId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            project_description: desc,
+                            estimated_cost: parseFloat(cost.replace(/,/g, '')) || 0,
+                            funding_source: funding
+                        })
+                    });
+
+                    if (res.ok) {
+                        showNotification(lang === 'ar' ? 'تم تحديث الطلب بنجاح' : 'Request updated successfully', 'success');
+                        closeEditModal();
+                        // Refresh requests
+                        await fetchRequests();
+                    } else {
+                        const err = await res.json();
+                        showNotification(err.detail || (lang === 'ar' ? 'فشل التحديث' : 'Update failed'), 'error');
+                    }
+                }
+                // Partnership per-file re-upload is handled by handlePerFileReupload() directly
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            }
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes'; }
+        }
+
+        function openEditModal() {
+            const overlay = document.getElementById('editModalOverlay');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            // Trap Escape key
+            document._editModalEscHandler = (e) => { if (e.key === 'Escape') closeEditModal(); };
+            document.addEventListener('keydown', document._editModalEscHandler);
+        }
+
+        function closeEditModal() {
+            const overlay = document.getElementById('editModalOverlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            editingRequestId = null;
+            if (document._editModalEscHandler) {
+                document.removeEventListener('keydown', document._editModalEscHandler);
+            }
+        }
+
+        // ===== Reviews =====
+        function setStarRating(n) {
+            selectedRating = n;
+            document.querySelectorAll('#reviewStars .star').forEach((s, i) => {
+                s.classList.toggle('active', i < n);
+            });
+        }
+
+        function renderReviews(reviews) {
+            const lang = getLang();
+            const list = document.getElementById('reviewsList');
+
+            if (!reviews || reviews.length === 0) {
+                list.innerHTML = `<p style="color:var(--gray-500);text-align:center;">${lang === 'ar' ? 'لا توجد تقييمات بعد.' : 'No reviews yet.'}</p>`;
+                return;
+            }
+
+            list.innerHTML = reviews.map(r => `
             <div class="review-item" data-review-id="${r.id}">
                 <div class="review-body">
                     <div class="stars-display">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>
@@ -970,113 +1555,160 @@
                 </div>
             </div>
         `).join('');
-    }
-
-    // Submit review
-    document.getElementById('reviewForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const lang = getLang();
-        const text = document.getElementById('reviewText').value.trim();
-
-        if (!selectedRating || selectedRating < 1) {
-            showNotification(lang === 'ar' ? 'يرجى اختيار تقييم بالنجوم' : 'Please select a star rating', 'error');
-            return;
-        }
-        if (!text) {
-            showNotification(lang === 'ar' ? 'يرجى كتابة نص التقييم' : 'Please write review text', 'error');
-            return;
         }
 
-        const btn = this.querySelector('.btn-save');
-        btn.disabled = true;
+        // Submit review
+        document.getElementById('reviewForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const lang = getLang();
+            const text = document.getElementById('reviewText').value.trim();
 
-        try {
-            let res;
-            if (editingReviewId) {
-                // Update existing review
-                res = await apiFetch(`/api/v1/reviews/${editingReviewId}`, {
-                    method: 'PATCH',
-                    body: JSON.stringify({ stars: selectedRating, review_text: text })
-                });
-            } else {
-                // Create new review
-                res = await apiFetch('/api/v1/reviews', {
+            if (!selectedRating || selectedRating < 1) {
+                showNotification(lang === 'ar' ? 'يرجى اختيار تقييم بالنجوم' : 'Please select a star rating', 'error');
+                return;
+            }
+            if (!text) {
+                showNotification(lang === 'ar' ? 'يرجى كتابة نص التقييم' : 'Please write review text', 'error');
+                return;
+            }
+
+            const btn = this.querySelector('.btn-save');
+            btn.disabled = true;
+
+            try {
+                // Create new review only — editing is handled by the edit modal
+                const res = await apiFetch('/api/v1/reviews', {
                     method: 'POST',
                     body: JSON.stringify({ stars: selectedRating, review_text: text })
                 });
-            }
 
-            if (res.ok) {
-                const review = await res.json();
-                if (editingReviewId) {
-                    // Update in cache
-                    const idx = currentReviews.findIndex(r => r.id === editingReviewId);
-                    if (idx >= 0) currentReviews[idx] = review;
-                    editingReviewId = null;
-                    showNotification(lang === 'ar' ? 'تم تحديث التقييم' : 'Review updated', 'success');
-                } else {
+                if (res.ok) {
+                    const review = await res.json();
                     if (!currentReviews) currentReviews = [];
                     currentReviews.unshift(review);
-                    showNotification(lang === 'ar' ? 'تم إرسال التقييم بنجاح' : 'Review submitted successfully', 'success');
+                    showNotification(lang === 'ar' ? 'تم إرسال التقييم بنجاح' : 'Review submitted', 'success');
+                    setCachedReviews(currentReviews);
+                    renderReviews(currentReviews);
+
+                    // Reset form
+                    document.getElementById('reviewText').value = '';
+                    selectedRating = 0;
+                    document.querySelectorAll('#reviewStars .star').forEach(s => s.classList.remove('active'));
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل الإرسال' : 'Submit failed'), 'error');
                 }
-                setCachedReviews(currentReviews);
-                renderReviews(currentReviews);
-
-                // Reset form
-                document.getElementById('reviewText').value = '';
-                selectedRating = 0;
-                document.querySelectorAll('#reviewStars .star').forEach(s => s.classList.remove('active'));
-                btn.textContent = lang === 'ar' ? 'إرسال التقييم' : 'Submit Review';
-            } else {
-                const err = await res.json();
-                showNotification(err.detail || (lang === 'ar' ? 'فشل الإرسال' : 'Submit failed'), 'error');
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
             }
-        } catch {
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            btn.disabled = false;
+        });
+
+        function startEditReview(id) {
+            const review = currentReviews.find(r => r.id === id);
+            if (!review) return;
+            const lang = getLang();
+
+            editingReviewId = id;
+            // Pre-fill modal
+            setModalStarRating(review.stars);
+            document.getElementById('reviewModalText').value = review.review_text;
+            document.getElementById('reviewModalTitle').textContent = lang === 'ar' ? 'تعديل التقييم' : 'Edit Review';
+            document.getElementById('reviewModalSaveBtn').textContent = lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes';
+
+            // Open review modal
+            const overlay = document.getElementById('reviewModalOverlay');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document._reviewModalEscHandler = (e) => { if (e.key === 'Escape') closeReviewModal(); };
+            document.addEventListener('keydown', document._reviewModalEscHandler);
         }
-        btn.disabled = false;
-    });
 
-    function startEditReview(id) {
-        const review = currentReviews.find(r => r.id === id);
-        if (!review) return;
-        const lang = getLang();
-
-        editingReviewId = id;
-        setStarRating(review.stars);
-        document.getElementById('reviewText').value = review.review_text;
-        document.querySelector('#reviewForm .btn-save').textContent = lang === 'ar' ? 'تحديث التقييم' : 'Update Review';
-
-        // Scroll to review form
-        document.querySelector('.review-form-card').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    async function deleteReview(id) {
-        const lang = getLang();
-        if (!confirm(lang === 'ar' ? 'هل أنت متأكد من حذف هذا التقييم؟' : 'Are you sure you want to delete this review?')) return;
-
-        try {
-            const res = await apiFetch(`/api/v1/reviews/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                currentReviews = currentReviews.filter(r => r.id !== id);
-                setCachedReviews(currentReviews);
-                renderReviews(currentReviews);
-                showNotification(lang === 'ar' ? 'تم حذف التقييم' : 'Review deleted', 'success');
-            } else {
-                const err = await res.json();
-                showNotification(err.detail || (lang === 'ar' ? 'فشل الحذف' : 'Delete failed'), 'error');
+        function closeReviewModal() {
+            const overlay = document.getElementById('reviewModalOverlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            editingReviewId = null;
+            modalSelectedRating = 0;
+            if (document._reviewModalEscHandler) {
+                document.removeEventListener('keydown', document._reviewModalEscHandler);
             }
-        } catch {
-            showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
         }
-    }
 
-    // ===== Logout =====
-    function handleLogout() {
-        clearCachedUser();
-        window.location.href = 'index.html';
-    }
-</script>
+        function setModalStarRating(n) {
+            modalSelectedRating = n;
+            document.querySelectorAll('#reviewModalStars .star').forEach((s, i) => {
+                s.classList.toggle('active', i < n);
+            });
+        }
+
+        async function submitReviewModal() {
+            const lang = getLang();
+            const text = document.getElementById('reviewModalText').value.trim();
+            if (!modalSelectedRating || modalSelectedRating < 1) {
+                showNotification(lang === 'ar' ? 'يرجى اختيار تقييم بالنجوم' : 'Please select a star rating', 'error');
+                return;
+            }
+            if (!text) {
+                showNotification(lang === 'ar' ? 'يرجى كتابة نص التقييم' : 'Please write review text', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('reviewModalSaveBtn');
+            btn.disabled = true;
+            btn.textContent = lang === 'ar' ? 'جاري الحفظ...' : 'Saving...';
+
+            try {
+                const res = await apiFetch(`/api/v1/reviews/${editingReviewId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ stars: modalSelectedRating, review_text: text })
+                });
+                if (res.ok) {
+                    const review = await res.json();
+                    const idx = currentReviews.findIndex(r => r.id === editingReviewId);
+                    if (idx >= 0) currentReviews[idx] = review;
+                    setCachedReviews(currentReviews);
+                    renderReviews(currentReviews);
+                    showNotification(lang === 'ar' ? 'تم تحديث التقييم' : 'Review updated', 'success');
+                    closeReviewModal();
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل التحديث' : 'Update failed'), 'error');
+                }
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes';
+        }
+
+        async function deleteReview(id) {
+            const lang = getLang();
+            if (!confirm(lang === 'ar' ? 'هل أنت متأكد من حذف هذا التقييم؟' : 'Are you sure you want to delete this review?')) return;
+
+            try {
+                const res = await apiFetch(`/api/v1/reviews/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    currentReviews = currentReviews.filter(r => r.id !== id);
+                    setCachedReviews(currentReviews);
+                    renderReviews(currentReviews);
+                    showNotification(lang === 'ar' ? 'تم حذف التقييم' : 'Review deleted', 'success');
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل الحذف' : 'Delete failed'), 'error');
+                }
+            } catch {
+                showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
+            }
+        }
+
+        // ===== Logout =====
+        function handleLogout() {
+            clearCachedUser();
+            window.location.href = 'index.html';
+        }
+    </script>
 
 </body>
+
 </html>

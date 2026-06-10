@@ -324,7 +324,7 @@
 
         /* Google OAuth — redirect to backend */
         function handleGoogleAuth() {
-            window.location.href = `${API_BASE}/auth/google`;
+            window.location.href = `${API_BASE}/api/v1/auth/google`;
         }
         document.getElementById('googleLoginBtn').addEventListener('click', handleGoogleAuth);
         document.getElementById('googleRegBtn').addEventListener('click', handleGoogleAuth);
@@ -368,7 +368,7 @@
                 const lang = document.documentElement.getAttribute('lang') || 'en';
                 showToast(lang === 'ar' ? 'جاري التحقق من حساب Google...' : 'Authenticating with Google...', 'success');
                 try {
-                    const res = await fetch(`${API_BASE}/auth/google/callback?code=${code}&remember_me=true`, {
+                    const res = await fetch(`${API_BASE}/api/v1/auth/google/callback?code=${code}&remember_me=true`, {
                         method: 'GET'
                     });
                     if (res.ok) {

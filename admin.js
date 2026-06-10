@@ -1,4 +1,6 @@
-let API = localStorage.getItem('badia_admin_api') || 'https://badia-backend.onrender.com';
+// https://badia-backend.onrender.com
+
+let API = localStorage.getItem('badia_admin_api') || 'http://127.0.0.1:8000';
 const TOKEN = () => localStorage.getItem('access_token') || '';
 
 // ── State ───────────────────────────────────────────────────────
@@ -117,7 +119,27 @@ function toast(msg, type = 'info') {
 
 // ── Modal helpers ───────────────────────────────────────────────
 function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function closeModal(id) { 
+  document.getElementById(id).classList.remove('open'); 
+  // Ensure the large plan modal resets cleanly every time it is closed
+  if (id === 'editPlanModal') {
+    _clearPlanForm();
+  }
+}
+
+
+
+// Clear all features and inputs
+function confirmClearAllPlanForm() {
+  if (!confirm('Clear all data and features? This cannot be undone.')) return;
+  
+  // Explicitly trigger the full form reset
+  _clearPlanForm(); 
+  
+  // Save the empty state to the draft
+  _saveDraft();
+}
 
 // ── Utilities ───────────────────────────────────────────────────
 function planClass(name) {
@@ -223,8 +245,49 @@ async function loadPlanDistribution() {
   }
 }
 
+async function loadEmailsThisMonth() {
+  try {
+    const data = await apiFetch('/api/v1/admin/emails/sent-this-month');
+
+    const thisMonth  = data.monthly_count ?? 0;
+    const thisDay    = data.daily_count   ?? 0;
+    const monthLimit = data.month_limit   ?? null;
+    const dayLimit   = data.day_limit     ?? null;
+
+    document.getElementById('statEmailsVal').textContent = thisMonth.toLocaleString();
+
+    // Sub-label: "Today: 2 · Limit/day: 300"
+    const subParts = [];
+    subParts.push(`Today: ${thisDay.toLocaleString()}`);
+    if (dayLimit   != null) subParts.push(`Limit/day: ${dayLimit.toLocaleString()}`);
+    if (monthLimit != null) subParts.push(`Limit/mo: ${monthLimit.toLocaleString()}`);
+    document.getElementById('statEmailSub').textContent = subParts.join(' · ');
+
+    // Right label: "2 / 3000"
+    document.getElementById('statEmailPct').textContent =
+      monthLimit ? `${thisMonth} / ${monthLimit}` : '';
+
+    // Month bar
+    const monthBar = document.getElementById('statEmailMonthBar');
+    const monthPct = monthLimit ? Math.min((thisMonth / monthLimit) * 100, 100) : (thisMonth > 0 ? 100 : 0);
+    monthBar.style.width = `${monthPct}%`;
+    monthBar.className = 'storage-bar-fill' + (monthLimit && monthPct >= 90 ? ' danger' : monthLimit && monthPct >= 70 ? ' warn' : '');
+
+    // Daily bar
+    const dayBar = document.getElementById('statEmailYearBar');
+    const dayPct = dayLimit ? Math.min((thisDay / dayLimit) * 100, 100) : (thisDay > 0 ? 100 : 0);
+    dayBar.style.width = `${dayPct}%`;
+    dayBar.className = 'storage-bar-fill' + (dayLimit && dayPct >= 90 ? ' danger' : dayLimit && dayPct >= 70 ? ' warn' : '');
+
+  } catch (e) {
+    document.getElementById('statEmailsVal').textContent = '—';
+    document.getElementById('statEmailSub').textContent  = 'Data unavailable';
+    document.getElementById('statEmailPct').textContent  = '';
+  }
+}
+
 async function loadAll() {
-  await Promise.allSettled([loadUsers(1), loadPlans(), loadRequests(1), loadReviews(1), loadStorageUsage(), loadPlanDistribution()]);
+  await Promise.allSettled([loadUsers(1), loadPlans(), loadRequests(1), loadReviews(1), loadStorageUsage(), loadPlanDistribution(), loadEmailsThisMonth()]);
   renderDashboard();
 }
 
@@ -250,6 +313,7 @@ async function loadStorageUsage() {
     document.getElementById('statStorageSub').textContent = 'Storage data unavailable';
   }
 }
+
 
 // ── USERS ────────────────────────────────────────────────────────
 async function loadUsers(page) {
@@ -330,7 +394,8 @@ function renderUsersCards(users) {
     const name    = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || '—';
     const email   = u.email || '—';
     const phone   = u.phone || u.phone_number || '—';
-    const plan    = u.plan_name || u.plan || 'None';
+    const userPlanObj = _plans.find(p => p.id === (u.current_plan_id || u.plan_id));
+    const plan    = userPlanObj ? userPlanObj.name : (u.plan_name || u.plan || 'None');
     const status  = u.is_active === false ? 'inactive' : 'active';
     const joined  = fmtDate(u.date_joined || u.created_at);
     const uid     = u.id || u.user_id || '—';
@@ -356,7 +421,7 @@ function renderUsersCards(users) {
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Plan</span>
-            <span class="item-info-value"><span class="plan-pill ${planClass(plan)}">${plan}</span></span>
+            <span class="item-info-value">${plan}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Joined</span>
@@ -428,28 +493,41 @@ function openEditUser(user) {
   document.getElementById('editUserId').value = user.id || user.user_id;
   document.getElementById('editFirstName').value = user.first_name || '';
   document.getElementById('editLastName').value  = user.last_name  || '';
+  document.getElementById('editCompanyName').value = user.company_name || '';
   document.getElementById('editEmail').value  = user.email || '';
   document.getElementById('editPhone').value  = user.phone || user.phone_number || '';
+  document.getElementById('editPassword').value = '';
+  document.getElementById('editEmailVerified').checked = !!user.is_email_verified;
+
   document.getElementById('editStatus').value = user.is_active === false ? 'inactive' : 'active';
   document.getElementById('editUserSubtitle').textContent = user.email || `User #${user.id}`;
   const sel = document.getElementById('editPlan');
   sel.innerHTML = `<option value="">No Plan</option>` +
-    _plans.map(p => `<option value="${p.id}" ${user.plan_id===p.id?'selected':''}>${p.name}</option>`).join('');
+    _plans.map(p => `<option value="${p.id}" ${(user.current_plan_id || user.plan_id)===p.id?'selected':''}>${p.name}</option>`).join('');
   openModal('editUserModal');
 }
 
 async function saveUser() {
   const id = document.getElementById('editUserId').value;
+  const userObj = _users.find(u => String(u.id||u.user_id) === String(id));
+  const targetEmail = userObj ? userObj.email : document.getElementById('editEmail').value;
+  
   const payload = {
-    first_name: document.getElementById('editFirstName').value,
-    last_name:  document.getElementById('editLastName').value,
-    email:      document.getElementById('editEmail').value,
-    phone:      document.getElementById('editPhone').value,
+    first_name: document.getElementById('editFirstName').value || null,
+    last_name:  document.getElementById('editLastName').value || null,
+    company_name: document.getElementById('editCompanyName').value || null,
+    email:      document.getElementById('editEmail').value || null,
+    phone:      document.getElementById('editPhone').value || null,
+    is_email_verified: document.getElementById('editEmailVerified').checked,
     is_active:  document.getElementById('editStatus').value === 'active',
-    plan_id:    document.getElementById('editPlan').value || null,
+    current_plan_id: document.getElementById('editPlan').value ? parseInt(document.getElementById('editPlan').value) : null,
   };
+
+  const pwd = document.getElementById('editPassword').value;
+  if (pwd) payload.password_hash = pwd;
+
   try {
-    await apiFetch(`/api/v1/admin/users/${encodeURIComponent(payload.email)}`, {
+    await apiFetch(`/api/v1/admin/users/${encodeURIComponent(targetEmail)}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
     });
@@ -492,6 +570,7 @@ async function loadRequests(page) {
   try {
     const data = await apiFetch(`/api/v1/admin/requests?page=${_reqPage}`);
     _requests = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.requests || []));
+    _requests = _requests.map(r => ({ ...r, id: r.request_id || r.id }));
     _reqHasMore = data && data.has_next !== undefined ? !!data.has_next : (_requests.length === PAGE_LIMIT);
     _totalRequests = data?.metrics?.total ?? _requests.length;
   } catch (e) {
@@ -585,7 +664,9 @@ function renderRequests(requests) {
   grid.innerHTML = requests.map(req => {
     const user      = req.user || {};
     const type      = req.request_type || req.type || 'unknown';
-    const plan      = user.plan || user.plan_name || 'None';
+    const fullUser = _users.find(u => u.id === user.id) || user;
+    const userPlanObj = _plans.find(p => p.id === (fullUser.current_plan_id || fullUser.plan_id));
+    const plan      = userPlanObj ? userPlanObj.name : (user.plan || user.plan_name || 'None');
     const files     = req.files || [];
     const name      = user.full_name || [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || '—';
     const firstName = user.first_name || '—';
@@ -634,7 +715,7 @@ function renderRequests(requests) {
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Plan</span>
-            <span class="item-info-value"><span class="plan-pill ${planClass(plan)}">${plan}</span></span>
+            <span class="item-info-value">${plan}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Request ID</span>
@@ -655,14 +736,20 @@ function renderRequests(requests) {
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           View Details
         </button>
-        ${req.status === 'pending' ? `
+        ${req.status !== 'approved' ? `
         <button class="act-btn act-btn-approve" onclick="approveRequest(${req.id})">
           <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
-          Approve
-        </button>
+          ${req.status === 'rejected' ? 'Re-Approve' : 'Approve'}
+        </button>` : ''}
+        ${req.status !== 'rejected' ? `
         <button class="act-btn act-btn-reject" onclick="openRejectModal(${req.id})">
           <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Reject
+          ${req.status === 'approved' ? 'Re-Reject' : 'Reject'}
+        </button>` : ''}
+        ${req.status !== 'pending' ? `
+        <button class="act-btn act-btn-pending" onclick="setPendingRequest(${req.id})">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          Set Pending
         </button>` : ''}
         ${files.length ? `<button class="act-btn act-btn-download" onclick="downloadAllFiles(${req.id})">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -693,6 +780,26 @@ async function approveRequest(reqId) {
     toast('Request approved successfully', 'success');
   } catch (e) {
     toast('Failed to approve request', 'error');
+  }
+}
+
+async function setPendingRequest(reqId) {
+  const req = _requests.find(r => r.id === reqId);
+  if (!req) return;
+  try {
+    await apiFetch(`/api/v1/admin/requests/${reqId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'pending' }),
+    });
+    req.status = 'pending';
+    req.rejection_reason = null;
+    req.admin_notes = null;
+    filterRequests();
+    updateRequestStats();
+    renderDashboard();
+    toast('Request set back to pending', 'info');
+  } catch (e) {
+    toast('Failed to update request status', 'error');
   }
 }
 
@@ -771,7 +878,7 @@ function viewRequest(reqId) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-bottom:18px">
       <div><div class="detail-label">User</div><div class="detail-value">${name}</div></div>
       <div><div class="detail-label">Email</div><div class="detail-value">${user.email||'—'}</div></div>
-      <div><div class="detail-label">Plan</div><div>${'<span class="plan-pill '+planClass(user.plan||user.plan_name||'None')+'">'+(user.plan||user.plan_name||'None')+'</span>'}</div></div>
+  
       <div><div class="detail-label">Status</div><div>${statusBadge(req.status)}</div></div>
       <div><div class="detail-label">Type</div><div>${typeChip(type)}</div></div>
       <div><div class="detail-label">Submitted</div><div class="detail-value">${fmtDate(req.created_at)}</div></div>
@@ -782,12 +889,25 @@ function viewRequest(reqId) {
 
   const footer = document.getElementById('viewReqFooter');
   footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal('viewReqModal')">Close</button>`;
-  if (req.status === 'pending') {
+
+  if (req.status !== 'approved') {
     footer.innerHTML += `
-      <button class="btn btn-danger" onclick="closeModal('viewReqModal');openRejectModal(${req.id})">Reject</button>
       <button class="btn btn-green" onclick="closeModal('viewReqModal');approveRequest(${req.id})">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
-        Approve
+        ${req.status === 'rejected' ? 'Re-Approve' : 'Approve'}
+      </button>`;
+  }
+  if (req.status !== 'rejected') {
+    footer.innerHTML += `
+      <button class="btn btn-danger" onclick="closeModal('viewReqModal');openRejectModal(${req.id})">
+        ${req.status === 'approved' ? 'Re-Reject' : 'Reject'}
+      </button>`;
+  }
+  if (req.status !== 'pending') {
+    footer.innerHTML += `
+      <button class="btn btn-ghost" onclick="closeModal('viewReqModal');setPendingRequest(${req.id})">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        Set Pending
       </button>`;
   }
   openModal('viewReqModal');
@@ -821,8 +941,10 @@ async function deleteRequest(reqId) {
 
 // ── PLANS ────────────────────────────────────────────────────────
 // State
-let _planDetailsTab = 'json';   // 'json' | 'order'
-
+let _currentFeatures = [];   // [{ key, en, ar, enabled }]
+let _isCreateMode    = false; // true = New Plan modal, false = Edit Plan modal
+ 
+// ── Data Loading ────────────────────────────────────────────────
 async function loadPlans(forceRefetch = false) {
   // 1. Show cached version instantly
   if (!forceRefetch) {
@@ -838,47 +960,53 @@ async function loadPlans(forceRefetch = false) {
       }
     }
   }
-
+ 
   // 2. Validate with ETag
   try {
     const reqHeaders = { 'Content-Type': 'application/json' };
     if (TOKEN()) reqHeaders['Authorization'] = `Bearer ${TOKEN()}`;
     const storedEtag = localStorage.getItem('admin_plans_etag');
     if (storedEtag && !forceRefetch) reqHeaders['If-None-Match'] = storedEtag;
-
+ 
     const res = await fetch(`${API}/api/v1/plans/`, { headers: reqHeaders });
     if (res.status === 304 && !forceRefetch) return;  // cache still fresh
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
+ 
     const data = await res.json();
     _plans = Array.isArray(data) ? data : (data.items || data.results || data.plans || []);
     localStorage.setItem('admin_plans_data', JSON.stringify(_plans));
     const newEtag = res.headers.get('ETag');
     if (newEtag) localStorage.setItem('admin_plans_etag', newEtag);
-
+ 
     renderPlansAdmin(_plans);
     syncPlanCounters();
   } catch (e) {
     if (!_plans.length) {
-      document.getElementById('plansAdminGrid').innerHTML = `<div style="color:var(--text-3);font-size:.84rem;padding:12px">Could not load plans.</div>`;
+      document.getElementById('plansAdminGrid').innerHTML =
+        `<div style="color:var(--text-3);font-size:.84rem;padding:12px">Could not load plans.</div>`;
       toast('Could not load plans', 'error');
     }
   }
 }
-
+ 
 function syncPlanCounters() {
   const total       = _plans.length;
-  const avgM        = total ? (_plans.reduce((s,p) => s + (p.price_monthly||0), 0) / total).toFixed(3) : '0.000';
-  const avgY        = total ? (_plans.reduce((s,p) => s + (p.price_yearly||0),  0) / total).toFixed(3) : '0.000';
-  const withDetails = _plans.filter(p => p.plan_details && Object.keys(p.plan_details).length > 0).length;
+  const avgM        = total ? (_plans.reduce((s, p) => s + (p.price_monthly || 0), 0) / total).toFixed(3) : '0.000';
+  const avgY        = total ? (_plans.reduce((s, p) => s + (p.price_yearly  || 0), 0) / total).toFixed(3) : '0.000';
+  const withDetails = _plans.filter(p => {
+    const d = p.plan_details;
+    if (Array.isArray(d)) return d.length > 0;
+    return d && Object.keys(d).length > 0;
+  }).length;
   document.getElementById('statPlans').textContent           = total;
-  document.getElementById('plansCount').textContent          = `${total} plan${total!==1?'s':''}`;
+  document.getElementById('plansCount').textContent          = `${total} plan${total !== 1 ? 's' : ''}`;
   document.getElementById('planStatTotal').textContent       = total;
   document.getElementById('planStatAvgMonthly').textContent  = avgM;
   document.getElementById('planStatAvgYearly').textContent   = avgY;
   document.getElementById('planStatWithDetails').textContent = withDetails;
 }
-
+ 
+// ── Plan Card Rendering ─────────────────────────────────────────
 function renderPlansAdmin(plans) {
   const grid = document.getElementById('plansAdminGrid');
   if (!plans.length) {
@@ -886,38 +1014,70 @@ function renderPlansAdmin(plans) {
     return;
   }
   grid.innerHTML = plans.map(plan => {
-    const d = plan.plan_details || {};
-    // Render plan_details as a compact key/value list (up to 6 keys)
-    const detailKeys = Object.keys(d).slice(0, 6);
-    const detailItems = detailKeys.map(k =>
-      `<li style="display:flex;justify-content:space-between;gap:8px;font-size:.75rem;padding:3px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--text-3);font-weight:600;text-transform:capitalize">${k.replace(/_/g,' ')}</span>
-        <span style="color:var(--text-2);font-family:'DM Mono',monospace;font-size:.72rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${JSON.stringify(d[k])}</span>
-      </li>`
-    ).join('');
-    const moreKeys = Object.keys(d).length - detailKeys.length;
-
-    return `<div class="plan-admin-card${plan.name==='Pro'?' featured':''}">
+    const d = plan.plan_details;
+    let detailItems = '';
+    let moreKeys    = 0;
+ 
+    if (Array.isArray(d) && d.length) {
+      // Array format: [{key, en, ar, enabled, price?}, ...]
+      const shown = d.slice(0, 6);
+      moreKeys    = d.length - shown.length;
+      detailItems = shown.map(feature => {
+        const nameEn      = (feature.en || feature.key || '').replace(/_/g, ' ');
+        const isEnabled   = feature.enabled !== false;
+        const statusClass = isEnabled ? 'feat-on' : 'feat-off';
+        const statusText  = isEnabled ? 'Enabled' : 'Disabled';
+        const priceSegment = (feature.price != null && feature.price !== '')
+          ? `<span style="color:var(--text-2)">${feature.price} KWD</span><span style="color:var(--border);margin:0 3px">·</span>`
+          : '';
+        return `<li style="list-style:none;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;align-items:center;gap:6px;font-size:.75rem">
+          <div class="feat-dot ${statusClass}"></div>
+          <span style="font-weight:600;color:var(--text)">${nameEn}</span>
+          <span style="color:var(--border);margin:0 1px">·</span>
+          ${priceSegment}<span style="color:var(--text-3)">${statusText}</span>
+        </li>`;
+      }).join('');
+ 
+    } else if (d && typeof d === 'object' && !Array.isArray(d)) {
+        // Use our parsing utility to safely sort by the internal order attribute
+        const sortedFeatures = _parsePlanDetailsToFeatures(d);
+        const shown = sortedFeatures.slice(0, 6);
+        moreKeys   = sortedFeatures.length - shown.length;
+        
+        detailItems = shown.map(f => {
+          const nameEn      = (f.en || f.key || '').replace(/_/g, ' ');
+          const statusClass = f.enabled ? 'feat-on' : 'feat-off';
+          const statusText  = f.enabled ? 'Enabled' : 'Disabled';
+          return `<li style="list-style:none;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;align-items:center;gap:6px;font-size:.75rem">
+            <div class="feat-dot ${statusClass}"></div>
+            <span style="font-weight:600;color:var(--text);text-transform:capitalize">${nameEn}</span>
+            <span style="color:var(--border);margin:0 1px">·</span>
+            <span style="color:var(--text-3)">${statusText}</span>
+          </li>`;
+        }).join('');
+      }
+ 
+    return `<div class="plan-admin-card${plan.name === 'Pro' ? ' featured' : ''}">
       <div class="plan-card-top">
         <div>
           <div class="plan-card-name">${plan.name}</div>
           <div class="plan-card-id">ID: ${plan.id}</div>
         </div>
-        <span class="plan-pill ${planClass(plan.name)}">${plan.name}</span>
+  
       </div>
       <div class="plan-card-body">
         <div class="plan-price-row">
           <div><div class="plan-price-label">Monthly</div><div class="plan-price-val">${Number(plan.price_monthly).toFixed(3)} <span>KWD</span></div></div>
           <div><div class="plan-price-label">Yearly</div><div class="plan-price-val">${Number(plan.price_yearly).toFixed(3)} <span>KWD</span></div></div>
         </div>
-        ${detailItems ? `<ul style="list-style:none;border-top:1px solid var(--border);padding-top:8px;margin-top:4px">${detailItems}${moreKeys>0?`<li style="font-size:.72rem;color:var(--text-3);padding-top:4px">+ ${moreKeys} more key${moreKeys!==1?'s':''}</li>`:''}</ul>` : ''}
+        ${detailItems ? `<ul style="list-style:none;padding:0;margin:0">${detailItems}${moreKeys > 0 ? `<li style="font-size:.72rem;color:var(--text-3);padding-top:8px">+ ${moreKeys} more feature${moreKeys !== 1 ? 's' : ''}</li>` : ''}</ul>` : ''}
       </div>
       <div class="plan-card-footer">
         <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openEditPlanById(${plan.id})">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Edit
         </button>
-        <button class="btn btn-danger btn-sm" onclick="confirmDeletePlan(${plan.id},'${plan.name.replace(/'/g,"\\'")}')">
+        <button class="btn btn-danger btn-sm" onclick="confirmDeletePlan(${plan.id},'${plan.name.replace(/'/g, "\\'")}')">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
           Delete
         </button>
@@ -925,118 +1085,287 @@ function renderPlansAdmin(plans) {
     </div>`;
   }).join('');
 }
-
+ 
 // ── Plan Modal helpers ──────────────────────────────────────────
+ 
+// Resets every form field and feature state to a blank slate.
 function _clearPlanForm() {
-  ['editPlanId','editPlanName','editPlanMonthly','editPlanYearly','editPlanDetails'].forEach(id => {
+  ['editPlanId', 'editPlanName', 'editPlanMonthly', 'editPlanYearly'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  ['errPlanName','errPlanMonthly','errPlanDetails'].forEach(id => {
+  ['errPlanName', 'errPlanMonthly'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = '';
   });
-  switchPlanDetailsTab('json');
+  const enEl = document.getElementById('fbInputEn');
+  const arEl = document.getElementById('fbInputAr');
+  if (enEl) enEl.value = '';
+  if (arEl) arEl.value = '';
+  const tog = document.getElementById('fbInputEnabledToggle');
+  if (tog) tog.classList.add('checked');
+  const errFb = document.getElementById('errFbInput');
+  if (errFb) { errFb.style.display = 'none'; errFb.textContent = ''; }
+  _currentFeatures = [];
+  _renderFeaturesList();
 }
-
+ 
+// ── Open: New Plan ──────────────────────────────────────────────
 function openNewPlanModal() {
+  _isCreateMode = true;
   _clearPlanForm();
+ 
   document.getElementById('editPlanModalTitle').textContent = 'New Plan';
   document.getElementById('editPlanModalSub').textContent   = 'Create a new pricing tier';
   document.getElementById('savePlanLabel').textContent      = 'Create Plan';
+ 
+  _syncClearAllVisibility();
   openModal('editPlanModal');
 }
-
+ 
+// ── Open: Edit Existing Plan ────────────────────────────────────
 function openEditPlanById(id) {
   const plan = _plans.find(p => String(p.id) === String(id));
   if (plan) openEditPlan(plan);
 }
-
+ 
 function openEditPlan(plan) {
-  _clearPlanForm();
-  document.getElementById('editPlanId').value       = plan.id;
+  _isCreateMode = false;
+ 
+  document.getElementById('editPlanId').value      = plan.id;
+  document.getElementById('editPlanName').value    = plan.name          || '';
+  document.getElementById('editPlanMonthly').value = plan.price_monthly ?? '';
+  document.getElementById('editPlanYearly').value  = plan.price_yearly  ?? '';
+ 
+  ['errPlanName', 'errPlanMonthly'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+  const enEl = document.getElementById('fbInputEn');
+  const arEl = document.getElementById('fbInputAr');
+  if (enEl) enEl.value = '';
+  if (arEl) arEl.value = '';
+  const tog = document.getElementById('fbInputEnabledToggle');
+  if (tog) tog.classList.add('checked');
+  const errFb = document.getElementById('errFbInput');
+  if (errFb) { errFb.style.display = 'none'; errFb.textContent = ''; }
+ 
+  _currentFeatures = _parsePlanDetailsToFeatures(plan.plan_details);
+  _renderFeaturesList();
+ 
   document.getElementById('editPlanModalTitle').textContent = `Edit — ${plan.name}`;
   document.getElementById('editPlanModalSub').textContent   = `Plan ID: ${plan.id}`;
   document.getElementById('savePlanLabel').textContent      = 'Save Changes';
-  document.getElementById('editPlanName').value     = plan.name || '';
-  document.getElementById('editPlanMonthly').value  = plan.price_monthly ?? '';
-  document.getElementById('editPlanYearly').value   = plan.price_yearly  ?? '';
-  if (plan.plan_details && Object.keys(plan.plan_details).length) {
-    document.getElementById('editPlanDetails').value = JSON.stringify(plan.plan_details, null, 2);
-  }
+ 
+  _syncClearAllVisibility();
   openModal('editPlanModal');
 }
-
-// ── Plan Details Tab switcher ───────────────────────────────────
-function switchPlanDetailsTab(tab) {
-  _planDetailsTab = tab;
-  const jsonPane  = document.getElementById('planDetailsJsonPane');
-  const orderPane = document.getElementById('planDetailsOrderPane');
-  const btnJson   = document.getElementById('detTabJson');
-  const btnOrder  = document.getElementById('detTabOrder');
-
-  if (tab === 'json') {
-    jsonPane.style.display  = '';
-    orderPane.style.display = 'none';
-    btnJson.style.borderColor  = 'var(--accent)';  btnJson.style.color  = 'var(--accent)';
-    btnOrder.style.borderColor = '';               btnOrder.style.color = '';
-  } else {
-    // parse current JSON → build order list
-    const raw = document.getElementById('editPlanDetails').value.trim();
-    let obj = {};
-    try {
-      if (raw) obj = JSON.parse(raw);
-      document.getElementById('errPlanDetailsOrder').textContent = '';
-    } catch {
-      document.getElementById('errPlanDetailsOrder').textContent = 'Fix JSON syntax before reordering.';
-      return;
-    }
-    jsonPane.style.display  = 'none';
-    orderPane.style.display = '';
-    btnJson.style.borderColor  = '';               btnJson.style.color  = '';
-    btnOrder.style.borderColor = 'var(--accent)';  btnOrder.style.color = 'var(--accent)';
-    _renderPlanOrderList(obj);
+ 
+// Show/hide the "Clear All Data" button — only visible in create mode
+function _syncClearAllVisibility() {
+  const btn = document.getElementById('clearAllPlanDataBtn');
+  if (!btn) return;
+  btn.style.display = _isCreateMode ? '' : 'none';
+}
+ 
+// ── Convert plan_details → _currentFeatures ────────────────────
+function _parsePlanDetailsToFeatures(plan_details) {
+  if (Array.isArray(plan_details)) {
+    // New format: array order IS the canonical order — preserve it as-is
+    return plan_details.map((f, i) => ({
+      key:     f.key     || `feature_${i}`,
+      en:      f.en      || f.name || '',
+      ar:      f.ar      || '',
+      enabled: f.enabled !== false,
+    }));
   }
+  // Legacy object format: parse and sort by order field for backwards compat
+  if (plan_details && typeof plan_details === 'object') {
+    return Object.entries(plan_details).map(([k, v], i) => {
+      const isObject = v !== null && typeof v === 'object' && !Array.isArray(v);
+      return {
+        key:     k,
+        en:      isObject ? (v.en  || k) : String(v),
+        ar:      isObject ? (v.ar  || '') : '',
+        enabled: isObject ? v.enabled !== false : (v !== false && v !== 0 && v !== null),
+        order:   isObject ? (v.order ?? i) : i
+      };
+    }).sort((a, b) => a.order - b.order);
+  }
+  return [];
 }
-
-function _renderPlanOrderList(obj) {
-  const list = document.getElementById('planDetailsOrderList');
-  const keys = Object.keys(obj);
-  list._obj  = obj;
-  list.innerHTML = !keys.length
-    ? `<p style="font-size:.78rem;color:var(--text-3)">No keys in the JSON yet.</p>`
-    : keys.map((k, i) => `
-      <div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1.5px solid var(--border);border-radius:7px;padding:7px 10px" data-key="${k.replace(/"/g,'&quot;')}">
-        <span style="font-size:.78rem;font-weight:600;color:var(--text);flex:1">${k}</span>
-        <span style="font-size:.72rem;color:var(--text-3);font-family:'DM Mono',monospace;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${JSON.stringify(obj[k])}</span>
-        <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
-          <button onclick="movePlanKey(this,-1)" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:.65rem;line-height:1;padding:1px 4px;border-radius:3px" title="Up">▲</button>
-          <button onclick="movePlanKey(this,1)"  style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:.65rem;line-height:1;padding:1px 4px;border-radius:3px" title="Down">▼</button>
-        </div>
-      </div>`).join('');
+ 
+// ── Feature Builder ─────────────────────────────────────────────
+ 
+function _renderFeaturesList() {
+  const list = document.getElementById('fbFeaturesList');
+  if (!list) return;
+ 
+  if (!_currentFeatures.length) {
+    list.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-3);font-size:.82rem">No features added yet. Use the form above to add one.</div>`;
+    return;
+  }
+ 
+  list.innerHTML = _currentFeatures.map((f, i) => `
+    <div class="fb-feature-item" draggable="true" data-idx="${i}">
+      <div class="fb-drag-handle" title="Drag to reorder">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>
+        </svg>
+      </div>
+      <div class="fb-feature-text">
+        <span class="fb-feature-en">${_esc(f.en)}</span>
+        ${f.ar ? `<span class="fb-feature-ar">${_esc(f.ar)}</span>` : ''}
+      </div>
+      <div class="fb-item-controls">
+        <button class="fb-toggle-btn ${f.enabled ? 'enabled' : 'disabled'}" onclick="_toggleFeat(${i})">
+          ${f.enabled ? 'On' : 'Off'}
+        </button>
+        <button class="fb-btn-delete" onclick="_deleteFeat(${i})" title="Remove feature">
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+ 
+  _bindDragDrop();
 }
-
-function movePlanKey(btn, dir) {
-  const item  = btn.closest('[data-key]');
-  const list  = item.closest('#planDetailsOrderList');
-  const items = Array.from(list.children).filter(el => el.dataset.key);
-  const idx   = items.indexOf(item);
-  const next  = idx + dir;
-  if (next < 0 || next >= items.length) return;
-  dir === -1 ? list.insertBefore(item, items[next]) : list.insertBefore(items[next], item);
-  _syncPlanOrderToJSON();
+ 
+function _esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-
-function _syncPlanOrderToJSON() {
-  const list = document.getElementById('planDetailsOrderList');
-  const obj  = list._obj || {};
-  const keys = Array.from(list.querySelectorAll('[data-key]')).map(el => el.dataset.key);
-  const reordered = {};
-  keys.forEach(k => { if (k in obj) reordered[k] = obj[k]; });
-  list._obj = reordered;
-  document.getElementById('editPlanDetails').value = JSON.stringify(reordered, null, 2);
+ 
+// Add feature from the input row
+function addFeatureFromBuilder() {
+  const enEl  = document.getElementById('fbInputEn');
+  const arEl  = document.getElementById('fbInputAr');
+  const togEl = document.getElementById('fbInputEnabledToggle');
+  const errEl = document.getElementById('errFbInput');
+ 
+  const en = (enEl.value || '').trim();
+  const ar = (arEl.value || '').trim();
+ 
+  if (!en || !ar) {
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+ 
+  const enabled = togEl.classList.contains('checked');
+  const key = en.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || `feature_${Date.now()}`;
+ 
+  _currentFeatures.push({ key, en, ar, enabled });
+  enEl.value = '';
+  arEl.value = '';
+  togEl.classList.add('checked');
+ 
+  _renderFeaturesList();
 }
-
+ 
+// Toggle the input row "Enabled" toggle
+function toggleFbInputEnabled() {
+  document.getElementById('fbInputEnabledToggle').classList.toggle('checked');
+}
+ 
+// Move a feature up/down
+function _moveFeat(idx, dir) {
+  const next = idx + dir;
+  if (next < 0 || next >= _currentFeatures.length) return;
+  [_currentFeatures[idx], _currentFeatures[next]] = [_currentFeatures[next], _currentFeatures[idx]];
+  _renderFeaturesList();
+}
+ 
+// Toggle enabled state of a feature row
+function _toggleFeat(idx) {
+  _currentFeatures[idx].enabled = !_currentFeatures[idx].enabled;
+  _renderFeaturesList();
+}
+ 
+// Delete a feature row
+function _deleteFeat(idx) {
+  _currentFeatures.splice(idx, 1);
+  _renderFeaturesList();
+}
+ 
+// ── "Clear All Data" — Create Mode Only ────────────────────────
+function confirmClearAllPlanForm() {
+  if (!_isCreateMode) return;
+  const hasData = document.getElementById('editPlanName').value.trim() ||
+                  document.getElementById('editPlanMonthly').value ||
+                  document.getElementById('editPlanYearly').value ||
+                  _currentFeatures.length;
+  if (!hasData) return;
+  if (!confirm('Clear all data? This will remove the plan name, prices, and all features.')) return;
+  _clearPlanForm();
+}
+ 
+// ── Drag & Drop (mouse + touch) ─────────────────────────────────
+let _dragSrcIdx = null;
+ 
+function _bindDragDrop() {
+  const list = document.getElementById('fbFeaturesList');
+  if (!list) return;
+ 
+  list.querySelectorAll('.fb-feature-item').forEach(row => {
+    row.addEventListener('dragstart', e => {
+      _dragSrcIdx = parseInt(row.dataset.idx);
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      list.querySelectorAll('.fb-feature-item').forEach(r => r.classList.remove('drag-over'));
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      list.querySelectorAll('.fb-feature-item').forEach(r => r.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+    
+      const targetIdx = parseInt(row.dataset.idx, 10);
+    
+      if (
+        _dragSrcIdx !== null &&
+        _dragSrcIdx !== targetIdx &&
+        targetIdx >= 0
+      ) {
+        const movedFeature = _currentFeatures.splice(_dragSrcIdx, 1)[0];
+    
+        _currentFeatures.splice(targetIdx, 0, movedFeature);
+    
+        _renderFeaturesList();
+      }
+    
+      _dragSrcIdx = null;
+    });
+    
+    // Touch drag
+    let touchStartY = 0;
+    let touchSrcIdx = null;
+ 
+    row.addEventListener('touchstart', e => {
+      touchSrcIdx = parseInt(row.dataset.idx);
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+ 
+    row.addEventListener('touchend', e => {
+      if (touchSrcIdx === null) return;
+      const dy        = e.changedTouches[0].clientY - touchStartY;
+      const threshold = 30;
+      if (Math.abs(dy) < threshold) { touchSrcIdx = null; return; }
+      const dir  = dy > 0 ? 1 : -1;
+      const next = touchSrcIdx + dir;
+      if (next >= 0 && next < _currentFeatures.length) {
+        [_currentFeatures[touchSrcIdx], _currentFeatures[next]] = [_currentFeatures[next], _currentFeatures[touchSrcIdx]];
+        _renderFeaturesList();
+      }
+      touchSrcIdx = null;
+    }, { passive: true });
+  });
+}
+ 
 // ── Validation & Payload ────────────────────────────────────────
 function _validatePlanForm() {
   let ok = true;
@@ -1045,84 +1374,107 @@ function _validatePlanForm() {
     document.getElementById('errPlanName').textContent = 'Name is required';
     ok = false;
   } else { document.getElementById('errPlanName').textContent = ''; }
-
+ 
   const monthly = document.getElementById('editPlanMonthly').value;
   if (monthly === '' || isNaN(monthly) || Number(monthly) < 0) {
     document.getElementById('errPlanMonthly').textContent = 'Enter a valid monthly price';
     ok = false;
   } else { document.getElementById('errPlanMonthly').textContent = ''; }
-
-  const detRaw = document.getElementById('editPlanDetails').value.trim();
-  if (detRaw) {
-    try { JSON.parse(detRaw); document.getElementById('errPlanDetails').textContent = ''; }
-    catch { document.getElementById('errPlanDetails').textContent = 'Invalid JSON'; ok = false; }
-  }
+ 
   return ok;
 }
-
+ 
 function _buildPlanPayload() {
-  const detRaw = document.getElementById('editPlanDetails').value.trim();
+  const planDetailsArray = _currentFeatures.map((feature) => ({
+    en: feature.en || '',
+    ar: feature.ar || '',
+    enabled: feature.enabled !== false
+  }));
+
   return {
-    name:          document.getElementById('editPlanName').value.trim(),
+    name: document.getElementById('editPlanName').value.trim(),
     price_monthly: parseFloat(document.getElementById('editPlanMonthly').value) || 0,
-    price_yearly:  parseFloat(document.getElementById('editPlanYearly').value)  || 0,
-    plan_details:  detRaw ? JSON.parse(detRaw) : {},
+    price_yearly: parseFloat(document.getElementById('editPlanYearly').value) || 0,
+    plan_details: planDetailsArray
   };
 }
 
 // ── Save (Create or Edit) ───────────────────────────────────────
 async function savePlan() {
   if (!_validatePlanForm()) return;
-  const btn   = document.getElementById('savePlanBtn');
+
+  const btn = document.getElementById('savePlanBtn');
   const label = document.getElementById('savePlanLabel');
+
   btn.disabled = true;
-  label.innerHTML = '<span class="pagination-spinner" style="display:inline-block;width:13px;height:13px;border:2px solid rgba(0,0,0,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px"></span>Saving…';
+  label.innerHTML =
+    '<span class="pagination-spinner" style="display:inline-block;width:13px;height:13px;border:2px solid rgba(0,0,0,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px"></span>Saving…';
 
   try {
-    const id      = document.getElementById('editPlanId').value;
+    const id = document.getElementById('editPlanId').value;
     const payload = _buildPlanPayload();
 
     let saved;
+
     if (id) {
-      // PATCH /api/v1/admin/plans/{plan_id}
-      saved = await apiFetch(`/api/v1/admin/plans/${id}`, { method:'PATCH', body: JSON.stringify(payload) });
-      const idx = _plans.findIndex(p => String(p.id) === String(id));
-      if (idx >= 0) _plans[idx] = saved;
+      saved = await apiFetch(
+        `/api/v1/admin/plans/${id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify(payload)
+        }
+      );
+
+      const idx = _plans.findIndex(
+        p => String(p.id) === String(id)
+      );
+
+      if (idx >= 0) {
+        _plans[idx] = saved;
+      }
+
       toast(`Plan "${saved.name}" updated`, 'success');
     } else {
-      // POST /api/v1/admin/plans
-      saved = await apiFetch('/api/v1/admin/plans', { method:'POST', body: JSON.stringify(payload) });
+      saved = await apiFetch(
+        '/api/v1/admin/plans',
+        {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        }
+      );
+
       _plans.push(saved);
+
       toast(`Plan "${saved.name}" created`, 'success');
     }
 
-    // Refresh plans specifically
     await loadPlans(true);
     closeModal('editPlanModal');
   } catch (e) {
     toast(`Failed to save plan: ${e.message}`, 'error');
   } finally {
     btn.disabled = false;
-    label.textContent = document.getElementById('editPlanId').value ? 'Save Changes' : 'Create Plan';
+    label.textContent = _isCreateMode
+      ? 'Create Plan'
+      : 'Save Changes';
   }
 }
-
+ 
 // ── Delete ──────────────────────────────────────────────────────
 function confirmDeletePlan(planId, planName) {
   document.getElementById('deletePlanDetail').textContent = `${planName} (ID: ${planId})`;
   document.getElementById('confirmDeletePlanBtn').onclick = () => deletePlan(planId, planName);
   openModal('deletePlanModal');
 }
-
+ 
 async function deletePlan(planId, planName) {
   const btn   = document.getElementById('confirmDeletePlanBtn');
   const label = document.getElementById('deletePlanLabel');
   btn.disabled = true;
   label.innerHTML = '<span class="pagination-spinner" style="display:inline-block;width:13px;height:13px;border:2px solid rgba(239,68,68,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px"></span>Deleting…';
-
+ 
   try {
-    // DELETE /api/v1/admin/plans/{plan_id}
-    await apiFetch(`/api/v1/admin/plans/${planId}`, { method:'DELETE' });
+    await apiFetch(`/api/v1/admin/plans/${planId}`, { method: 'DELETE' });
     _plans = _plans.filter(p => p.id !== planId);
     await loadPlans(true);
     closeModal('deletePlanModal');
@@ -1421,7 +1773,6 @@ function renderDashboard() {
         return `<div class="recent-row">
           <div class="recent-avatar">${initials}</div>
           <div class="recent-info"><div class="recent-name">${u.email||n}</div><div class="recent-time">${fmtDate(u.date_joined||u.created_at)}</div></div>
-          <span class="plan-pill ${planClass(plan)}">${plan}</span>
         </div>`;
       }).join('')
     : '<p style="color:var(--text-3);font-size:.82rem">No users yet</p>';
@@ -1464,7 +1815,7 @@ function handleGlobalSearch(q) {
 // ── Refresh ──────────────────────────────────────────────────────
 async function refreshAll() {
   toast('Refreshing data…', 'info');
-  await Promise.allSettled([loadUsers(_userPage), loadPlans(true), loadRequests(_reqPage), loadReviews(_revPage), loadStorageUsage(), loadPlanDistribution()]);
+  await Promise.allSettled([loadUsers(_userPage), loadPlans(true), loadRequests(_reqPage), loadReviews(_revPage), loadStorageUsage(), loadPlanDistribution(), loadEmailsThisMonth()]);
   renderDashboard();
 }
 

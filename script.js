@@ -1,5 +1,7 @@
+// https://badia-backend.onrender.com
+
 // ===== API Base URL =====
-const API_BASE = 'https://badia-backend.onrender.com';
+const API_BASE = 'http://127.0.0.1:8000';
 
 // ===== Plans State =====
 let _cachedPlans = null;
@@ -549,46 +551,108 @@ function decodePlanDetails(plan_details, lang) {
     const l = lang === 'ar' ? 'ar' : 'en';
     const lines = [];
 
-    // Limits line
-    const limits = plan_details.limits || {};
-    const users = limits.users === 'unlimited'
-        ? (l === 'ar' ? 'مستخدمون غير محدودون' : 'Unlimited users')
-        : limits.users ? `${limits.users} ${l === 'ar' ? (limits.users === 1 ? 'مستخدم' : 'مستخدمين') : (limits.users === 1 ? 'user' : 'users')}` : null;
-    if (users) lines.push(users);
-
-    const txn = limits.transactions === 'unlimited'
-        ? (l === 'ar' ? 'معاملات غير محدودة' : 'Unlimited transactions')
-        : limits.transactions ? `${Number(limits.transactions).toLocaleString()} ${l === 'ar' ? 'معاملة / شهر' : 'transactions/month'}` : null;
-    if (txn) lines.push(txn);
-
-    const storage = limits.storage_gb === 'unlimited'
-        ? (l === 'ar' ? 'تخزين غير محدود' : 'Unlimited storage')
-        : limits.storage_gb ? `${limits.storage_gb} GB ${l === 'ar' ? 'تخزين' : 'storage'}` : null;
-    if (storage) lines.push(storage);
-
-    // Enabled features
-    const features = plan_details.features || {};
-    const featureLabels = FEATURE_LABELS[l];
-    Object.entries(features).forEach(([key, val]) => {
-        if (val === true && featureLabels[key]) lines.push(featureLabels[key]);
+    // Parse the new API format and append only enabled features
+    Object.values(plan_details).forEach(feature => {
+        if (feature && feature.enabled) {
+            lines.push(feature[l]);
+        }
     });
-
-    // Support channels
-    const support = plan_details.support || {};
-    const supportLabels = SUPPORT_LABELS[l];
-    Object.entries(support).forEach(([key, val]) => {
-        if (val === true && supportLabels[key]) lines.push(supportLabels[key]);
-    });
-
-    // SLA uptime
-    const sla = plan_details.sla || {};
-    if (sla.uptime) lines.push(`${sla.uptime} ${l === 'ar' ? 'وقت تشغيل' : 'uptime'}`);
-    if (sla.backup) {
-        const backupMap = { daily: l === 'ar' ? 'نسخ احتياطي يومي' : 'Daily backups', 'real-time': l === 'ar' ? 'نسخ احتياطي فوري' : 'Real-time backups' };
-        lines.push(backupMap[sla.backup] || `${sla.backup} ${l === 'ar' ? 'نسخ احتياطي' : 'backup'}`);
-    }
 
     return lines;
+}
+
+
+// Replace existing openPlanModal
+function openPlanModal(planIdx) {
+    if (!_cachedPlans) return;
+    const plan = _cachedPlans[planIdx];
+    if (!plan) return;
+
+    const lang = getCurrentLang();
+    const isYearly = _currentBilling === 'yearly';
+    const name = plan.name || `Plan ${planIdx + 1}`;
+    const monthlyPrice = plan.price_monthly ?? plan.monthly_price ?? 0;
+    const yearlyPrice = plan.price_yearly ?? plan.yearly_price ?? (monthlyPrice * 12);
+    const displayPrice = isYearly ? yearlyPrice : monthlyPrice;
+    const periodLabel = isYearly
+        ? (lang === 'ar' ? 'د.ك / سنة' : 'KWD / year')
+        : (lang === 'ar' ? 'د.ك / شهر' : 'KWD / month');
+
+    const features = decodePlanDetails(plan.plan_details, lang);
+    const MAX_VIS = 5;
+    const hid = features.slice(MAX_VIS);
+
+    const featureListHTML = features.length
+        ? features.map((f, i) => `<li class="modal-feat-item${i >= MAX_VIS ? ' modal-feat-hidden' : ''}">${f}</li>`).join('')
+        : `<li>${lang === 'ar' ? 'تفاصيل عبر الاتصال بنا' : 'Details via consultation'}</li>`;
+
+    const showAllText = lang === 'ar' ? `عرض كل الميزات (${features.length})` : `Show all features (${features.length})`;
+    const showLessText = lang === 'ar' ? '↑ عرض أقل' : '↑ Show less';
+    const showAllBtn = hid.length
+        ? `<button class="modal-show-all-btn" data-expanded="0" data-more="${showAllText}" data-less="${showLessText}" onclick="toggleModalFeatures(this)">${showAllText}</button>`
+        : '';
+
+    let savingsHTML = '';
+    if (isYearly && monthlyPrice > 0) {
+        const saved = Math.round((monthlyPrice * 12) - yearlyPrice);
+        if (saved > 0) savingsHTML = `<p class="modal-savings">${lang === 'ar' ? `وفّر ${saved} د.ك` : `Save ${saved} KWD`}</p>`;
+    }
+
+    const isFeatured = plan.name === 'Pro';
+
+    const modalHTML = `
+    <div class="plan-modal-overlay" id="planModalOverlay" onclick="closePlanModalOnBackdrop(event)">
+        <div class="plan-modal" role="dialog" aria-modal="true">
+            <button class="plan-modal-close" onclick="closePlanModal()" aria-label="Close">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+
+            ${isFeatured ? `<span class="modal-badge">${lang === 'ar' ? 'الأكثر طلباً' : 'Most Popular'}</span>` : ''}
+            <div class="modal-plan-name">${name}</div>
+
+            <div class="modal-price-box">
+                <span class="modal-price">${Number(displayPrice).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 })}</span>
+                <span class="modal-price-period">${periodLabel}</span>
+            </div>
+            ${savingsHTML}
+
+            <div class="modal-features-section">
+                <p class="modal-features-title">${lang === 'ar' ? 'المميزات' : 'Features'}</p>
+                <ul class="modal-features-list">${featureListHTML}</ul>
+                ${showAllBtn}
+            </div>
+        </div>
+    </div>`;
+
+    document.getElementById('planModalOverlay')?.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.classList.add('modal-open');
+    document.addEventListener('keydown', handleModalKeydown);
+}
+
+function closePlanModal() {
+    document.getElementById('planModalOverlay')?.remove();
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', handleModalKeydown);
+}
+
+function closePlanModalOnBackdrop(e) {
+    if (e.target.id === 'planModalOverlay') closePlanModal();
+}
+
+function handleModalKeydown(e) {
+    if (e.key === 'Escape') closePlanModal();
+}
+
+function toggleModalFeatures(btn) {
+    const expanded = btn.dataset.expanded === '1';
+    const modal = btn.closest('.plan-modal');
+    const hidden = modal.querySelectorAll('.modal-feat-hidden');
+    hidden.forEach(li => {
+        li.style.display = expanded ? 'none' : 'flex';
+    });
+    btn.dataset.expanded = expanded ? '0' : '1';
+    btn.textContent = expanded ? btn.dataset.more : btn.dataset.less;
 }
 
 function renderPlans(plans, billing) {
@@ -603,13 +667,12 @@ function renderPlans(plans, billing) {
     const lang = getCurrentLang();
     const isYearly = billing === 'yearly';
 
-    // Mark Pro (idx=2) as featured — it's the mid-tier with most value
     grid.innerHTML = plans.map((plan, idx) => {
         const name = plan.name || `Plan ${idx + 1}`;
         const monthlyPrice = plan.price_monthly ?? plan.monthly_price ?? 0;
         const yearlyPrice = plan.price_yearly ?? plan.yearly_price ?? (monthlyPrice * 12);
         const displayPrice = isYearly ? yearlyPrice : monthlyPrice;
-        const isFeatured = plan.name === 'Pro'; // Pro is the hero plan
+        const isFeatured = plan.name === 'Pro';
 
         const periodLabel = isYearly
             ? (lang === 'ar' ? 'د.ك / سنة' : 'KWD / year')
@@ -620,17 +683,17 @@ function renderPlans(plans, billing) {
             : (isYearly ? (lang === 'ar' ? 'سنوي' : 'Annual') : (lang === 'ar' ? 'شهري' : 'Monthly'));
 
         const subscribeText = lang === 'ar' ? 'اشترك الآن' : 'Subscribe Now';
+        const detailsText = lang === 'ar' ? 'عرض التفاصيل' : 'View Details';
 
         const features = decodePlanDetails(plan.plan_details, lang);
-        const MAX_VIS = 6;
+        const MAX_VIS = 5;
         const vis = features.slice(0, MAX_VIS);
         const hid = features.slice(MAX_VIS);
-        const moreText = lang === 'ar' ? `+ ${hid.length} ميزة إضافية` : `+ ${hid.length} more`;
-        const lessText = lang === 'ar' ? '↑ عرض أقل' : '↑ Less';
+        const moreCount = hid.length;
+
         const featureHTML = vis.length
             ? vis.map(f => `<li>${f}</li>`).join('')
-            + hid.map(f => `<li class="plan-feat-extra">${f}</li>`).join('')
-            + (hid.length ? `<li class="plan-feat-toggle" data-more="${moreText}" data-less="${lessText}"><span>${moreText}</span></li>` : '')
+            + (moreCount > 0 ? `<li class="plan-feat-more-hint">${lang === 'ar' ? `+ ${moreCount} ميزة إضافية` : `+ ${moreCount} more features`}</li>` : '')
             : `<li>${lang === 'ar' ? 'تفاصيل عبر الاتصال بنا' : 'Details via consultation'}</li>`;
 
         // Yearly savings badge
@@ -650,7 +713,10 @@ function renderPlans(plans, billing) {
             </div>
             ${savingsHTML}
             <ul class="plan-features">${featureHTML}</ul>
-            <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="scrollToSection('contact')">${subscribeText}</button>
+            <div class="plan-card-actions">
+                <button class="btn btn-ghost-small" onclick="openPlanModal(${idx})">${detailsText}</button>
+                <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="window.open('https://upayto.me/badia','_blank')">${subscribeText}</button>
+            </div>
         </div>`;
     }).join('');
 }
@@ -674,17 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Plan feature expand/collapse (event delegation on the grid)
-    document.getElementById('plansGrid')?.addEventListener('click', e => {
-        const btn = e.target.closest('.plan-feat-toggle');
-        if (!btn) return;
-        const card = btn.closest('.plan-card');
-        const extras = card.querySelectorAll('.plan-feat-extra');
-        const exp = btn.dataset.expanded === '1';
-        extras.forEach(li => li.style.display = exp ? 'none' : 'block');
-        btn.dataset.expanded = exp ? '0' : '1';
-        btn.querySelector('span').textContent = exp ? btn.dataset.more : btn.dataset.less;
-    });
+
 });
 
 // ===== Service Gate Auth State =====

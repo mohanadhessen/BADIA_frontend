@@ -211,6 +211,40 @@
                 </div>
               </div>
             </div>
+            
+            <!-- Target Card: Total Emails Card with Multi-bar Config -->
+            <div class="stat-card stat-card-emails">
+              <div class="stat-card-inner">
+                <div class="stat-card-text" style="flex:1;min-width:0">
+                  <div class="stat-label">Total Emails sent</div>
+                  <div class="stat-value" id="statEmailsVal">—</div>
+                  
+                  <div class="storage-bar-wrap">
+                    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
+                      <span id="statEmailSub">Month: — | Year: —</span>
+                      <span id="statEmailPct">— / —</span>
+                    </div>
+
+                    <!-- Month bar -->
+                    <div class="storage-bar" style="margin-bottom:6px">
+                      <div class="storage-bar-fill" id="statEmailMonthBar" style="width:0%"></div>
+                    </div>
+
+                    <!-- Daily bar -->
+                    <div class="storage-bar">
+                      <div class="storage-bar-fill" id="statEmailYearBar" style="width:0%"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="stat-icon-box" style="background:rgba(59,130,246,.08);color:#3b82f6">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+                    <path d="M22 6l-10 7L2 6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -223,7 +257,6 @@
           </div>
         </div>
       </div>
-
 
       <div class="dash-grid">
         <div class="dash-card">
@@ -658,13 +691,25 @@
           <input class="form-input" id="editLastName" type="text" placeholder="Last name"/>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" id="editEmail" type="email" placeholder="email@example.com"/>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Company Name</label>
+          <input class="form-input" id="editCompanyName" type="text" placeholder="Company Name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="editEmail" type="email" placeholder="email@example.com"/>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Phone</label>
-        <input class="form-input" id="editPhone" type="tel" placeholder="+965 XXXX XXXX"/>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="editPhone" type="tel" placeholder="+965 XXXX XXXX"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input class="form-input" id="editPassword" type="text" placeholder="Leave blank to keep current"/>
+        </div>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -676,8 +721,13 @@
           <select class="form-input" id="editStatus">
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
-            <option value="suspended">Suspended</option>
           </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="display:flex; align-items:center; margin-top:10px; gap:8px;">
+          <input type="checkbox" id="editEmailVerified" style="width:16px; height:16px;" />
+          <label for="editEmailVerified" class="form-label" style="margin:0;">Email Verified</label>
         </div>
       </div>
     </div>
@@ -706,7 +756,19 @@
       <input type="hidden" id="editPlanId"/>
 
       <div class="form-section">
-        <div class="form-section-title">Basic Info</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">
+          <span style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-3)">Basic Info</span>
+          <button
+            id="clearAllPlanDataBtn"
+            class="btn btn-ghost btn-sm"
+            style="font-size:.72rem;padding:3px 9px;height:auto;color:var(--red);border-color:var(--red);opacity:.75;display:none"
+            onclick="confirmClearAllPlanForm()"
+            type="button"
+          >
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-right:3px"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Clear All Data
+          </button>
+        </div>
         <div class="form-group">
           <label class="form-label">Plan Name *</label>
           <input class="form-input" id="editPlanName" type="text" placeholder="e.g. Professional"/>
@@ -729,24 +791,36 @@
         </div>
       </div>
 
-
-
       <div class="form-section" style="margin-bottom:0">
         <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>Plan Details <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.75rem">(JSON — optional extra features object)</span></span>
-          <div style="display:flex;gap:5px">
-            <button class="btn btn-ghost btn-xs" id="detTabJson"  onclick="switchPlanDetailsTab('json')"  style="font-size:.7rem">Raw JSON</button>
-            <button class="btn btn-ghost btn-xs" id="detTabOrder" onclick="switchPlanDetailsTab('order')" style="font-size:.7rem">Order Keys</button>
+          <span>Plan Features Builder</span>
+        </div>
+        
+        <div class="feature-builder-section">
+          <!-- Inputs Row -->
+          <div class="fb-inputs-row">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:.72rem">English Name *</label>
+              <input type="text" class="form-input" id="fbInputEn" placeholder="e.g. 10 Users" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:.72rem">Arabic Name *</label>
+              <input type="text" class="form-input" id="fbInputAr" placeholder="مثال: ١٠ مستخدمين" style="direction:rtl" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0; display:flex; flex-direction:column; align-items:center">
+              <label class="form-label" style="font-size:.72rem">Enabled</label>
+              <div class="toggle-item checked" id="fbInputEnabledToggle" onclick="toggleFbInputEnabled()" style="padding: 7px 10px; height: 34px;">
+                <div class="toggle-switch"></div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-accent btn-sm" onclick="addFeatureFromBuilder()" style="height:34px; padding:0 14px">Add</button>
           </div>
-        </div>
-        <div id="planDetailsJsonPane">
-          <textarea class="form-input form-textarea" id="editPlanDetails" style="min-height:110px;font-family:'DM Mono',monospace;font-size:.78rem" placeholder='{"feature_a": "Unlimited", "custom_limit": 100}'></textarea>
-          <div id="errPlanDetails" style="font-size:.75rem;color:var(--red);margin-top:3px"></div>
-        </div>
-        <div id="planDetailsOrderPane" style="display:none">
-          <p style="font-size:.75rem;color:var(--text-3);margin-bottom:8px">Use the arrows to reorder keys. Changes sync back to the JSON.</p>
-          <div id="planDetailsOrderList" style="display:flex;flex-direction:column;gap:5px"></div>
-          <div id="errPlanDetailsOrder" style="font-size:.75rem;color:var(--red);margin-top:4px"></div>
+          <div id="errFbInput" style="font-size:.75rem;color:var(--red);margin-top:3px;display:none">Both English and Arabic names are required.</div>
+
+          <!-- Features List -->
+          <div class="fb-features-list" id="fbFeaturesList">
+          </div>
+
         </div>
       </div>
     </div>
@@ -895,7 +969,6 @@
   </div>
 </div>
 
-<script src="admin.js">
-</script>
+<script src="admin.js"></script>
 </body>
 </html>
