@@ -1,6 +1,6 @@
 // https://badia-backend.onrender.com
 
-let API = localStorage.getItem('badia_admin_api') || 'http://127.0.0.1:8000';
+let API = localStorage.getItem('badia_admin_api') || 'https://badia-backend.onrender.com';
 const TOKEN = () => localStorage.getItem('access_token') || '';
 
 // ── State ───────────────────────────────────────────────────────
@@ -8,6 +8,7 @@ let _users    = [];
 let _plans    = [];
 let _requests = [];
 let _reviews  = [];
+let _payments = [];
 let _currentPage = 'dashboard';
 let _totalUsers = 0;
 let _totalRequests = 0;
@@ -39,8 +40,22 @@ async function doRefreshToken() {
 }
 
 async function apiFetch(path, opts = {}) {
+  const method = (opts.method || 'GET').toUpperCase();
+  const isGet = method === 'GET';
+  
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
   if (TOKEN()) headers['Authorization'] = `Bearer ${TOKEN()}`;
+  
+  const cacheKeyData = `api_cache_data_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
+  const cacheKeyEtag = `api_cache_etag_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
+  
+  if (isGet) {
+    const cachedEtag = localStorage.getItem(cacheKeyEtag);
+    if (cachedEtag) {
+      headers['If-None-Match'] = cachedEtag;
+    }
+  }
+
   let res = await fetch(`${API}${path}`, { ...opts, headers });
 
   if (res.status === 401) {
@@ -76,18 +91,40 @@ async function apiFetch(path, opts = {}) {
     }
   }
 
+  if (isGet && res.status === 304) {
+    const cachedData = localStorage.getItem(cacheKeyData);
+    if (cachedData) {
+      try {
+        return JSON.parse(cachedData);
+      } catch (_) {
+        // Fallback to reload if JSON parse error
+      }
+    }
+  }
+
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.json();
+  
+  const data = await res.json();
+  
+  if (isGet) {
+    const newEtag = res.headers.get('ETag');
+    if (newEtag) {
+      localStorage.setItem(cacheKeyEtag, newEtag);
+      localStorage.setItem(cacheKeyData, JSON.stringify(data));
+    }
+  }
+  
+  return data;
 }
 
 // ── Page Navigation (with hash persistence) ────────────────────
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
   document.getElementById(`page-${id}`)?.classList.add('active');
   document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
   _currentPage = id;
-  const titles = { dashboard:'Dashboard', requests:'Service Requests', users:'Users', plans:'Pricing Plans', reviews:'Reviews', settings:'Settings' };
+  const titles = { dashboard:'Dashboard', requests:'Service Requests', users:'Users', plans:'Pricing Plans', reviews:'Reviews', payments:'Payments', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[id] || id;
   // Persist section in URL hash so F5 restores it
   history.replaceState(null, '', '#' + id);
@@ -159,8 +196,8 @@ function statusBadge(status) {
 }
 function typeChip(type) {
   return type === 'partnership'
-    ? '<span class="type-chip type-partnership"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Partnership</span>'
-    : '<span class="type-chip type-feasibility"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Feasibility</span>';
+    ? '<span class="type-chip type-partnership"><i class="fas fa-handshake" style="font-size:10px; margin-right:4px;"></i>Partnership</span>'
+    : '<span class="type-chip type-feasibility"><i class="fas fa-file-alt" style="font-size:10px; margin-right:4px;"></i>Feasibility</span>';
 }
 function fmtDate(d) {
   if (!d) return '—';
@@ -287,7 +324,7 @@ async function loadEmailsThisMonth() {
 }
 
 async function loadAll() {
-  await Promise.allSettled([loadUsers(1), loadPlans(), loadRequests(1), loadReviews(1), loadStorageUsage(), loadPlanDistribution(), loadEmailsThisMonth()]);
+  await Promise.allSettled([loadUsers(1), loadPlans(), loadRequests(1), loadReviews(1), loadStorageUsage(), loadPlanDistribution(), loadEmailsThisMonth(), loadPaymentsTelemetry()]);
   renderDashboard();
 }
 
@@ -365,7 +402,7 @@ function updateUserCount() {
   document.getElementById('userCount').textContent = `${n} user${n !== 1 ? 's' : ''}`;
   document.getElementById('sidebarUserCount').textContent = n;
   document.getElementById('statUsers').textContent = n;
-  document.getElementById('statActive').textContent = _users.filter(u => u.is_active !== false && (u.plan_name || u.plan)).length;
+  // Active Plans stat is now populated by paid_payments from the payments telemetry
 }
 
 function populatePlanFilter() {
@@ -387,7 +424,7 @@ function renderUsersTable(users) { renderUsersCards(users); }
 function renderUsersCards(users) {
   const grid = document.getElementById('usersCardsGrid');
   if (!users.length) {
-    grid.innerHTML = `<div class="item-row"><div class="item-row-body"><div class="empty-state"><div class="empty-state-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><h3>No users found</h3><p>Try adjusting your search or filters</p></div></div></div>`;
+    grid.innerHTML = `<div class="item-row"><div class="item-row-body"><div class="empty-state"><div class="empty-state-icon"><i class="fas fa-users" style="font-size:2rem;color:var(--text-muted)"></i></div><h3>No users found</h3><p>Try adjusting your search or filters</p></div></div></div>`;
     return;
   }
   grid.innerHTML = users.map(u => {
@@ -431,12 +468,12 @@ function renderUsersCards(users) {
       </div>
       <div class="item-row-actions">
         <button class="act-btn act-btn-edit" onclick="openEditUserById(${uid})">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <i class="fas fa-user-edit" style="margin-right:4px;"></i>
           Edit User
         </button>
         <div class="spacer"></div>
         <button class="act-btn act-btn-delete" onclick="confirmDelete(${uid},'${email}')">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
           Delete User
         </button>
       </div>
@@ -460,8 +497,15 @@ async function _filterUsersNow(q) {
   // Use server search endpoint when query looks like an email or is non-empty
   if (query && query.includes('@')) {
     try {
-      const result = await apiFetch(`/api/v1/admin/users/by-email?email=${encodeURIComponent(query)}`);
-      pool = result ? (Array.isArray(result) ? result : [result]) : [];
+      const result = await apiFetch(`/api/v1/admin/user?email=${encodeURIComponent(query)}`);
+      pool = result ? [result] : [];
+    } catch (e) {
+      pool = [];
+    }
+  } else if (query && /^\d+$/.test(query)) {
+    try {
+      const result = await apiFetch(`/api/v1/admin/user?user_id=${encodeURIComponent(query)}`);
+      pool = result ? [result] : [];
     } catch (e) {
       pool = [];
     }
@@ -658,7 +702,7 @@ function _filterRequestsNow() {
 function renderRequests(requests) {
   const grid = document.getElementById('requestsCardsGrid');
   if (!requests.length) {
-    grid.innerHTML = `<div class="item-row"><div class="item-row-body"><div class="empty-state"><div class="empty-state-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></div><h3>No requests found</h3><p>Try adjusting your filters</p></div></div></div>`;
+    grid.innerHTML = `<div class="item-row"><div class="item-row-body"><div class="empty-state"><div class="empty-state-icon"><i class="fas fa-clipboard-list" style="font-size:2rem;color:var(--text-muted)"></i></div><h3>No requests found</h3><p>Try adjusting your filters</p></div></div></div>`;
     return;
   }
   grid.innerHTML = requests.map(req => {
@@ -680,7 +724,7 @@ function renderRequests(requests) {
       const sz     = fmtSize(f.size || 0);
       const fileId = f.file_id || f.id || '';
       return `<span class="file-chip" onclick="event.stopPropagation();downloadFileById(${req.id},'${fileId}','${fname}')" title="Download ${fname}">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <i class="fas fa-paperclip" style="margin-right:4px;"></i>
         ${fname.length > 18 ? fname.slice(0,15)+'…' : fname}
         ${sz ? `<span class="file-size">${sz}</span>` : ''}
       </span>`;
@@ -733,31 +777,31 @@ function renderRequests(requests) {
       </div>
       <div class="item-row-actions">
         <button class="act-btn act-btn-view" onclick="viewRequest(${req.id})">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <i class="fas fa-eye" style="margin-right:4px;"></i>
           View Details
         </button>
         ${req.status !== 'approved' ? `
         <button class="act-btn act-btn-approve" onclick="approveRequest(${req.id})">
-          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+          <i class="fas fa-check" style="margin-right:4px;"></i>
           ${req.status === 'rejected' ? 'Re-Approve' : 'Approve'}
         </button>` : ''}
         ${req.status !== 'rejected' ? `
         <button class="act-btn act-btn-reject" onclick="openRejectModal(${req.id})">
-          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <i class="fas fa-ban" style="margin-right:4px;"></i>
           ${req.status === 'approved' ? 'Re-Reject' : 'Reject'}
         </button>` : ''}
         ${req.status !== 'pending' ? `
         <button class="act-btn act-btn-pending" onclick="setPendingRequest(${req.id})">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          <i class="fas fa-clock" style="margin-right:4px;"></i>
           Set Pending
         </button>` : ''}
         ${files.length ? `<button class="act-btn act-btn-download" onclick="downloadAllFiles(${req.id})">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <i class="fas fa-download" style="margin-right:4px;"></i>
           Download All (${files.length})
         </button>` : ''}
         <div class="spacer"></div>
         <button class="act-btn act-btn-delete" onclick="confirmDeleteRequest(${req.id})">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
           Delete
         </button>
       </div>
@@ -766,6 +810,7 @@ function renderRequests(requests) {
 }
 
 async function approveRequest(reqId) {
+  if (!confirm('This action will send an approval email to the user. Are you sure you want to proceed?')) return;
   const req = _requests.find(r => r.id === reqId);
   if (!req) return;
   try {
@@ -817,6 +862,7 @@ async function confirmRejectRequest() {
   const reqId = parseInt(document.getElementById('rejectReqId').value);
   const reason = document.getElementById('rejectReqReason').value.trim();
   const notes  = document.getElementById('rejectReqNotes').value.trim();
+  if (!confirm('This action will send a rejection email to the user. Are you sure you want to proceed?')) return;
   const req = _requests.find(r => r.id === reqId);
   if (!req) return;
   try {
@@ -856,14 +902,14 @@ function viewRequest(reqId) {
         const fileId = f.file_id || f.id || '';
         return `<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:9px;min-width:200px;flex:1">
           <div style="width:34px;height:34px;border-radius:8px;background:var(--red-dim);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" onclick="downloadFileById(${req.id},'${fileId}','${fname}')" title="Download ${fname}">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            <i class="fas fa-file-pdf"></i>
           </div>
           <div style="flex:1;min-width:0">
             <div style="font-size:.81rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fname}</div>
             <div style="font-size:.72rem;color:var(--text-3)">${[fsize,fdate].filter(Boolean).join(' · ')}</div>
           </div>
           <button class="btn-icon download btn-xs" onclick="downloadFileById(${req.id},'${fileId}','${fname}')">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <i class="fas fa-download"></i>
           </button>
         </div>`;
       }).join('')}</div>`
@@ -893,7 +939,7 @@ function viewRequest(reqId) {
   if (req.status !== 'approved') {
     footer.innerHTML += `
       <button class="btn btn-green" onclick="closeModal('viewReqModal');approveRequest(${req.id})">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+        <i class="fas fa-check" style="margin-right:4px;"></i>
         ${req.status === 'rejected' ? 'Re-Approve' : 'Approve'}
       </button>`;
   }
@@ -906,7 +952,7 @@ function viewRequest(reqId) {
   if (req.status !== 'pending') {
     footer.innerHTML += `
       <button class="btn btn-ghost" onclick="closeModal('viewReqModal');setPendingRequest(${req.id})">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        <i class="fas fa-clock" style="margin-right:4px;"></i>
         Set Pending
       </button>`;
   }
@@ -954,6 +1000,7 @@ async function loadPlans(forceRefetch = false) {
         _plans = JSON.parse(cachedRaw);
         renderPlansAdmin(_plans);
         syncPlanCounters();
+        populatePlanDropdown();
       } catch (_) {
         localStorage.removeItem('admin_plans_data');
         localStorage.removeItem('admin_plans_etag');
@@ -980,6 +1027,7 @@ async function loadPlans(forceRefetch = false) {
  
     renderPlansAdmin(_plans);
     syncPlanCounters();
+    populatePlanDropdown();
   } catch (e) {
     if (!_plans.length) {
       document.getElementById('plansAdminGrid').innerHTML =
@@ -1074,11 +1122,11 @@ function renderPlansAdmin(plans) {
       </div>
       <div class="plan-card-footer">
         <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openEditPlanById(${plan.id})">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <i class="fas fa-edit" style="margin-right:4px;"></i>
           Edit
         </button>
         <button class="btn btn-danger btn-sm" onclick="confirmDeletePlan(${plan.id},'${plan.name.replace(/'/g, "\\'")}')">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
           Delete
         </button>
       </div>
@@ -1209,9 +1257,7 @@ function _renderFeaturesList() {
   list.innerHTML = _currentFeatures.map((f, i) => `
     <div class="fb-feature-item" draggable="true" data-idx="${i}">
       <div class="fb-drag-handle" title="Drag to reorder">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>
-        </svg>
+        <i class="fas fa-grip-lines" style="color:var(--text-muted); opacity:0.6"></i>
       </div>
       <div class="fb-feature-text">
         <span class="fb-feature-en">${_esc(f.en)}</span>
@@ -1222,7 +1268,7 @@ function _renderFeaturesList() {
           ${f.enabled ? 'On' : 'Off'}
         </button>
         <button class="fb-btn-delete" onclick="_deleteFeat(${i})" title="Remove feature">
-          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <i class="fas fa-times"></i>
         </button>
       </div>
     </div>`).join('');
@@ -1546,14 +1592,14 @@ function updateReviewStats() {
 function starRating(rating) {
   const r = Math.round(rating || 0);
   return Array.from({length:5}, (_,i) =>
-    `<svg class="review-star-${i < r ? 'filled':'empty'}" fill="${i < r ? 'currentColor':'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`
+    `<i class="${i < r ? 'fas':'far'} fa-star review-star-${i < r ? 'filled':'empty'}"></i>`
   ).join('');
 }
 
 function renderReviews(reviews) {
   const grid = document.getElementById('reviewsCardsGrid');
   if (!reviews.length) {
-    grid.innerHTML = `<div class="item-row"><div class="item-row-body"><div class="empty-state"><div class="empty-state-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>No reviews found</h3><p>Try adjusting your filters</p></div></div></div>`;
+    grid.innerHTML = `<div class="item-row"><div class="item-row-body"><div class="empty-state"><div class="empty-state-icon"><i class="fas fa-comments" style="font-size:2rem;color:var(--text-muted)"></i></div><h3>No reviews found</h3><p>Try adjusting your filters</p></div></div></div>`;
     return;
   }
   grid.innerHTML = reviews.map(rev => {
@@ -1594,12 +1640,12 @@ function renderReviews(reviews) {
       </div>
       <div class="item-row-actions">
         ${status !== 'accepted' ? `<button class="act-btn act-btn-accept" onclick="acceptReview(${rev.id})">
-          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+          <i class="fas fa-check" style="margin-right:4px;"></i>
           Accept Review
-        </button>` : '<span style="font-size:.82rem;color:var(--green);font-weight:600;display:flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>Published</span>'}
+        </button>` : '<span style="font-size:.82rem;color:var(--green);font-weight:600;display:flex;align-items:center;gap:5px"><i class="fas fa-check" style="margin-right:4px;"></i>Published</span>'}
         <div class="spacer"></div>
         <button class="act-btn act-btn-delete" onclick="confirmDeleteReview(${rev.id})">
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
           Delete Review
         </button>
       </div>
@@ -1792,14 +1838,14 @@ function renderDashboard() {
           </div>
           <div class="pending-req-actions">
             <button class="btn-icon btn-xs" onclick="showPage('requests');setTimeout(()=>viewRequest(${req.id}),150)" title="View request details">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <i class="fas fa-eye" style="margin-right:4px;"></i>
               View
             </button>
           </div>
         </div>`;
       }).join('')
     : `<div style="text-align:center;padding:24px 0;color:var(--text-3)">
-        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block"><polyline points="20,6 9,17 4,12"/></svg>
+        <i class="fas fa-check" style="font-size:1.5rem;color:var(--green);margin-bottom:8px;display:block"></i>
         <p style="font-size:.82rem">All caught up — no pending requests</p>
       </div>`;
 
@@ -1815,7 +1861,7 @@ function handleGlobalSearch(q) {
 // ── Refresh ──────────────────────────────────────────────────────
 async function refreshAll() {
   toast('Refreshing data…', 'info');
-  await Promise.allSettled([loadUsers(_userPage), loadPlans(true), loadRequests(_reqPage), loadReviews(_revPage), loadStorageUsage(), loadPlanDistribution(), loadEmailsThisMonth()]);
+  await Promise.allSettled([loadUsers(_userPage), loadPlans(true), loadRequests(_reqPage), loadReviews(_revPage), loadStorageUsage(), loadPlanDistribution(), loadEmailsThisMonth(), loadPaymentsTelemetry()]);
   renderDashboard();
 }
 
@@ -1830,7 +1876,7 @@ function saveSettings() {
 function handleLogout() {
   if (confirm('Log out of the admin dashboard?')) {
     localStorage.removeItem('access_token');
-    window.location.href = 'Signin.html';
+    window.location.href = 'index.html';
   }
 }
 
@@ -1840,7 +1886,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Restore section from URL hash (e.g. admin.html#plans survives F5)
   const hash = (location.hash || '').replace('#', '').trim();
-  const validPages = ['dashboard','requests','users','plans','reviews','settings'];
+  const validPages = ['dashboard','requests','users','plans','reviews','payments','settings'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   }
@@ -1849,6 +1895,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
+      closeStatusModal();
+      closeCreateConfirm();
     }
     // Ctrl/Cmd + Enter saves plan modal if open
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -1856,6 +1904,474 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Flatpickr initialization
+  if (typeof flatpickr !== 'undefined') {
+    const startContainer = document.getElementById('start-date-container');
+    const startEl = document.getElementById('sub-start');
+    if (startEl && !startEl.value) {
+      startEl.value = new Date().toISOString().split('T')[0];
+    }
+    if (startContainer) {
+      flatpickr(startContainer, {
+        wrap: true,
+        allowInput: true,
+        clickOpens: false,
+        dateFormat: 'Y-m-d',
+        onChange: function() {
+          autoFillPlanAmount();
+        }
+      });
+    }
+    const endContainer = document.getElementById('end-date-container');
+    if (endContainer) {
+      flatpickr(endContainer, {
+        wrap: true,
+        allowInput: true,
+        clickOpens: false,
+        dateFormat: 'Y-m-d'
+      });
+    }
+  }
+
+  // Modal Backdrop Click Listeners
+  document.getElementById('statusModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeStatusModal();
+  });
+  document.getElementById('createConfirmModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeCreateConfirm();
+  });
+
   // Init
   loadAll();
 });
+
+async function loadPaymentsTelemetry() {
+  try {
+    // Perform parallel fetches of the payments list and the telemetry metrics
+    const [paymentsData, telemetryData] = await Promise.allSettled([
+      apiFetch('/api/v1/admin/payments'),
+      apiFetch('/api/v1/admin/payments/telemetry')
+    ]);
+
+    let items = [];
+    if (paymentsData.status === 'fulfilled' && paymentsData.value) {
+      const data = paymentsData.value;
+      items = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.payments || []));
+    }
+    _payments = items;
+
+    let byStatus = {};
+    let totalFromTelemetry = null;
+    if (telemetryData.status === 'fulfilled' && telemetryData.value) {
+      const tel = telemetryData.value;
+      byStatus = tel.by_status || {};
+      totalFromTelemetry = tel.total_payments;
+    }
+
+    // Calculate metrics and fallback values
+    const totalPaymentsCount = items.length;
+    const paidPayments = items.filter(p => p.status === 'paid');
+    const canceledPaymentsCount = items.filter(p => p.status === 'canceled' || p.status === 'rejected').length;
+    // Total revenue includes both paid and canceled status payments
+    const revenuePayments = items.filter(p => p.status === 'paid' || p.status === 'canceled');
+    const totalRevenue = revenuePayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    
+    // Resolve metrics priority: Telemetry endpoint data first, then client-side computed fallback
+    const finalTotalPayments = totalFromTelemetry ?? totalPaymentsCount;
+    const finalPaidPayments = byStatus.paid ?? paidPayments.length;
+    const finalCanceledPayments = (byStatus.canceled !== undefined || byStatus.rejected !== undefined)
+      ? ((byStatus.canceled || 0) + (byStatus.rejected || 0))
+      : canceledPaymentsCount;
+
+    const totalEl = document.getElementById('payStatTotal');
+    if (totalEl) totalEl.textContent = finalTotalPayments;
+
+    const payActiveEl = document.getElementById('payStatActive');
+    if (payActiveEl) payActiveEl.textContent = finalPaidPayments;
+
+    const canceledEl = document.getElementById('payStatCanceled');
+    if (canceledEl) canceledEl.textContent = finalCanceledPayments;
+    
+    const revTotalEl = document.getElementById('payStatTotalRevenue');
+    if (revTotalEl) {
+      revTotalEl.textContent = Number(totalRevenue).toFixed(3) + ' KWD';
+    }
+    
+    const activeEl = document.getElementById('statActive');
+    if (activeEl) {
+      activeEl.textContent = finalPaidPayments;
+    }
+    
+    renderPaymentsTable(items);
+  } catch(e) {
+    const totalEl = document.getElementById('payStatTotal');
+    if (totalEl) totalEl.textContent = '—';
+    console.error('Failed to load payments telemetry:', e);
+  }
+}
+
+let _lookupTimeout = null;
+let _selectedUserId = null;
+let _currentStatusPaymentId = null;
+
+function lookupUserByEmail(email) {
+  clearTimeout(_lookupTimeout);
+  const resultEl = document.getElementById('payUserLookupResult');
+  const createBtn = document.getElementById('createPaymentBtn');
+  
+  if (!email || !email.includes('@')) {
+    if (resultEl) {
+      resultEl.innerHTML = '';
+      resultEl.style.color = '';
+    }
+    if (createBtn) createBtn.disabled = true;
+    _selectedUserId = null;
+    return;
+  }
+  
+  if (resultEl) {
+    resultEl.textContent = 'Searching user...';
+    resultEl.style.color = 'var(--text-muted)';
+  }
+  
+  _lookupTimeout = setTimeout(async () => {
+    try {
+      const user = await apiFetch(`/api/v1/admin/user?email=${encodeURIComponent(email.trim())}`);
+      if (user && user.id) {
+        _selectedUserId = user.id;
+        const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.company_name || 'No Name';
+        if (resultEl) {
+          resultEl.innerHTML = `<span style="color:var(--green)">✓ User found: ${name} (ID: ${user.id})</span>`;
+        }
+        if (createBtn) createBtn.disabled = false;
+        
+        autoFillPlanAmount();
+      } else {
+        _selectedUserId = null;
+        if (resultEl) {
+          resultEl.innerHTML = '<span style="color:var(--red)">✗ User not found</span>';
+        }
+        if (createBtn) createBtn.disabled = true;
+      }
+    } catch(e) {
+      _selectedUserId = null;
+      if (resultEl) {
+        resultEl.innerHTML = '<span style="color:var(--red)">✗ User not found</span>';
+      }
+      if (createBtn) createBtn.disabled = true;
+    }
+  }, 400);
+}
+
+function populatePlanDropdown() {
+  const select = document.getElementById('sub-plan');
+  if (!select) return;
+  select.innerHTML = '<option value="" disabled selected>Select…</option>';
+  _plans.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    select.appendChild(opt);
+  });
+}
+
+function autoFillPlanAmount() {
+  const planId = document.getElementById('sub-plan').value;
+  const cycle = document.getElementById('sub-cycle').value;
+  const amountInput = document.getElementById('sub-amount');
+  const startDateInput = document.getElementById('sub-start');
+  const endDateInput = document.getElementById('sub-end');
+  
+  if (startDateInput && !startDateInput.value) {
+    const today = new Date();
+    startDateInput.value = today.toISOString().split('T')[0];
+  }
+  if (endDateInput && startDateInput.value) {
+    const start = new Date(startDateInput.value);
+    let end;
+    if (cycle === 'yearly') {
+      end = new Date(start);
+      end.setFullYear(end.getFullYear() + 1);
+    } else {
+      end = new Date(start);
+      end.setMonth(end.getMonth() + 1);
+    }
+    endDateInput.value = end.toISOString().split('T')[0];
+    const fp = endDateInput._flatpickr || document.getElementById('end-date-container')?._flatpickr;
+    if (fp) {
+      fp.setDate(endDateInput.value);
+    }
+  }
+  
+  if (!planId) return;
+  const plan = _plans.find(p => String(p.id) === String(planId));
+  if (!plan) return;
+  
+  const planName = (plan.name || '').toLowerCase();
+  let monthlyPrice = plan.price_monthly ?? plan.monthly_price ?? 0;
+  let yearlyPrice = plan.price_yearly ?? plan.yearly_price ?? (monthlyPrice * 12);
+  
+  if (planName.includes('starter')) {
+    monthlyPrice = 49;
+    yearlyPrice = 490;
+  } else if (planName.includes('growth')) {
+    monthlyPrice = 99;
+    yearlyPrice = 990;
+  } else if (planName.includes('enterprise')) {
+    monthlyPrice = 199;
+    yearlyPrice = 1990;
+  }
+  
+  if (amountInput) {
+    amountInput.value = cycle === 'yearly' ? yearlyPrice : monthlyPrice;
+  }
+}
+
+function showCreateConfirm() {
+  const email  = document.getElementById('sub-email').value.trim();
+  const planId = document.getElementById('sub-plan').value;
+  const amount = document.getElementById('sub-amount').value;
+  const cycle  = document.getElementById('sub-cycle').value;
+  const start  = document.getElementById('sub-start').value;
+  const end    = document.getElementById('sub-end').value;
+
+  if (!_selectedUserId) {
+    toast('Please search and select a valid user first', 'error');
+    return;
+  }
+  if (!planId) {
+    toast('Please select a plan', 'error');
+    return;
+  }
+  const parseFloatAmount = parseFloat(amount);
+  if (isNaN(parseFloatAmount) || parseFloatAmount < 0) {
+    toast('Please enter a valid amount', 'error');
+    return;
+  }
+  if (!start || !end) {
+    toast('Please fill all required fields', 'error');
+    return;
+  }
+
+  const plan = _plans.find(p => String(p.id) === String(planId));
+  const planName = plan ? plan.name : 'Unknown';
+
+  document.getElementById('confirmEmail').textContent  = email;
+  document.getElementById('confirmPlan').textContent   = planName;
+  document.getElementById('confirmAmount').textContent = parseFloatAmount.toFixed(3) + ' KWD';
+  document.getElementById('confirmCycle').textContent  = cycle.charAt(0).toUpperCase() + cycle.slice(1);
+  document.getElementById('confirmPeriod').textContent = start + ' → ' + end;
+
+  document.getElementById('createConfirmModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCreateConfirm() {
+  document.getElementById('createConfirmModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function submitSubscription() {
+  const planId = document.getElementById('sub-plan').value;
+  const amount = parseFloat(document.getElementById('sub-amount').value);
+  const cycle  = document.getElementById('sub-cycle').value;
+  const start  = document.getElementById('sub-start').value;
+  const end    = document.getElementById('sub-end').value;
+
+  const payload = {
+    user_id: _selectedUserId,
+    plan_id: parseInt(planId),
+    amount: amount,
+    billing_cycle: cycle,
+    start_date: start ? new Date(start).toISOString() : new Date().toISOString(),
+    end_date: end ? new Date(end).toISOString() : new Date(Date.now() + 30*24*60*60*1000).toISOString()
+  };
+
+  const btn = document.getElementById('createPaymentBtn');
+  const originalText = btn ? btn.textContent : 'Create subscription';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+  }
+
+  closeCreateConfirm();
+
+  try {
+    await apiFetch('/api/v1/admin/payments', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    toast('Payment / Plan Subscription created successfully', 'success');
+
+    document.getElementById('sub-email').value = '';
+    document.getElementById('sub-plan').value = '';
+    document.getElementById('sub-amount').value = '';
+    const resultEl = document.getElementById('payUserLookupResult');
+    if (resultEl) resultEl.innerHTML = '';
+    _selectedUserId = null;
+
+    await loadPaymentsTelemetry();
+  } catch (e) {
+    toast(`Failed to create payment: ${e.message}`, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+}
+
+function renderPaymentsTable(items) {
+  const grid = document.getElementById('paymentsListGrid');
+  const countEl = document.getElementById('paymentsListCount');
+  if (!grid) return;
+  
+  if (countEl) {
+    countEl.textContent = `${items.length} payment${items.length !== 1 ? 's' : ''}`;
+  }
+  
+  if (!items.length) {
+    grid.innerHTML = `<div style="text-align:center;padding:32px 0;color:var(--text-muted)"><h3>No payments found</h3></div>`;
+    return;
+  }
+  
+  grid.innerHTML = items.map(p => {
+    // Fallback lookup: if nested user or plan objects are missing, fetch them from our caches
+    let u = p.user;
+    if (!u && p.user_id) {
+      u = _users.find(usr => usr.id === p.user_id);
+    }
+    u = u || {};
+
+    let plan = p.plan;
+    if (!plan && p.plan_id) {
+      plan = _plans.find(pln => pln.id === p.plan_id);
+    }
+    plan = plan || {};
+
+    const name = p.name || p.user_name || [u.first_name, u.last_name].filter(Boolean).join(' ') || u.company_name || '—';
+    const email = p.email || p.user_email || u.email || '—';
+    const status = p.status || 'pending';
+    const initials = name !== '—' ? name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (email[0]||'?').toUpperCase();
+    
+    let statusClass = 'pending';
+    if (status === 'paid') statusClass = 'paid';
+    if (status === 'canceled' || status === 'rejected') statusClass = 'rejected';
+    
+    const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
+    
+    return `<div class="payment-card">
+      <div class="payment-avatar">${initials}</div>
+      <div class="payment-main">
+        <div class="payment-top">
+          <div class="payment-name">${name}</div>
+          <span class="status-badge ${statusClass}"><span class="status-dot"></span>${formattedStatus}</span>
+        </div>
+        <div class="payment-email">${email}</div>
+        <div class="payment-meta">
+          <div class="meta-item"><div class="meta-label">ID</div><div class="meta-value">#${p.id}</div></div>
+          <div class="meta-item"><div class="meta-label">Plan</div><div class="meta-value">${plan.name || '—'}</div></div>
+          <div class="meta-item"><div class="meta-label">Amount</div><div class="meta-value amount">${p.amount} KWD</div></div>
+          <div class="meta-item"><div class="meta-label">Cycle</div><div class="meta-value">${p.billing_cycle || '—'}</div></div>
+          <div class="meta-item"><div class="meta-label">Period</div><div class="meta-value">${fmtDate(p.start_date)} – ${fmtDate(p.end_date)}</div></div>
+          <div class="meta-item"><div class="meta-label">Created</div><div class="meta-value">${fmtDate(p.created_at)}</div></div>
+        </div>
+      </div>
+      <div class="payment-actions">
+        <button class="btn-update" onclick="openStatusModal(${p.id}, '${status}')">
+          <i class="fas fa-edit" style="font-size:12px; margin-right:4px;"></i>
+          Update status
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterPayments() {
+  const q = (document.getElementById('paySearch').value || '').toLowerCase().trim();
+  const status = document.getElementById('payStatusFilter').value;
+  const sort = document.getElementById('paySortFilter').value;
+
+  let filtered = _payments.filter(p => {
+    const u = p.user || {};
+    const plan = p.plan || {};
+    const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.company_name || '';
+    const email = u.email || '';
+    
+    const matchQ = !q ||
+      email.toLowerCase().includes(q) ||
+      name.toLowerCase().includes(q) ||
+      (plan.name || '').toLowerCase().includes(q) ||
+      String(p.id).includes(q) ||
+      String(p.plan_id).includes(q);
+      
+    const matchStatus = !status || p.status === status;
+    return matchQ && matchStatus;
+  });
+
+  filtered.sort((a, b) => {
+    const da = new Date(a.created_at || 0), db = new Date(b.created_at || 0);
+    return sort === 'oldest' ? da - db : db - da;
+  });
+
+  renderPaymentsTable(filtered);
+}
+
+function openStatusModal(pid, currentStatus) {
+  _currentStatusPaymentId = pid;
+  document.getElementById('modalSubtitle').textContent = 'Payment ID: #' + pid;
+  const sel = document.getElementById('newStatusSelect');
+  if (sel) {
+    sel.value = currentStatus;
+  }
+  togglePaidNotice();
+  document.getElementById('statusModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeStatusModal() {
+  document.getElementById('statusModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function togglePaidNotice() {
+  const sel = document.getElementById('newStatusSelect');
+  const notice = document.getElementById('paidEmailNotice');
+  const textEl = document.getElementById('statusNoticeText');
+  if (sel && notice && textEl) {
+    notice.classList.remove('warning', 'danger');
+    if (sel.value === 'paid') {
+      notice.style.display = 'flex';
+      textEl.innerHTML = `Marking as <strong>Paid</strong> will automatically send a payment receipt to the user's email.`;
+    } else if (sel.value === 'rejected') {
+      notice.style.display = 'flex';
+      notice.classList.add('danger');
+      textEl.innerHTML = `Marking as <strong>Rejected</strong> will automatically send a rejection notification to the user's email.`;
+    } else if (sel.value === 'canceled') {
+      notice.style.display = 'flex';
+      notice.classList.add('warning');
+      textEl.innerHTML = `Marking as <strong>Canceled</strong> will automatically send a cancellation notification to the user's email.`;
+    } else {
+      notice.style.display = 'none';
+    }
+  }
+}
+
+async function confirmStatusUpdate() {
+  const pid = _currentStatusPaymentId;
+  const st = document.getElementById('newStatusSelect').value;
+  if (!pid) return toast('Please select a payment ID', 'error');
+
+  closeStatusModal();
+
+  try {
+    await apiFetch(`/api/v1/admin/payments/${pid}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: st })
+    });
+    toast('Payment status updated successfully', 'success');
+    loadPaymentsTelemetry();
+  } catch (e) {
+    toast('Failed to update payment status', 'error');
+  }
+}

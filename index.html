@@ -60,15 +60,13 @@
         </li>
         <li class="nav-mobile-divider"></li>
         <li class="nav-mobile-auth" id="navMobileAuth">
-            <a class="nav-btn-signin" data-ar="تسجيل الدخول" data-en="Sign In" href="Signin.html"><i class="fa-regular fa-user"></i> Sign In</a>
-            <a class="nav-btn-register" data-ar="إنشاء حساب" data-en="Register" href="Signin.html?tab=register" id="navRegister"><i class="fa-solid fa-user-plus"></i> Register</a>
+            <button class="nav-btn-signin" data-ar="تسجيل الدخول" data-en="Login" onclick="openAuthModal('login')"><i class="fa-regular fa-user"></i> <span data-en="Login" data-ar="تسجيل الدخول">Login</span></button>
         </li>
     </ul>
     <!-- Right-side actions -->
     <div class="nav-actions">
         <div class="nav-auth-desktop" id="navAuthDesktop">
-            <a class="nav-btn-signin" data-ar="تسجيل الدخول" data-en="Sign In" href="Signin.html" id="navSignIn"><i class="fa-regular fa-user"></i> Sign In</a>
-            <a class="nav-btn-register" data-ar="إنشاء حساب" data-en="Register" href="Signin.html?tab=register"><i class="fa-solid fa-user-plus"></i> Register</a>
+            <button class="nav-btn-signin" data-ar="تسجيل الدخول" data-en="Login" onclick="openAuthModal('login')" id="navSignIn"><i class="fa-regular fa-user"></i> <span data-en="Login" data-ar="تسجيل الدخول">Login</span></button>
         </div>
         <button aria-label="Switch Language" class="lang-toggle" id="langToggle">
             <i class="fa-solid fa-globe"></i>
@@ -268,7 +266,7 @@ We are a company specialized in developing and managing projects with high effic
         <p class="pib-title" data-ar="يرجى قراءة تعليمات الدفع قبل الاشتراك" data-en="Please read the payment instructions before subscribing">Please read the payment instructions before subscribing</p>
     </div>
     <ol class="pib-steps">
-        <li data-ar="اختر خطتك واضغط على 'اشترك الآن' للانتقال لصفحة الدفع" data-en="Choose your plan and click 'Subscribe Now' to go to the payment page">Choose your plan and click "Subscribe Now" to go to the payment page</li>
+        <li data-ar="اختر خطتك واضغط على 'اشترك الآن'. إذا لم يكن لديك حساب، سيُطلب منك التسجيل أولاً (مع تقديم الاسم الأول والأخير واسم الشركة)." data-en="Choose your plan and click 'Subscribe Now'. If you don't have an account, you will be prompted to register first (providing First Name, Last Name, and Company Name).">Choose your plan and click 'Subscribe Now'. If you don't have an account, you will be prompted to register first (providing First Name, Last Name, and Company Name).</li>
         <li data-ar="أتمم عملية الدفع عبر upayto.me/badia" data-en="Complete your payment via upayto.me/badia">Complete your payment via <strong>upayto.me/badia</strong></li>
         <li>
             <span data-ar="أرسل لقطة شاشة للدفع عبر واتساب إلى:" data-en="Send a screenshot of the payment via WhatsApp to:">Send a screenshot of the payment via WhatsApp to:</span>
@@ -331,7 +329,7 @@ We are a company specialized in developing and managing projects with high effic
         <p class="pib-title" data-ar="يرجى قراءة تعليمات الدفع قبل الطلب" data-en="Please read the payment instructions before ordering">Please read the payment instructions before ordering</p>
     </div>
     <ol class="pib-steps">
-        <li data-ar="اختر باقتك واضغط على 'ابدأ الآن' للانتقال لصفحة الدفع" data-en="Choose your package and click 'Get Started' to go to the payment page">Choose your package and click "Get Started" to go to the payment page</li>
+        <li data-ar="اختر باقتك واضغط على 'ابدأ الآن'. إذا لم يكن لديك حساب، سيُطلب منك التسجيل أولاً (مع تقديم الاسم الأول والأخير واسم الشركة)." data-en="Choose your package and click 'Get Started'. If you don't have an account, you will be prompted to register first (providing First Name, Last Name, and Company Name).">Choose your package and click 'Get Started'. If you don't have an account, you will be prompted to register first (providing First Name, Last Name, and Company Name).</li>
         <li data-ar="أتمم عملية الدفع عبر upayto.me/badia" data-en="Complete your payment via upayto.me/badia">Complete your payment via <strong>upayto.me/badia</strong></li>
         <li>
             <span data-ar="أرسل لقطة شاشة للدفع عبر واتساب إلى:" data-en="Send a screenshot of the payment via WhatsApp to:">Send a screenshot of the payment via WhatsApp to:</span>
@@ -537,6 +535,190 @@ We are a company specialized in developing and managing projects with high effic
 </div>
 </div>
 </section>
+
+<!-- Auth Modal -->
+<div class="auth-modal-overlay" id="authModalOverlay" onclick="closeAuthModalOnBackdrop(event)">
+    <div class="auth-modal comix-style" role="dialog" aria-modal="true">
+        <div class="auth-container">
+            <button class="auth-modal-close" onclick="closeAuthModal()" aria-label="Close">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="comix-header">
+                <h2 data-en="Welcome back" data-ar="مرحباً بعودتك">Welcome back</h2>
+                <p data-en="Sign in to access your dashboard and services." data-ar="سجل دخولك للوصول إلى لوحة التحكم وخدماتك.">Sign in to access your dashboard and services.</p>
+            </div>
+
+            <!-- LOGIN Panel -->
+            <div class="tab-panel active" id="panel-login">
+                <form id="loginForm" novalidate>
+                    <div class="comix-form-group">
+                        <label for="loginEmail" data-en="Email or username" data-ar="البريد الإلكتروني أو اسم المستخدم">Email or username</label>
+                        <div class="input-wrap">
+                            <input type="email" id="loginEmail" placeholder="you@domain.com">
+                        </div>
+                        <div class="form-error" id="loginEmailErr" data-en="Enter a valid email address" data-ar="أدخل بريداً إلكترونياً صحيحاً">Enter a valid email address</div>
+                    </div>
+
+                    <div class="comix-form-group">
+                        <div class="comix-label-row">
+                            <label for="loginPass" data-en="Password" data-ar="كلمة المرور">Password</label>
+                            <a href="#" class="comix-forgot-link" data-en="Forgot password?" data-ar="نسيت كلمة المرور؟" onclick="showForgotPassword(event)">Forgot password?</a>
+                        </div>
+                        <div class="input-wrap">
+                            <input type="password" id="loginPass" class="password-field" placeholder="••••••••">
+                            <button type="button" class="password-toggle-btn" onclick="togglePass('loginPass', this)" aria-label="Toggle password visibility">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-error" id="loginPassErr" data-en="Password is required" data-ar="كلمة المرور مطلوبة">Password is required</div>
+                    </div>
+
+                    <button type="submit" class="btn-submit comix-submit"><span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span></button>
+
+                    <div class="comix-divider"><span data-en="OR" data-ar="أو">OR</span></div>
+
+                    <button type="button" class="btn-social comix-social" id="googleLoginBtn">
+                        <svg class="google-icon-svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        <span data-en="Continue with Google" data-ar="المتابعة بحساب Google">Continue with Google</span>
+                    </button>
+
+                    <p class="comix-footer-text">
+                        <span data-en="New here?" data-ar="جديد هنا؟">New here?</span> <a href="#" class="comix-create-link" onclick="switchTab('register', event)" data-en="Create an account" data-ar="إنشاء حساب">Create an account</a>
+                    </p>
+                </form>
+            </div>
+
+            <!-- REGISTER Panel -->
+            <div class="tab-panel" id="panel-register">
+                <!-- Kept the id panel-register just in case the JS expects it, but we can style it or keep it functional if the user clicks Create an account -->
+                <form id="registerForm" novalidate>
+                    <div class="comix-form-group">
+                        <label for="regFirst" data-en="First Name" data-ar="الاسم الأول">First Name</label>
+                        <div class="input-wrap">
+                            <input type="text" id="regFirst" data-placeholder-en="John" data-placeholder-ar="أحمد" placeholder="John">
+                        </div>
+                    </div>
+                    <div class="comix-form-group">
+                        <label for="regLast" data-en="Last Name" data-ar="اسم العائلة">Last Name</label>
+                        <div class="input-wrap">
+                            <input type="text" id="regLast" data-placeholder-en="Doe" data-placeholder-ar="العنزي" placeholder="Doe">
+                        </div>
+                    </div>
+
+                    <div class="comix-form-group">
+                        <label for="regCompany" data-en="Company Name" data-ar="اسم الشركة">Company Name</label>
+                        <div class="input-wrap">
+                            <input type="text" id="regCompany" data-placeholder-en="Acme Corp" data-placeholder-ar="شركة بادية" placeholder="Acme Corp">
+                        </div>
+                    </div>
+
+                    <div class="comix-form-group">
+                        <label for="regEmail" data-en="Email Address" data-ar="البريد الإلكتروني">Email Address</label>
+                        <div class="input-wrap">
+                            <input type="email" id="regEmail" placeholder="example@company.com">
+                        </div>
+                        <div class="form-error" id="regEmailErr" data-en="Enter a valid email address" data-ar="أدخل بريداً إلكترونياً صحيحاً">Enter a valid email address</div>
+                    </div>
+
+                    <div class="comix-form-group">
+                        <label for="regPhone" data-en="Phone Number" data-ar="رقم الجوال">Phone Number</label>
+                        <div class="input-wrap">
+                            <input type="tel" id="regPhone" placeholder="+965 XXXX XXXX">
+                        </div>
+                    </div>
+
+                    <div class="comix-form-group">
+                        <label for="regPass" data-en="Password" data-ar="كلمة المرور">Password</label>
+                        <div class="input-wrap">
+                            <input type="password" id="regPass" class="password-field" data-placeholder-en="At least 8 characters" data-placeholder-ar="8 أحرف على الأقل" placeholder="At least 8 characters" oninput="checkStrength(this.value)">
+                            <button type="button" class="password-toggle-btn" onclick="togglePass('regPass,regConfirmPass', this)" aria-label="Toggle password visibility">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="strength-meter" id="strengthMeter">
+                            <div class="strength-bar" id="sb1"></div>
+                            <div class="strength-bar" id="sb2"></div>
+                            <div class="strength-bar" id="sb3"></div>
+                            <div class="strength-bar" id="sb4"></div>
+                        </div>
+                        <div class="strength-label" id="strengthLabel"></div>
+                    </div>
+
+                    <div class="comix-form-group">
+                        <label for="regConfirmPass" data-en="Confirm Password" data-ar="تأكيد كلمة المرور">Confirm Password</label>
+                        <div class="input-wrap">
+                            <input type="password" id="regConfirmPass" data-placeholder-en="Re-enter your password" data-placeholder-ar="أعد إدخال كلمة المرور" placeholder="Re-enter your password">
+                        </div>
+                    </div>
+
+                    <div class="comix-form-group">
+                        <label class="checkbox-wrap" style="margin-top:0.5rem; justify-content:flex-start; gap:8px;">
+                            <input type="checkbox" id="agreeTerms">
+                            <span data-en="I agree to the Terms of Use" data-ar="أوافق على شروط الاستخدام">I agree to the Terms of Use</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-submit comix-submit"><span data-en="Create Account" data-ar="إنشاء الحساب">Create Account</span></button>
+
+                    <div class="comix-divider"><span data-en="OR" data-ar="أو">OR</span></div>
+
+                    <button type="button" class="btn-social comix-social" id="googleRegBtn">
+                        <svg class="google-icon-svg" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        <span data-en="Sign up with Google" data-ar="التسجيل بحساب Google">Sign up with Google</span>
+                    </button>
+                    <p class="comix-footer-text">
+                        <span data-en="Already have an account?" data-ar="لديك حساب بالفعل؟">Already have an account?</span> <a href="#" class="comix-create-link" onclick="switchTab('login', event)" data-en="Sign in" data-ar="تسجيل الدخول">Sign in</a>
+                    </p>
+                </form>
+            </div>
+
+            <!-- FORGOT PASSWORD Panel -->
+            <div class="tab-panel" id="panel-forgot">
+                <form id="forgotForm" novalidate>
+                    <div class="comix-form-group">
+                        <label for="forgotEmail" data-en="Email Address" data-ar="البريد الإلكتروني">Email Address</label>
+                        <div class="input-wrap">
+                            <input type="email" id="forgotEmail" placeholder="example@company.com">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit comix-submit"><span data-en="Send Reset Link" data-ar="إرسال رابط إعادة التعيين">Send Reset Link</span></button>
+                    <div style="text-align:center;margin-top:1.5rem;">
+                        <a href="#" class="comix-create-link" data-en="Have a reset token? Reset here" data-ar="لديك رمز إعادة تعيين؟ أعد التعيين هنا" onclick="showResetWithToken(event)">Have a reset token? Reset here</a>
+                    </div>
+                    <div style="text-align:center;margin-top:1rem;">
+                        <a href="#" class="comix-create-link" data-en="← Back to Sign In" data-ar="→ العودة لتسجيل الدخول" onclick="backToLogin(event)">← Back to Sign In</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RESET PASSWORD WITH TOKEN Panel -->
+            <div class="tab-panel" id="panel-reset-token">
+                <form id="resetTokenForm" novalidate>
+                    <div class="comix-form-group">
+                        <label for="resetToken" data-en="Reset Token" data-ar="رمز إعادة التعيين">Reset Token</label>
+                        <div class="input-wrap">
+                            <input type="text" id="resetToken" data-placeholder-en="Paste the token from your email" data-placeholder-ar="الصق الرمز من بريدك الإلكتروني" placeholder="Paste the token from your email">
+                        </div>
+                    </div>
+                    <div class="comix-form-group">
+                        <label for="resetNewPass" data-en="New Password" data-ar="كلمة المرور الجديدة">New Password</label>
+                        <div class="input-wrap">
+                            <input type="password" id="resetNewPass" class="password-field" data-placeholder-en="At least 8 characters" data-placeholder-ar="8 أحرف على الأقل" placeholder="At least 8 characters">
+                            <button type="button" class="password-toggle-btn" onclick="togglePass('resetNewPass', this)" aria-label="Toggle password visibility">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit comix-submit"><span data-en="Reset Password" data-ar="إعادة تعيين كلمة المرور">Reset Password</span></button>
+                    <div style="text-align:center;margin-top:1.5rem;">
+                        <a href="#" class="comix-create-link" data-en="← Back to Sign In" data-ar="→ العودة لتسجيل الدخول" onclick="backToLogin(event)">← Back to Sign In</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Footer -->
 <footer class="footer">
 <div class="container">
@@ -558,22 +740,7 @@ We are a company specialized in developing and managing projects with high effic
 </div>
 </footer>
 <script src="script.js"></script>
-<script>
-        function handleServiceRequest(serviceType) {
-            var isLoggedIn = !!localStorage.getItem('badia_user');
-            if (isLoggedIn) {
-                var destinations = {
-                    partnership: 'account.html#partnership',
-                    feasibility: 'account.html#feasibility'
-                };
-                window.location.href = destinations[serviceType] || 'account.html';
-            } else {
-                // Persist intended destination so Signin.html can redirect back after login
-                sessionStorage.setItem('badia_redirect_after_login',
-                    serviceType === 'partnership' ? 'account.html#partnership' : 'account.html#feasibility');
-                window.location.href = 'Signin.html';
-            }
-        }
-    </script>
+<script src="auth_logic.js"></script>
+
 </body>
 </html>

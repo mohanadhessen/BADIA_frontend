@@ -1,7 +1,7 @@
-// https://badia-backend.onrender.com
+// 
 
 // ===== API Base URL =====
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = 'https://badia-backend.onrender.com';
 
 // ===== Plans State =====
 let _cachedPlans = null;
@@ -97,50 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavAuthLink();
 });
 
-// ===== Nav Auth =====
-function updateNavAuthLink() {
-    const desktopAuth = document.getElementById('navAuthDesktop');
-    const mobileAuth = document.getElementById('navMobileAuth');
-    const token = localStorage.getItem('access_token');
-    const lang = getCurrentLang();
-
-    if (token) {
-        const role = localStorage.getItem('user_role');
-        const targetUrl = role === 'admin' ? 'admin.html' : 'account.html';
-
-        // Logged in → replace both auth zones with a single link
-        const accountLabelEN = role === 'admin' ? 'Admin Dashboard' : 'My Account';
-        const accountLabelAR = role === 'admin' ? 'لوحة الإدارة' : 'حسابي';
-        const label = lang === 'ar' ? accountLabelAR : accountLabelEN;
-
-        if (desktopAuth) {
-            desktopAuth.innerHTML = `<a href="${targetUrl}" class="nav-btn-account"
-                data-en="${accountLabelEN}" data-ar="${accountLabelAR}"><i class="fa-solid fa-user-gear"></i> ${label}</a>`;
-        }
-        if (mobileAuth) {
-            mobileAuth.innerHTML = `<a href="${targetUrl}" class="nav-btn-register" style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:.4rem"
-                data-en="${accountLabelEN}" data-ar="${accountLabelAR}"><i class="fa-solid fa-user-gear"></i> ${label}</a>`;
-        }
-    } else {
-        // Not logged in → show Sign In + Register
-        const siEN = 'Sign In', siAR = 'تسجيل الدخول', rgEN = 'Register', rgAR = 'إنشاء حساب';
-        const si = lang === 'ar' ? siAR : siEN;
-        const rg = lang === 'ar' ? rgAR : rgEN;
-
-        if (desktopAuth) {
-            desktopAuth.innerHTML = `
-                <a href="Signin.html"   class="nav-btn-signin"   id="navSignIn"   data-en="${siEN}" data-ar="${siAR}"><i class="fa-regular fa-user"></i> ${si}</a>
-                <a href="Signin.html?tab=register" class="nav-btn-register" id="navRegister" data-en="${rgEN}" data-ar="${rgAR}"><i class="fa-solid fa-user-plus"></i> ${rg}</a>`;
-        }
-        if (mobileAuth) {
-            mobileAuth.innerHTML = `
-                <a href="Signin.html"   class="nav-btn-signin"   data-en="${siEN}" data-ar="${siAR}"><i class="fa-regular fa-user"></i> ${si}</a>
-                <a href="Signin.html?tab=register" class="nav-btn-register" data-en="${rgEN}" data-ar="${rgAR}"><i class="fa-solid fa-user-plus"></i> ${rg}</a>`;
-        }
-    }
-    // Sync service gates with current auth state
-    updateServiceGates();
-}
+// ===== Nav Auth & Service Gates moved to auth_logic.js =====
 
 // ===== Smooth Scroll =====
 function scrollToSection(id) {
@@ -371,7 +328,9 @@ async function apiFetch(path, options = {}) {
             return fetch(`${API_BASE}${path}`, { ...options, headers });
         } else {
             clearCachedUser();
-            window.location.href = 'Signin.html';
+            if (typeof openAuthModal === 'function') {
+                openAuthModal('login');
+            }
             return res;
         }
     }
@@ -715,7 +674,7 @@ function renderPlans(plans, billing) {
             <ul class="plan-features">${featureHTML}</ul>
             <div class="plan-card-actions">
                 <button class="btn btn-ghost-small" onclick="openPlanModal(${idx})">${detailsText}</button>
-                <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="window.open('https://upayto.me/badia','_blank')">${subscribeText}</button>
+                <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="handlePaymentClick('https://upayto.me/badia')">${subscribeText}</button>
             </div>
         </div>`;
     }).join('');
@@ -743,70 +702,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// ===== Service Gate Auth State =====
-function updateServiceGates() {
-    const token = localStorage.getItem('access_token');
-    const isLoggedIn = !!token;
-    const lang = getCurrentLang();
-
-    document.querySelectorAll('.service-gate').forEach(gate => {
-        const blockId = gate.closest('.service-block')?.id;
-        const serviceType = blockId === 'service-operations' ? 'partnership' : 'feasibility';
-        const cta = gate.querySelector('.service-gate-cta');
-        if (!cta) return;
-
-        if (isLoggedIn) {
-            gate.classList.add('gate-open');
-            gate.classList.remove('gate-locked');
-
-            const btnEN = serviceType === 'partnership' ? 'Request Operational Partnership' : 'Request Feasibility Study';
-            const btnAR = serviceType === 'partnership' ? 'اطلب الشراكة التشغيلية' : 'اطلب دراسة الجدوى';
-            const msgEN = serviceType === 'partnership'
-                ? "You're all set. Submit your request and our team will follow up within 24 hours."
-                : "You're all set. Submit your request and we'll reach out to start your study.";
-            const msgAR = serviceType === 'partnership'
-                ? 'أنت جاهز. أرسل طلبك وسيتواصل معك فريقنا خلال 24 ساعة.'
-                : 'أنت جاهز. أرسل طلبك وسنتواصل معك للبدء في دراستك.';
-            const labelEN = 'Account Connected';
-            const labelAR = 'الحساب متصل';
-
-            cta.innerHTML = `
-                <div class="gate-open-icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                </div>
-                <p class="gate-open-label" data-en="${labelEN}" data-ar="${labelAR}">${lang === 'ar' ? labelAR : labelEN}</p>
-                <p class="gate-open-message" data-en="${msgEN}" data-ar="${msgAR}">${lang === 'ar' ? msgAR : msgEN}</p>
-                <button class="btn btn-primary service-request-btn"
-                    data-en="${btnEN}" data-ar="${btnAR}"
-                    onclick="handleServiceRequest('${serviceType}')">
-                    ${lang === 'ar' ? btnAR : btnEN}
-                </button>`;
-        } else {
-            gate.classList.remove('gate-open');
-            gate.classList.add('gate-locked');
-
-            // Restore original lock CTA if it was replaced
-            if (!cta.querySelector('.gate-lock-icon')) {
-                const msgEN = serviceType === 'partnership'
-                    ? 'Sign in or create an account to request this service and access your partnership dashboard.'
-                    : 'Sign in or create an account to request a feasibility study and track your project through your dashboard.';
-                const msgAR = serviceType === 'partnership'
-                    ? 'سجّل دخولك أو أنشئ حساباً لطلب هذه الخدمة والوصول إلى لوحة الشراكة.'
-                    : 'سجّل دخولك أو أنشئ حساباً لطلب دراسة الجدوى ومتابعة مشروعك عبر لوحة التحكم.';
-                const btnEN = serviceType === 'partnership' ? 'Request Operational Partnership' : 'Request Feasibility Study';
-                const btnAR = serviceType === 'partnership' ? 'اطلب الشراكة التشغيلية' : 'اطلب دراسة الجدوى';
-
-                cta.innerHTML = `
-                    <div class="gate-lock-icon">
-                        <svg fill="none" height="28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="28"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    </div>
-                    <p class="gate-message" data-en="${msgEN}" data-ar="${msgAR}">${lang === 'ar' ? msgAR : msgEN}</p>
-                    <button class="btn btn-primary service-request-btn"
-                        data-en="${btnEN}" data-ar="${btnAR}"
-                        onclick="handleServiceRequest('${serviceType}')">
-                        ${lang === 'ar' ? btnAR : btnEN}
-                    </button>`;
-            }
-        }
-    });
-}
+// Service Gates moved to auth_logic.js
