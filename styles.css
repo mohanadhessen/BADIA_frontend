@@ -128,8 +128,9 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
     display:none;position:fixed;inset:0;top:68px;
     background:rgba(0,0,0,.3);backdrop-filter:blur(2px);z-index:999;
     opacity:0;transition:opacity .3s;
+    pointer-events:none;
 }
-.nav-backdrop.visible{opacity:1}
+.nav-backdrop.visible{opacity:1;pointer-events:auto}
 
 /* ===== Mobile breakpoint ===== */
 @media(max-width:900px){
