@@ -987,7 +987,7 @@ tbody tr.expanded-detail td{background:#fffbf0;border-bottom:1.5px solid var(--a
 /* remove number arrows */
 input[type=number].form-input::-webkit-inner-spin-button,
 input[type=number].form-input::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
-input[type=number].form-input { -moz-appearance: textfield; }
+input[type=number].form-input { -moz-appearance: textfield; appearance: textfield; }
 
 select.form-input {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A0A0A5' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
