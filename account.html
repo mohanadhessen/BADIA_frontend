@@ -42,46 +42,58 @@
 
 <body>
 
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
     <div class="account-layout">
         <!-- Sidebar -->
-        <aside class="account-sidebar">
-            <div class="sidebar-logo">
-                <a href="index.html"><img src="assets/logo.png" alt="BADIA"></a>
-                <span>BADIA</span>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo" onclick="window.location.href='index.html'" title="Return to Website" style="cursor:pointer">
+                <div class="logo-name">BADIA</div>
+                <span class="admin-badge" data-en="Account" data-ar="الحساب">Account</span>
             </div>
-            <div class="sidebar-user">
-                <div class="sidebar-avatar-placeholder" id="sidebarAvatar">👤</div>
-                <div class="sidebar-user-info">
-                    <h4 id="sidebarName" data-en="Loading..." data-ar="جاري التحميل...">Loading...</h4>
-                    <p id="sidebarEmail">—</p>
-                </div>
-             <nav class="sidebar-nav">
-                <a href="#" class="active" data-section="profile" onclick="showSection('profile', this)">
+
+            <div class="nav-section">
+                <div class="nav-label" data-en="Overview" data-ar="نظرة عامة">Overview</div>
+                <div class="nav-item active" data-section="profile" onclick="showSection('profile', this)">
                     <span class="nav-icon"><i class="far fa-user"></i></span>
                     <span data-en="Profile" data-ar="الملف الشخصي">Profile</span>
-                </a>
-                <a href="#" data-section="partnership" onclick="showSection('partnership', this)">
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-label" data-en="Services" data-ar="الخدمات">Services</div>
+                <div class="nav-item" data-section="partnership" onclick="showSection('partnership', this)">
                     <span class="nav-icon"><i class="far fa-handshake"></i></span>
                     <span data-en="Operational Partnership" data-ar="الشراكة التشغيلية">Operational Partnership</span>
-                </a>
-                <a href="#" data-section="feasibility" onclick="showSection('feasibility', this)">
+                </div>
+                <div class="nav-item" data-section="feasibility" onclick="showSection('feasibility', this)">
                     <span class="nav-icon"><i class="far fa-chart-bar"></i></span>
                     <span data-en="Feasibility Study" data-ar="دراسة الجدوى">Feasibility Study</span>
-                </a>
-                <a href="#" data-section="reviews" onclick="showSection('reviews', this)">
+                </div>
+                <div class="nav-item" data-section="reviews" onclick="showSection('reviews', this)">
                     <span class="nav-icon"><i class="far fa-star"></i></span>
                     <span data-en="Reviews" data-ar="التقييمات">Reviews</span>
-                </a>
-                <a href="#" data-section="edit-profile" onclick="showSection('edit-profile', this)">
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-label" data-en="System" data-ar="النظام">System</div>
+                <div class="nav-item" data-section="edit-profile" onclick="showSection('edit-profile', this)">
                     <span class="nav-icon"><i class="far fa-edit"></i></span>
                     <span data-en="Settings" data-ar="الإعدادات">Settings</span>
-                </a>
-            </nav>
+                </div>
+            </div>
+
             <div class="sidebar-footer">
-                <a href="#" onclick="handleLogout()" id="logoutLink">
-                    <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
-                    <span data-en="Sign Out" data-ar="تسجيل الخروج">Sign Out</span>
-                </a>
+                <div class="avatar" id="sidebarAvatar">👤</div>
+                <div style="min-width: 0; flex: 1; display: flex; flex-direction: column;">
+                    <div class="sidebar-user-name" id="sidebarName">Loading...</div>
+                    <div class="sidebar-user-role" id="sidebarEmail">—</div>
+                </div>
+                <button class="sidebar-logout" onclick="handleLogout()" title="Log out" data-en="Sign Out" data-ar="تسجيل الخروج">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
             </div>
         </aside>
 
@@ -217,27 +229,13 @@
 
                 <div class="account-card danger-zone" style="margin-top:2rem;">
                     <h3 data-en="Delete Account" data-ar="حذف الحساب">Delete Account</h3>
-                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1rem;"
+                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;"
                         data-en="This action is permanent and cannot be undone. All your data, reviews, and submissions will be permanently deleted."
                         data-ar="هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك وطلباتك بشكل دائم.">
                         This action is permanent and cannot be undone. All your data, reviews, and submissions will
                         be permanently deleted.</p>
-                    <div class="delete-confirm-input">
-                        <p data-en="To confirm, type your email address below:"
-                            data-ar="للتأكيد، اكتب بريدك الإلكتروني أدناه:">To confirm, type your email address
-                            below:</p>
-                        <p><code id="deleteEmailDisplay">—</code></p>
-                        <div class="form-group" style="margin-top:1rem;">
-                            <input type="email" id="deleteConfirmEmail"
-                                data-placeholder-en="Type your email to confirm"
-                                data-placeholder-ar="اكتب بريدك الإلكتروني للتأكيد"
-                                placeholder="Type your email to confirm" oninput="checkDeleteConfirmation()"
-                                class="danger-input">
-                        </div>
-                    </div>
-                    <button class="btn-danger" id="deleteAccountBtn" onclick="deleteAccount()"
-                        data-en="Permanently Delete My Account" data-ar="حذف حسابي نهائياً" disabled>Permanently Delete My
-                        Account</button>
+                    <button class="btn-danger" onclick="openDeleteModal()"
+                        data-en="Permanently Delete My Account" data-ar="حذف حسابي نهائياً">Permanently Delete My Account</button>
                 </div>
             </div>
 
@@ -472,6 +470,47 @@
                 </div>
             </div>
         </div>
+
+        <!-- ===== DELETE ACCOUNT MODAL ===== -->
+        <div class="edit-modal-overlay" id="deleteAccountModalOverlay" onclick="closeDeleteModal()">
+            <div class="edit-modal" id="deleteAccountModal" onclick="event.stopPropagation()">
+                <div class="edit-modal-header">
+                    <h3 data-en="Delete Account" data-ar="حذف الحساب">Delete Account</h3>
+                    <button class="edit-modal-close" onclick="closeDeleteModal()" aria-label="Close">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round">
+                            <path d="M3 3l10 10M13 3L3 13" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="edit-modal-body">
+                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1rem;"
+                        data-en="This action is permanent and cannot be undone. All your data, reviews, and submissions will be permanently deleted."
+                        data-ar="هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك وطلباتك بشكل دائم.">
+                        This action is permanent and cannot be undone. All your data, reviews, and submissions will
+                        be permanently deleted.</p>
+                    <div class="delete-confirm-input">
+                        <p style="font-weight: 500; margin-bottom: 0.5rem;" data-en="To confirm, type your email address below:"
+                            data-ar="للتأكيد، اكتب بريدك الإلكتروني أدناه:">To confirm, type your email address
+                            below:</p>
+                        <p style="margin-bottom: 1rem;"><code id="deleteEmailDisplay" style="font-size: 1.05rem; background: var(--soft); padding: 0.2rem 0.5rem; border-radius: 4px; font-family: monospace;">—</code></p>
+                        <div class="form-group">
+                            <input type="email" id="deleteConfirmEmail"
+                                data-placeholder-en="Type your email to confirm"
+                                data-placeholder-ar="اكتب بريدك الإلكتروني للتأكيد"
+                                placeholder="Type your email to confirm" oninput="checkDeleteConfirmation()"
+                                class="danger-input">
+                        </div>
+                    </div>
+                    <div class="edit-modal-footer" style="margin-top: 1.5rem; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button class="btn-modal-cancel" onclick="closeDeleteModal()" data-en="Cancel"
+                            data-ar="إلغاء">Cancel</button>
+                        <button class="btn-danger" id="deleteAccountBtn" onclick="deleteAccount()"
+                            data-en="Permanently Delete My Account" data-ar="حذف حسابي نهائياً" disabled style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">Permanently Delete My Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
@@ -538,16 +577,30 @@
 
         // ===== Section Navigation =====
         function toggleSidebar() {
-            document.querySelector('.account-sidebar').classList.toggle('active');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const hamburger = document.getElementById('hamburger');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('visible');
+            if (hamburger) hamburger.classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const hamburger = document.getElementById('hamburger');
+            if (sidebar) sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('visible');
+            if (hamburger) hamburger.classList.remove('open');
         }
 
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', (e) => {
-            const sidebar = document.querySelector('.account-sidebar');
+            const sidebar = document.getElementById('sidebar');
             const hamburger = document.getElementById('hamburger');
-            if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('active')) {
+            if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open')) {
                 if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
-                    sidebar.classList.remove('active');
+                    closeSidebar();
                 }
             }
         });
@@ -555,7 +608,7 @@
         function showSection(sectionId, linkEl) {
             if (linkEl) linkEl.preventDefault && linkEl.preventDefault();
             document.querySelectorAll('.account-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
 
             const section = document.getElementById('section-' + sectionId);
             if (section) section.classList.add('active');
@@ -564,9 +617,12 @@
             if (linkEl) {
                 linkEl.classList.add('active');
             } else {
-                const matchingLink = document.querySelector(`.sidebar-nav a[data-section="${sectionId}"]`);
+                const matchingLink = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
                 if (matchingLink) matchingLink.classList.add('active');
             }
+
+            // Close mobile sidebar on navigation
+            closeSidebar();
 
             // Update URL hash so direct links work (account.html#partnership)
             history.replaceState(null, '', '#' + sectionId);
@@ -594,12 +650,34 @@
         }
 
         // Click handler for sidebar links
-        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+        document.querySelectorAll('.nav-item').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 showSection(link.dataset.section, link);
             });
         });
+
+        // ===== Delete Account Modal =====
+        function openDeleteModal() {
+            const overlay = document.getElementById('deleteAccountModalOverlay');
+            if (overlay) {
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                // Reset fields
+                document.getElementById('deleteConfirmEmail').value = '';
+                const btn = document.getElementById('deleteAccountBtn');
+                btn.disabled = true;
+                btn.classList.remove('enabled');
+            }
+        }
+
+        function closeDeleteModal() {
+            const overlay = document.getElementById('deleteAccountModalOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
 
         // ===== Initialize Account Page =====
         async function initAccountPage() {
@@ -901,8 +979,10 @@
             const btn = document.getElementById('deleteAccountBtn');
             if (input === userEmail) {
                 btn.classList.add('enabled');
+                btn.disabled = false;
             } else {
                 btn.classList.remove('enabled');
+                btn.disabled = true;
             }
         }
 
@@ -919,6 +999,7 @@
                 if (res.ok) {
                     clearCachedUser();
                     showNotification(lang === 'ar' ? 'تم حذف الحساب بنجاح' : 'Account deleted successfully', 'success');
+                    closeDeleteModal();
                     setTimeout(() => window.location.href = 'index.html', 2000);
                 } else {
                     const err = await res.json();
