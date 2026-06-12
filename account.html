@@ -50,7 +50,6 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-logo" onclick="window.location.href='index.html'" title="Return to Website" style="cursor:pointer">
                 <div class="logo-name">BADIA</div>
-                <span class="admin-badge" data-en="Account" data-ar="الحساب">Account</span>
             </div>
 
             <div class="nav-section">
@@ -101,14 +100,14 @@
         <main class="account-main">
             <div class="account-topbar">
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <button class="topbar-hamburger" id="hamburger" onclick="toggleSidebar()">
-                        <span></span><span></span><span></span>
-                    </button>
                     <h1 id="sectionTitle" data-en="Profile" data-ar="الملف الشخصي">Profile</h1>
                 </div>
                 <div class="account-topbar-actions">
                     <button class="lang-toggle" id="accountLangToggle" onclick="toggleAccountLang()">
                         <span class="lang-toggle-text">عربي</span>
+                    </button>
+                    <button class="topbar-hamburger" id="hamburger" onclick="toggleSidebar()">
+                        <span></span><span></span><span></span>
                     </button>
                 </div>
             </div>
@@ -234,7 +233,7 @@
                         data-ar="هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك وطلباتك بشكل دائم.">
                         This action is permanent and cannot be undone. All your data, reviews, and submissions will
                         be permanently deleted.</p>
-                    <button class="btn-danger" onclick="openDeleteModal()"
+                    <button class="btn-danger enabled" onclick="openDeleteModal()"
                         data-en="Permanently Delete My Account" data-ar="حذف حسابي نهائياً">Permanently Delete My Account</button>
                 </div>
             </div>
