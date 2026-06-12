@@ -643,7 +643,7 @@ body.modal-open{overflow:hidden}
   letter-spacing: -0.01em;
 }
 .pi-steps {
-  padding-left: 1rem;
+  padding-left: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -653,25 +653,25 @@ body.modal-open{overflow:hidden}
 }
 html[lang="ar"] .pi-steps {
   padding-left: 0;
-  padding-right: 1rem;
+  padding-right: 0;
 }
 .pi-steps li {
   font-size: 0.95rem;
   color: var(--gray-600);
   line-height: 1.6;
-  padding-left: 1.8rem;
+  padding-left: 2.2rem;
   position: relative;
   counter-increment: pi-counter;
 }
 html[lang="ar"] .pi-steps li {
   padding-left: 0;
-  padding-right: 1.8rem;
+  padding-right: 2.2rem;
 }
 .pi-steps li::before {
   content: counter(pi-counter);
   position: absolute;
-  left: -0.5rem;
-  top: 0.1em;
+  left: 0;
+  top: 0;
   width: 24px;
   height: 24px;
   background: var(--gray-100);
@@ -685,7 +685,7 @@ html[lang="ar"] .pi-steps li {
 }
 html[lang="ar"] .pi-steps li::before {
   left: auto;
-  right: -0.5rem;
+  right: 0;
 }
 .pi-steps li strong {
   color: var(--primary);
