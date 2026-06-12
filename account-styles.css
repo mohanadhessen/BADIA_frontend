@@ -68,11 +68,7 @@
   transition: transform .3s var(--ease-out);
 }
 
-html[lang="ar"] .sidebar {
-  inset: 0 0 0 auto;
-  border-right: none;
-  border-left: 1px solid var(--sidebar-border);
-}
+
 
 .sidebar-logo {
   display: flex;
@@ -231,7 +227,7 @@ html[lang="ar"] .sidebar {
   margin-right: 0;
   padding: 2rem 2.5rem 3rem;
 }
-html[lang="ar"] .account-main { margin-left: 0; margin-right: var(--sidebar-w); }
+
 
 /* Topbar */
 .account-topbar {
@@ -397,7 +393,7 @@ html[lang="ar"] .account-main { margin-left: 0; margin-right: var(--sidebar-w); 
 .verification-banner .vb-text h4 { margin: 0 0 .15rem; font-size: .88rem; color: #543d00; font-weight: 700; }
 .verification-banner .vb-text p { margin: 0; font-size: .79rem; color: #7a5800; line-height: 1.5; }
 .verification-banner .btn { margin-left: auto; padding: .48rem 1rem; font-size: .8rem; border-radius: 7px; }
-html[lang="ar"] .verification-banner .btn { margin-left: 0; margin-right: auto; }
+
 
 .verified-badge {
   display: inline-flex;
@@ -609,7 +605,7 @@ html[lang="ar"] .verification-banner .btn { margin-left: 0; margin-right: auto; 
 @media (max-width: 768px) {
   .account-layout { flex-direction: column; }
   .account-sidebar { position: relative; width: 100%; height: auto; inset: auto; flex-direction: column; padding: 1rem 0; }
-  html[lang="ar"] .account-sidebar { inset: auto; }
+
   .account-main { margin: 0 !important; padding: 1.25rem; }
   .sidebar-user { padding: .875rem 1.25rem; }
   .sidebar-avatar, .sidebar-avatar-placeholder { width: 34px; height: 34px; border-radius: 7px; font-size: 1rem; }
@@ -1155,11 +1151,7 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,.08) transparent;
 }
-html[lang="ar"] .account-sidebar {
-  inset: 0 0 0 auto;
-  border-right: none;
-  border-left: 1px solid var(--sidebar-border);
-}
+
 .account-sidebar::-webkit-scrollbar { width: 3px; }
 .account-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
 
@@ -1268,7 +1260,7 @@ html[lang="ar"] .account-sidebar {
   margin-left: auto;
   flex-shrink: 0;
 }
-html[lang="ar"] .nav-status-dot { margin-left: 0; margin-right: auto; }
+
 .dot-pending  { background: #fbbf24; }
 .dot-approved { background: #34d399; }
 .dot-rejected { background: #f87171; }
@@ -1301,7 +1293,7 @@ html[lang="ar"] .nav-status-dot { margin-left: 0; margin-right: auto; }
   padding: 2rem 2.5rem 3.5rem;
   min-width: 0;
 }
-html[lang="ar"] .account-main { margin-left: 0; margin-right: 248px; }
+
 
 /* Topbar */
 .account-topbar {
@@ -1392,7 +1384,7 @@ html[lang="ar"] .account-main { margin-left: 0; margin-right: 248px; }
   transition: all var(--t);
   border: 1.5px solid;
 }
-html[lang="ar"] .vb-btn, html[lang="ar"] .ib-btn { margin-left: 0; margin-right: auto; }
+
 .vb-btn { background: var(--gold); color: #fff; border-color: var(--gold); }
 .vb-btn:hover { background: #b38818; border-color: #b38818; }
 .ib-btn { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
@@ -2179,7 +2171,7 @@ html[lang="ar"] .form-locked::after { content: "فعّل بريدك الإلكت
   gap: .5rem;
   pointer-events: none;
 }
-html[lang="ar"] .toast-container { right: auto; left: 1.5rem; }
+
 .toast {
   display: flex;
   align-items: center;
@@ -2226,14 +2218,7 @@ html[lang="ar"] .toast-container { right: auto; left: 1.5rem; }
     transform: translateX(0);
   }
   
-  html[lang="ar"] .sidebar {
-    inset: 0 0 0 auto;
-    transform: translateX(100%);
-  }
-  
-  html[lang="ar"] .sidebar.open {
-    transform: translateX(0);
-  }
+
 
   .account-main { margin: 0 !important; padding: 1.25rem; }
   .account-topbar { margin-bottom: 1.25rem; }
@@ -2253,7 +2238,7 @@ html[lang="ar"] .toast-container { right: auto; left: 1.5rem; }
   .rsc-preview { margin: 0 1.25rem; }
   .rsc-status-message { margin: 1rem 1.25rem; }
   .toast-container { right: 1rem; left: 1rem; bottom: 1rem; }
-  html[lang="ar"] .toast-container { right: 1rem; left: 1rem; }
+
   .toast { max-width: 100%; }
 }
 
