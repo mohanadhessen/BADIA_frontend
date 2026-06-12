@@ -165,17 +165,22 @@ function closeModal(id) {
   }
 }
 
-
+function confirmAction(title, subtitle, onConfirm) {
+  document.getElementById('genericConfirmTitle').textContent = title;
+  document.getElementById('genericConfirmSubtitle').textContent = subtitle;
+  document.getElementById('genericConfirmBtn').onclick = () => {
+    closeModal('genericConfirmModal');
+    if (onConfirm) onConfirm();
+  };
+  openModal('genericConfirmModal');
+}
 
 // Clear all features and inputs
 function confirmClearAllPlanForm() {
-  if (!confirm('Clear all data and features? This cannot be undone.')) return;
-  
-  // Explicitly trigger the full form reset
-  _clearPlanForm(); 
-  
-  // Save the empty state to the draft
-  _saveDraft();
+  confirmAction('Clear all data?', 'This will remove the plan name, prices, and all features.', () => {
+    _clearPlanForm(); 
+    _saveDraft();
+  });
 }
 
 // ── Utilities ───────────────────────────────────────────────────
@@ -588,9 +593,9 @@ async function saveUser() {
 }
 
 function confirmDelete(userId, email) {
-  document.getElementById('deleteUserDetail').textContent = `${email} (ID: ${userId})`;
-  document.getElementById('confirmDeleteBtn').onclick = () => deleteUser(userId);
-  openModal('deleteModal');
+  confirmAction('Delete User?', `Are you sure you want to delete user ${email}?`, async () => {
+    await deleteUser(userId);
+  });
 }
 
 async function deleteUser(userId) {
@@ -601,7 +606,6 @@ async function deleteUser(userId) {
     _users = _users.filter(u => String(u.id||u.user_id) !== String(userId));
     renderUsersTable(_users);
     updateUserCount();
-    closeModal('deleteModal');
     toast('User deleted', 'info');
   } catch (e) {
     toast('Failed to delete user', 'error');
@@ -813,42 +817,45 @@ function renderRequests(requests) {
 }
 
 async function approveRequest(reqId) {
-  if (!confirm('This action will send an approval email to the user. Are you sure you want to proceed?')) return;
-  const req = _requests.find(r => r.id === reqId);
-  if (!req) return;
-  try {
-    await apiFetch(`/api/v1/admin/requests/${reqId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'approved' }),
-    });
-    req.status = 'approved';
-    filterRequests();
-    updateRequestStats();
-    renderDashboard();
-    toast('Request approved successfully', 'success');
-  } catch (e) {
-    toast('Failed to approve request', 'error');
-  }
+  confirmAction('Approve Request?', 'This action will send an approval email to the user. Are you sure you want to proceed?', async () => {
+    const req = _requests.find(r => r.id === reqId);
+    if (!req) return;
+    try {
+      await apiFetch(`/api/v1/admin/requests/${reqId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'approved' }),
+      });
+      req.status = 'approved';
+      filterRequests();
+      updateRequestStats();
+      renderDashboard();
+      toast('Request approved successfully', 'success');
+    } catch (e) {
+      toast('Failed to approve request', 'error');
+    }
+  });
 }
 
 async function setPendingRequest(reqId) {
-  const req = _requests.find(r => r.id === reqId);
-  if (!req) return;
-  try {
-    await apiFetch(`/api/v1/admin/requests/${reqId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'pending' }),
-    });
-    req.status = 'pending';
-    req.rejection_reason = null;
-    req.admin_notes = null;
-    filterRequests();
-    updateRequestStats();
-    renderDashboard();
-    toast('Request set back to pending', 'info');
-  } catch (e) {
-    toast('Failed to update request status', 'error');
-  }
+  confirmAction('Set Pending?', 'This action will reset the request status to pending.', async () => {
+    const req = _requests.find(r => r.id === reqId);
+    if (!req) return;
+    try {
+      await apiFetch(`/api/v1/admin/requests/${reqId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'pending' }),
+      });
+      req.status = 'pending';
+      req.rejection_reason = null;
+      req.admin_notes = null;
+      filterRequests();
+      updateRequestStats();
+      renderDashboard();
+      toast('Request set back to pending', 'info');
+    } catch (e) {
+      toast('Failed to update request status', 'error');
+    }
+  });
 }
 
 function openRejectModal(reqId) {
@@ -865,25 +872,26 @@ async function confirmRejectRequest() {
   const reqId = parseInt(document.getElementById('rejectReqId').value);
   const reason = document.getElementById('rejectReqReason').value.trim();
   const notes  = document.getElementById('rejectReqNotes').value.trim();
-  if (!confirm('This action will send a rejection email to the user. Are you sure you want to proceed?')) return;
-  const req = _requests.find(r => r.id === reqId);
-  if (!req) return;
-  try {
-    await apiFetch(`/api/v1/admin/requests/${reqId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'rejected', rejection_reason: reason, admin_notes: notes }),
-    });
-    req.status = 'rejected';
-    req.rejection_reason = reason;
-    req.admin_notes = notes;
-    closeModal('rejectReqModal');
-    filterRequests();
-    updateRequestStats();
-    renderDashboard();
-    toast('Request rejected', 'info');
-  } catch (e) {
-    toast('Failed to reject request', 'error');
-  }
+  confirmAction('Reject Request?', 'This action will send a rejection email to the user. Are you sure you want to proceed?', async () => {
+    const req = _requests.find(r => r.id === reqId);
+    if (!req) return;
+    try {
+      await apiFetch(`/api/v1/admin/requests/${reqId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'rejected', rejection_reason: reason, admin_notes: notes }),
+      });
+      req.status = 'rejected';
+      req.rejection_reason = reason;
+      req.admin_notes = notes;
+      closeModal('rejectReqModal');
+      filterRequests();
+      updateRequestStats();
+      renderDashboard();
+      toast('Request rejected', 'info');
+    } catch (e) {
+      toast('Failed to reject request', 'error');
+    }
+  });
 }
 
 function viewRequest(reqId) {
@@ -1042,8 +1050,6 @@ async function loadPlans(forceRefetch = false) {
  
 function syncPlanCounters() {
   const total       = _plans.length;
-  const avgM        = total ? (_plans.reduce((s, p) => s + (p.price_monthly || 0), 0) / total).toFixed(3) : '0.000';
-  const avgY        = total ? (_plans.reduce((s, p) => s + (p.price_yearly  || 0), 0) / total).toFixed(3) : '0.000';
   const withDetails = _plans.filter(p => {
     const d = p.plan_details;
     if (Array.isArray(d)) return d.length > 0;
@@ -1053,8 +1059,6 @@ function syncPlanCounters() {
   if (elPlans) elPlans.textContent = total;
   document.getElementById('plansCount').textContent          = `${total} plan${total !== 1 ? 's' : ''}`;
   document.getElementById('planStatTotal').textContent       = total;
-  document.getElementById('planStatAvgMonthly').textContent  = avgM;
-  document.getElementById('planStatAvgYearly').textContent   = avgY;
   document.getElementById('planStatWithDetails').textContent = withDetails;
 }
  
@@ -1344,8 +1348,9 @@ function confirmClearAllPlanForm() {
                   document.getElementById('editPlanYearly').value ||
                   _currentFeatures.length;
   if (!hasData) return;
-  if (!confirm('Clear all data? This will remove the plan name, prices, and all features.')) return;
-  _clearPlanForm();
+  confirmAction('Clear all data?', 'This will remove the plan name, prices, and all features.', () => {
+    _clearPlanForm();
+  });
 }
  
 // ── Drag & Drop (mouse + touch) ─────────────────────────────────
@@ -1645,12 +1650,15 @@ function renderReviews(reviews) {
       <div class="item-row-actions">
         ${status !== 'accepted' ? `<button class="act-btn act-btn-accept" onclick="acceptReview(${rev.id})">
           <i class="fas fa-check" style="margin-right:4px;"></i>
-          Accept Review
-        </button>` : '<span style="font-size:.82rem;color:var(--green);font-weight:600;display:flex;align-items:center;gap:5px"><i class="fas fa-check" style="margin-right:4px;"></i>Published</span>'}
+          Approve
+        </button>` : `<button class="act-btn" style="color:var(--text-2);" onclick="pendingReview(${rev.id})">
+          <i class="fas fa-clock" style="margin-right:4px;"></i>
+          Set Pending
+        </button>`}
         <div class="spacer"></div>
         <button class="act-btn act-btn-delete" onclick="confirmDeleteReview(${rev.id})">
           <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
-          Delete Review
+          Delete
         </button>
       </div>
     </div>`;
@@ -1699,13 +1707,30 @@ async function acceptReview(revId) {
     const idx = _reviews.findIndex(r => r.id === revId);
     if (idx >= 0) {
       _reviews[idx] = { ..._reviews[idx], is_published: true, status: 'accepted' };
-      // Re-render the full cards grid (lightweight at page size)
       filterReviews();
     }
     updateReviewStats();
     toast('Review accepted and published', 'success');
   } catch (e) {
     toast('Failed to accept review', 'error');
+  }
+}
+
+async function pendingReview(revId) {
+  try {
+    await apiFetch(`/api/v1/admin/reviews/${revId}/publish`, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_published: false }),
+    });
+    const idx = _reviews.findIndex(r => r.id === revId);
+    if (idx >= 0) {
+      _reviews[idx] = { ..._reviews[idx], is_published: false, status: 'pending' };
+      filterReviews();
+    }
+    updateReviewStats();
+    toast('Review set to pending', 'info');
+  } catch (e) {
+    toast('Failed to update review', 'error');
   }
 }
 
@@ -1878,10 +1903,8 @@ function saveSettings() {
 
 // ── Logout ───────────────────────────────────────────────────────
 function handleLogout() {
-  if (confirm('Log out of the admin dashboard?')) {
-    localStorage.removeItem('access_token');
-    window.location.href = 'index.html';
-  }
+  localStorage.removeItem('access_token');
+  window.location.href = 'index.html';
 }
 
 // ── Init ─────────────────────────────────────────────────────────

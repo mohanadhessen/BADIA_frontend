@@ -13,6 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="account-styles.css">
     <style>
@@ -54,70 +55,35 @@
                     <h4 id="sidebarName" data-en="Loading..." data-ar="جاري التحميل...">Loading...</h4>
                     <p id="sidebarEmail">—</p>
                 </div>
-            </div>
-            <nav class="sidebar-nav">
+             <nav class="sidebar-nav">
                 <a href="#" class="active" data-section="profile" onclick="showSection('profile', this)">
-                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="8" cy="5.5" r="2.5" />
-                            <path d="M2.5 14c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5" />
-                        </svg></span>
+                    <span class="nav-icon"><i class="far fa-user"></i></span>
                     <span data-en="Profile" data-ar="الملف الشخصي">Profile</span>
                 </a>
-                <a href="#" data-section="edit-profile" onclick="showSection('edit-profile', this)">
-                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5L11 2.5z" />
-                            <path d="M9.5 4l2 2" />
-                        </svg></span>
-                    <span data-en="Edit Profile" data-ar="تعديل الملف">Edit Profile</span>
-                </a>
-                <a href="#" data-section="change-password" onclick="showSection('change-password', this)">
-                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2.5" y="7.5" width="11" height="7" rx="1.5" />
-                            <path d="M5 7.5V5.5a3 3 0 016 0v2" />
-                        </svg></span>
-                    <span data-en="Change Password" data-ar="تغيير كلمة المرور">Change Password</span>
-                </a>
                 <a href="#" data-section="partnership" onclick="showSection('partnership', this)">
-                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1.5 11l3.5-2.5h6L14.5 11M5 8V6h6v2" />
-                        </svg></span>
+                    <span class="nav-icon"><i class="far fa-handshake"></i></span>
                     <span data-en="Operational Partnership" data-ar="الشراكة التشغيلية">Operational Partnership</span>
                 </a>
                 <a href="#" data-section="feasibility" onclick="showSection('feasibility', this)">
-                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M2 13l3.5-5 3 2.5L12 5" />
-                            <path d="M2 13h12" />
-                        </svg></span>
+                    <span class="nav-icon"><i class="far fa-chart-bar"></i></span>
                     <span data-en="Feasibility Study" data-ar="دراسة الجدوى">Feasibility Study</span>
                 </a>
-
                 <a href="#" data-section="reviews" onclick="showSection('reviews', this)">
-                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M8 1.5l1.8 3.8 4.2.6-3 3 .7 4.2L8 11l-3.7 2.1.7-4.2-3-3 4.2-.6z" />
-                        </svg></span>
+                    <span class="nav-icon"><i class="far fa-star"></i></span>
                     <span data-en="Reviews" data-ar="التقييمات">Reviews</span>
                 </a>
-                <a href="#" data-section="delete-account" onclick="showSection('delete-account', this)">
-                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 4.5h10M6 4.5V3h4v1.5M5 4.5l.75 8.5h4.5L11 4.5" />
-                        </svg></span>
-                    <span data-en="Delete Account" data-ar="حذف الحساب">Delete Account</span>
+                <a href="#" data-section="edit-profile" onclick="showSection('edit-profile', this)">
+                    <span class="nav-icon"><i class="far fa-edit"></i></span>
+                    <span data-en="Settings" data-ar="الإعدادات">Settings</span>
                 </a>
             </nav>
             <div class="sidebar-footer">
                 <a href="#" onclick="handleLogout()" id="logoutLink">
-                    <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10.5 11l3.5-3m0 0l-3.5-3m3.5 3H6" />
-                        </svg></span>
+                    <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
                     <span data-en="Sign Out" data-ar="تسجيل الخروج">Sign Out</span>
+                </a>
+            </div>
+        </aside>ut" data-ar="تسجيل الخروج">Sign Out</span>
                 </a>
             </div>
         </aside>
@@ -125,7 +91,12 @@
         <!-- Main Content -->
         <main class="account-main">
             <div class="account-topbar">
-                <h1 id="sectionTitle" data-en="Profile" data-ar="الملف الشخصي">Profile</h1>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="topbar-hamburger" id="hamburger" onclick="toggleSidebar()">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <h1 id="sectionTitle" data-en="Profile" data-ar="الملف الشخصي">Profile</h1>
+                </div>
                 <div class="account-topbar-actions">
                     <button class="lang-toggle" id="accountLangToggle" onclick="toggleAccountLang()">
                         <span class="lang-toggle-text">عربي</span>
@@ -232,51 +203,45 @@
                 </div>
             </div>
 
-            <!-- ===== CHANGE PASSWORD SECTION ===== -->
-            <div class="account-section" id="section-change-password">
-                <div class="account-card">
+                <div class="account-card" style="margin-top:2rem;">
                     <h3 data-en="Change Password" data-ar="تغيير كلمة المرور">Change Password</h3>
-                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;"
-                        data-en="A password reset link will be sent to your registered email address."
-                        data-ar="سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني المسجل.">A password reset
-                        link will be sent to your registered email address.</p>
                     <form class="account-form" id="changePasswordForm">
                         <div class="form-group">
-                            <label data-en="Your Email" data-ar="بريدك الإلكتروني">Your Email</label>
-                            <input type="email" id="changePassEmail" readonly
-                                style="background:var(--soft);cursor:not-allowed;color:var(--muted);">
+                            <label for="currentPassword" data-en="Current Password" data-ar="كلمة المرور الحالية">Current Password</label>
+                            <input type="password" id="currentPassword" required>
                         </div>
-                        <button type="submit" class="btn-save" data-en="Send Password Reset Link"
-                            data-ar="إرسال رابط إعادة التعيين">Send Password Reset Link</button>
+                        <div class="form-group">
+                            <label for="newPassword" data-en="New Password" data-ar="كلمة المرور الجديدة">New Password</label>
+                            <input type="password" id="newPassword" required>
+                        </div>
+                        <button type="submit" class="btn-save" data-en="Update Password"
+                            data-ar="تحديث كلمة المرور">Update Password</button>
                     </form>
                 </div>
 
-                <div class="account-card" style="margin-top:2rem;">
-                    <h3 data-en="Reset Password with Token" data-ar="إعادة تعيين كلمة المرور باستخدام الرمز">Reset
-                        Password with Token</h3>
-                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;"
-                        data-en="If you have already received a password reset token in your email, enter it below along with your new password to reset it."
-                        data-ar="إذا كنت قد تلقيت بالفعل رمز إعادة تعيين كلمة المرور في بريدك الإلكتروني، فأدخله أدناه مع كلمة المرور الجديدة لإعادة تعيينها.">
-                        If you have already received a password reset token in your email, enter it below along with
-                        your new password to reset it.</p>
-                    <form class="account-form" id="resetPasswordWithTokenForm">
-                        <div class="form-group">
-                            <label for="resetTokenInput" data-en="Reset Token" data-ar="رمز إعادة التعيين">Reset
-                                Token</label>
-                            <input type="text" id="resetTokenInput"
-                                data-placeholder-en="Enter the token from your email"
-                                data-placeholder-ar="أدخل الرمز المرسل إلى بريدك الإلكتروني"
-                                placeholder="Enter the token from your email" required>
+                <div class="account-card danger-zone" style="margin-top:2rem;">
+                    <h3 data-en="Delete Account" data-ar="حذف الحساب">Delete Account</h3>
+                    <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1rem;"
+                        data-en="This action is permanent and cannot be undone. All your data, reviews, and submissions will be permanently deleted."
+                        data-ar="هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك وطلباتك بشكل دائم.">
+                        This action is permanent and cannot be undone. All your data, reviews, and submissions will
+                        be permanently deleted.</p>
+                    <div class="delete-confirm-input">
+                        <p data-en="To confirm, type your email address below:"
+                            data-ar="للتأكيد، اكتب بريدك الإلكتروني أدناه:">To confirm, type your email address
+                            below:</p>
+                        <p><code id="deleteEmailDisplay">—</code></p>
+                        <div class="form-group" style="margin-top:1rem;">
+                            <input type="email" id="deleteConfirmEmail"
+                                data-placeholder-en="Type your email to confirm"
+                                data-placeholder-ar="اكتب بريدك الإلكتروني للتأكيد"
+                                placeholder="Type your email to confirm" oninput="checkDeleteConfirmation()"
+                                class="danger-input">
                         </div>
-                        <div class="form-group">
-                            <label for="resetNewPassInput" data-en="New Password" data-ar="كلمة المرور الجديدة">New
-                                Password</label>
-                            <input type="password" id="resetNewPassInput" data-placeholder-en="At least 8 characters"
-                                data-placeholder-ar="8 أحرف على الأقل" placeholder="At least 8 characters" required>
-                        </div>
-                        <button type="submit" class="btn-save" data-en="Reset Password"
-                            data-ar="إعادة تعيين كلمة المرور">Reset Password</button>
-                    </form>
+                    </div>
+                    <button class="btn-danger" id="deleteAccountBtn" onclick="deleteAccount()"
+                        data-en="Permanently Delete My Account" data-ar="حذف حسابي نهائياً" disabled>Permanently Delete My
+                        Account</button>
                 </div>
             </div>
 
@@ -455,33 +420,7 @@
 
 
 
-                <!-- ===== DELETE ACCOUNT SECTION ===== -->
-                <div class="account-section" id="section-delete-account">
-                    <div class="account-card danger-zone">
-                        <h3 data-en="Delete Account" data-ar="حذف الحساب">Delete Account</h3>
-                        <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1rem;"
-                            data-en="This action is permanent and cannot be undone. All your data, reviews, and submissions will be permanently deleted."
-                            data-ar="هذا الإجراء نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وتقييماتك وطلباتك بشكل دائم.">
-                            This action is permanent and cannot be undone. All your data, reviews, and submissions will
-                            be permanently deleted.</p>
-                        <div class="delete-confirm-input">
-                            <p data-en="To confirm, type your email address below:"
-                                data-ar="للتأكيد، اكتب بريدك الإلكتروني أدناه:">To confirm, type your email address
-                                below:</p>
-                            <p><code id="deleteEmailDisplay">—</code></p>
-                            <div class="form-group" style="margin-top:1rem;">
-                                <input type="email" id="deleteConfirmEmail"
-                                    data-placeholder-en="Type your email to confirm"
-                                    data-placeholder-ar="اكتب بريدك الإلكتروني للتأكيد"
-                                    placeholder="Type your email to confirm" oninput="checkDeleteConfirmation()"
-                                    class="danger-input">
-                            </div>
-                        </div>
-                        <button class="btn-danger" id="deleteAccountBtn" onclick="deleteAccount()"
-                            data-en="Permanently Delete My Account" data-ar="حذف حسابي نهائياً">Permanently Delete My
-                            Account</button>
-                    </div>
-                </div>
+
 
         </main>
 
@@ -602,6 +541,21 @@
         }
 
         // ===== Section Navigation =====
+        function toggleSidebar() {
+            document.querySelector('.account-sidebar').classList.toggle('active');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.account-sidebar');
+            const hamburger = document.getElementById('hamburger');
+            if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('active')) {
+                if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
         function showSection(sectionId, linkEl) {
             if (linkEl) linkEl.preventDefault && linkEl.preventDefault();
             document.querySelectorAll('.account-section').forEach(s => s.classList.remove('active'));
@@ -889,7 +843,7 @@
             btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
 
             try {
-                await fetch(`${API_BASE}/api/v1/email/auth/forgot-password`, {
+                await fetch(`${API_BASE}/api/v1/email/auth/forgot-password?email=${encodeURIComponent(email)}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })

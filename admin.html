@@ -235,7 +235,7 @@
                     <!-- Month Bar Row -->
                     <div>
                       <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
-                        <span style="font-weight:600;color:var(--text-2)"><i class="far fa-calendar-alt" style="margin-right:4px;color:#3b82f6"></i>This Month</span>
+                        <span style="font-weight:600;color:var(--text-2)"><i class="far fa-calendar-alt" style="margin-right:4px;color:#3b82f6"></i>Monthly Limit</span>
                         <span id="statEmailMonthPct" style="font-family:'Geist Mono', monospace;font-size:.72rem">— / —</span>
                       </div>
                       <div class="storage-bar" style="margin-top:0">
@@ -246,7 +246,7 @@
                     <!-- Day Bar Row -->
                     <div>
                       <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
-                        <span style="font-weight:600;color:var(--text-2)"><i class="far fa-clock" style="margin-right:4px;color:#3b82f6"></i>Today</span>
+                        <span style="font-weight:600;color:var(--text-2)"><i class="far fa-clock" style="margin-right:4px;color:#3b82f6"></i>Daily Limit</span>
                         <span id="statEmailDayPct" style="font-family:'Geist Mono', monospace;font-size:.72rem">— / —</span>
                       </div>
                       <div class="storage-bar" style="margin-top:0">
@@ -574,30 +574,6 @@
             </div>
             <div class="stat-icon-box" style="background:var(--purple-dim);color:var(--purple)">
               <i class="fas fa-tags" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div class="stat-card-text">
-              <div class="stat-label">Avg Monthly</div>
-              <div class="stat-value" id="planStatAvgMonthly" style="font-size:1.5rem">—</div>
-              <div class="stat-sub">KWD across plans</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--accent-dim);color:#9a7920">
-              <i class="fas fa-dollar-sign" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div class="stat-card-text">
-              <div class="stat-label">Avg Yearly</div>
-              <div class="stat-value" id="planStatAvgYearly" style="font-size:1.5rem">—</div>
-              <div class="stat-sub">KWD across plans</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-              <i class="fas fa-calendar-alt" style="font-size:16px;"></i>
             </div>
           </div>
         </div>
@@ -1308,6 +1284,27 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('deleteRevModal')">Cancel</button>
       <button class="btn btn-danger" id="confirmDeleteRevBtn">Delete Review</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="genericConfirmModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-icon danger" style="background:var(--yellow-dim);color:var(--yellow);">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div style="margin-left:15px">
+        <div class="modal-title" id="genericConfirmTitle">Confirm Action</div>
+        <div class="modal-subtitle" id="genericConfirmSubtitle">Are you sure?</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('genericConfirmModal')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('genericConfirmModal')">Cancel</button>
+      <button class="btn btn-primary" id="genericConfirmBtn">Confirm</button>
     </div>
   </div>
 </div>

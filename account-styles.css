@@ -1266,6 +1266,12 @@ html[lang="ar"] .account-main { margin-left: 0; margin-right: 248px; }
   align-items: center;
   margin-bottom: 1.75rem;
   gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: var(--bg);
+  padding: 1.5rem 0 1rem;
+  margin-top: -1.5rem;
 }
 .topbar-left { display: flex; align-items: center; gap: .75rem; }
 .account-topbar h1 {
@@ -2197,4 +2203,58 @@ html[lang="ar"] .toast-container { right: auto; left: 1.5rem; }
   .toast-container { right: 1rem; left: 1rem; bottom: 1rem; }
   html[lang="ar"] .toast-container { right: 1rem; left: 1rem; }
   .toast { max-width: 100%; }
+}
+
+/* Hamburger Menu for Mobile */
+.topbar-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 24px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 100;
+}
+
+.topbar-hamburger span {
+    width: 24px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+}
+
+@media (max-width: 768px) {
+    .topbar-hamburger {
+        display: flex;
+    }
+    
+    .account-sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .account-sidebar.active {
+        left: 0;
+    }
+    
+    html[lang="ar"] .account-sidebar {
+        left: auto;
+        right: -280px;
+        transition: right 0.3s ease;
+    }
+    
+    html[lang="ar"] .account-sidebar.active {
+        right: 0;
+    }
 }

@@ -50,7 +50,7 @@ function handleSuccessfulAuth(role) {
 
         function setAuthLang(lang, save = true) {
             document.documentElement.setAttribute('lang', lang);
-            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('dir', 'ltr');
 
             document.querySelectorAll('[data-en][data-ar]').forEach(el => {
                 if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
@@ -116,22 +116,7 @@ function handleSuccessfulAuth(role) {
             }
         }
 
-        /* Reset password with token view */
-        function showResetWithToken(e) {
-            e.preventDefault();
-            const loginPanel = document.getElementById('panel-login');
-            if (loginPanel) loginPanel.classList.remove('active');
-            const regPanel = document.getElementById('panel-register');
-            if (regPanel) regPanel.classList.remove('active');
-            const forgotPanel = document.getElementById('panel-forgot');
-            if (forgotPanel) forgotPanel.classList.remove('active');
-            const resetPanel = document.getElementById('panel-reset-token');
-            if (resetPanel) resetPanel.classList.add('active');
-            const tabsEl = document.querySelector('.auth-tabs');
-            if (tabsEl) {
-                tabsEl.style.display = 'none';
-            }
-        }
+
 
         function backToLogin(e) {
             e.preventDefault();
@@ -481,8 +466,11 @@ function handleSuccessfulAuth(role) {
         });
 
         /* Forgot password form */
+        let resetEmailCooldown = 0;
         document.getElementById('forgotForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            if (resetEmailCooldown > 0) return;
+
             const lang = document.documentElement.getAttribute('lang') || 'en';
             const email = document.getElementById('forgotEmail').value.trim();
 
@@ -496,18 +484,33 @@ function handleSuccessfulAuth(role) {
             btn.querySelector('span').textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
 
             try {
-                await fetch(`${API_BASE}/api/v1/email/auth/forgot-password`, {
+                await fetch(`${API_BASE}/api/v1/email/auth/forgot-password?email=${encodeURIComponent(email)}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
                 });
                 // Always show success (security — don't reveal if email exists)
                 showToast(lang === 'ar' ? 'إذا كان البريد مسجلاً، تم إرسال رابط إعادة التعيين' : 'If the email exists, a reset link has been sent', 'success');
+                
+                // Cooldown logic
+                resetEmailCooldown = 60;
+                const updateBtn = () => {
+                    if (resetEmailCooldown > 0) {
+                        btn.disabled = true;
+                        btn.querySelector('span').textContent = lang === 'ar' ? `إعادة الإرسال بعد ${resetEmailCooldown} ثانية` : `Resend in ${resetEmailCooldown}s`;
+                        resetEmailCooldown--;
+                        setTimeout(updateBtn, 1000);
+                    } else {
+                        btn.disabled = false;
+                        btn.querySelector('span').textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين →' : 'Send Reset Link →';
+                    }
+                };
+                updateBtn();
             } catch {
                 showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+                btn.disabled = false;
+                btn.querySelector('span').textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين →' : 'Send Reset Link →';
             }
-            btn.disabled = false;
-            btn.querySelector('span').textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين →' : 'Send Reset Link →';
         });
 
         /* Reset Password with Token form */
