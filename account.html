@@ -810,7 +810,6 @@
 
             // Delete section
             document.getElementById('deleteEmailDisplay').textContent = user.email;
-            document.getElementById('changePassEmail').value = user.email;
         }
 
         // ===== Populate Edit Form =====
@@ -910,24 +909,40 @@
         document.getElementById('changePasswordForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const lang = getLang();
-            const email = document.getElementById('changePassEmail').value;
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+
+            if (newPassword.length < 8) {
+                showNotification(lang === 'ar' ? 'كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل' : 'New password must be at least 8 characters', 'error');
+                return;
+            }
 
             const btn = this.querySelector('.btn-save');
             btn.disabled = true;
-            btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
+            btn.textContent = lang === 'ar' ? 'جاري التحديث...' : 'Updating...';
 
             try {
-                await fetch(`${API_BASE}/api/v1/email/auth/forgot-password?email=${encodeURIComponent(email)}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
+                const res = await apiFetch('/api/v1/users/me/password', {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
                 });
-                showNotification(lang === 'ar' ? 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك' : 'Password reset link sent to your email', 'success');
+
+                if (res.ok) {
+                    showNotification(lang === 'ar' ? 'تم تحديث كلمة المرور بنجاح!' : 'Password updated successfully!', 'success');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                } else {
+                    const err = await res.json();
+                    showNotification(err.detail || (lang === 'ar' ? 'فشل تحديث كلمة المرور' : 'Failed to update password'), 'error');
+                }
             } catch {
                 showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
             }
             btn.disabled = false;
-            btn.textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين' : 'Send Password Reset Link';
+            btn.textContent = lang === 'ar' ? 'تحديث كلمة المرور' : 'Update Password';
         });
 
         // ===== Reset Password with Token Submit =====
