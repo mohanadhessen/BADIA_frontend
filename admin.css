@@ -900,6 +900,8 @@ tbody tr.expanded-detail td{background:#fffbf0;border-bottom:1.5px solid var(--a
 .stat-icon.blue  { background: var(--blue-dim);  color: var(--blue); }
 .stat-icon.red   { background: var(--red-dim);   color: var(--red); }
 .stat-icon.gold  { background: var(--gold-dim);  color: var(--gold); }
+.stat-icon.purple { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+.stat-icon.amber  { background: var(--amber-dim);  color: var(--amber); }
 
 .stat-value.green { color: var(--green); }
 .stat-value.red   { color: var(--red); }

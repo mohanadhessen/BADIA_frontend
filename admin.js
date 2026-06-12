@@ -293,33 +293,36 @@ async function loadEmailsThisMonth() {
 
     document.getElementById('statEmailsVal').textContent = thisMonth.toLocaleString();
 
-    // Sub-label: "Today: 2 · Limit/day: 300"
-    const subParts = [];
-    subParts.push(`Today: ${thisDay.toLocaleString()}`);
-    if (dayLimit   != null) subParts.push(`Limit/day: ${dayLimit.toLocaleString()}`);
-    if (monthLimit != null) subParts.push(`Limit/mo: ${monthLimit.toLocaleString()}`);
-    document.getElementById('statEmailSub').textContent = subParts.join(' · ');
+    // Month stats (e.g. "120 / 3,000 (4%)")
+    const monthPctVal = monthLimit ? Math.min((thisMonth / monthLimit) * 100, 100) : (thisMonth > 0 ? 100 : 0);
+    const monthPctText = monthLimit ? `${thisMonth.toLocaleString()} / ${monthLimit.toLocaleString()} (${Math.round(monthPctVal)}%)` : thisMonth.toLocaleString();
+    const elMonthPct = document.getElementById('statEmailMonthPct');
+    if (elMonthPct) elMonthPct.textContent = monthPctText;
 
-    // Right label: "2 / 3000"
-    document.getElementById('statEmailPct').textContent =
-      monthLimit ? `${thisMonth} / ${monthLimit}` : '';
-
-    // Month bar
     const monthBar = document.getElementById('statEmailMonthBar');
-    const monthPct = monthLimit ? Math.min((thisMonth / monthLimit) * 100, 100) : (thisMonth > 0 ? 100 : 0);
-    monthBar.style.width = `${monthPct}%`;
-    monthBar.className = 'storage-bar-fill' + (monthLimit && monthPct >= 90 ? ' danger' : monthLimit && monthPct >= 70 ? ' warn' : '');
+    if (monthBar) {
+      monthBar.style.width = `${monthPctVal}%`;
+      monthBar.className = 'storage-bar-fill' + (monthLimit && monthPctVal >= 90 ? ' danger' : monthLimit && monthPctVal >= 70 ? ' warn' : '');
+    }
 
-    // Daily bar
-    const dayBar = document.getElementById('statEmailYearBar');
-    const dayPct = dayLimit ? Math.min((thisDay / dayLimit) * 100, 100) : (thisDay > 0 ? 100 : 0);
-    dayBar.style.width = `${dayPct}%`;
-    dayBar.className = 'storage-bar-fill' + (dayLimit && dayPct >= 90 ? ' danger' : dayLimit && dayPct >= 70 ? ' warn' : '');
+    // Daily stats (e.g. "5 / 300 (2%)")
+    const dayPctVal = dayLimit ? Math.min((thisDay / dayLimit) * 100, 100) : (thisDay > 0 ? 100 : 0);
+    const dayPctText = dayLimit ? `${thisDay.toLocaleString()} / ${dayLimit.toLocaleString()} (${Math.round(dayPctVal)}%)` : thisDay.toLocaleString();
+    const elDayPct = document.getElementById('statEmailDayPct');
+    if (elDayPct) elDayPct.textContent = dayPctText;
+
+    const dayBar = document.getElementById('statEmailDayBar');
+    if (dayBar) {
+      dayBar.style.width = `${dayPctVal}%`;
+      dayBar.className = 'storage-bar-fill' + (dayLimit && dayPctVal >= 90 ? ' danger' : dayLimit && dayPctVal >= 70 ? ' warn' : '');
+    }
 
   } catch (e) {
     document.getElementById('statEmailsVal').textContent = '—';
-    document.getElementById('statEmailSub').textContent  = 'Data unavailable';
-    document.getElementById('statEmailPct').textContent  = '';
+    const elMonthPct = document.getElementById('statEmailMonthPct');
+    if (elMonthPct) elMonthPct.textContent = 'Unavailable';
+    const elDayPct = document.getElementById('statEmailDayPct');
+    if (elDayPct) elDayPct.textContent = 'Unavailable';
   }
 }
 
@@ -1046,7 +1049,8 @@ function syncPlanCounters() {
     if (Array.isArray(d)) return d.length > 0;
     return d && Object.keys(d).length > 0;
   }).length;
-  document.getElementById('statPlans').textContent           = total;
+  const elPlans = document.getElementById('statPlans');
+  if (elPlans) elPlans.textContent = total;
   document.getElementById('plansCount').textContent          = `${total} plan${total !== 1 ? 's' : ''}`;
   document.getElementById('planStatTotal').textContent       = total;
   document.getElementById('planStatAvgMonthly').textContent  = avgM;
@@ -1931,6 +1935,24 @@ document.addEventListener('DOMContentLoaded', () => {
         dateFormat: 'Y-m-d'
       });
     }
+    const editStartContainer = document.getElementById('edit-payment-start-container');
+    if (editStartContainer) {
+      flatpickr(editStartContainer, {
+        wrap: true,
+        allowInput: true,
+        clickOpens: false,
+        dateFormat: 'Y-m-d'
+      });
+    }
+    const editEndContainer = document.getElementById('edit-payment-end-container');
+    if (editEndContainer) {
+      flatpickr(editEndContainer, {
+        wrap: true,
+        allowInput: true,
+        clickOpens: false,
+        dateFormat: 'Y-m-d'
+      });
+    }
   }
 
   // Modal Backdrop Click Listeners
@@ -1947,54 +1969,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadPaymentsTelemetry() {
   try {
-    // Perform parallel fetches of the payments list and the telemetry metrics
-    const [paymentsData, telemetryData] = await Promise.allSettled([
-      apiFetch('/api/v1/admin/payments'),
-      apiFetch('/api/v1/admin/payments/telemetry')
-    ]);
-
-    let items = [];
-    if (paymentsData.status === 'fulfilled' && paymentsData.value) {
-      const data = paymentsData.value;
-      items = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.payments || []));
-    }
+    const data = await apiFetch('/api/v1/admin/payments');
+    
+    const items = data && Array.isArray(data.items) ? data.items : [];
     _payments = items;
 
-    let byStatus = {};
-    let totalFromTelemetry = null;
-    if (telemetryData.status === 'fulfilled' && telemetryData.value) {
-      const tel = telemetryData.value;
-      byStatus = tel.by_status || {};
-      totalFromTelemetry = tel.total_payments;
+    const metrics = data.metrics || {};
+    
+    const finalTotalPayments = metrics.total_payments ?? items.length;
+    const finalPaidPayments = metrics.paid_payments ?? items.filter(p => p.status === 'paid').length;
+    const finalCanceledPayments = metrics.canceled_payments ?? items.filter(p => p.status === 'canceled').length;
+    const finalRejectedPayments = metrics.rejected_payments ?? items.filter(p => p.status === 'rejected').length;
+    const finalMonthlyCycle = metrics.monthly_payments ?? items.filter(p => p.billing_cycle === 'monthly').length;
+    const finalYearlyCycle = metrics.yearly_payments ?? items.filter(p => p.billing_cycle === 'yearly').length;
+    
+    const now = new Date();
+    const currentMonthItems = items.filter(p => {
+      const pDate = new Date(p.created_at);
+      return pDate.getFullYear() === now.getFullYear() && pDate.getMonth() === now.getMonth();
+    });
+    
+    const finalPaymentsThisMonth = metrics.payments_this_month ?? currentMonthItems.length;
+
+    const totalRevenue = metrics.total_revenue ?? items.filter(p => p.status === 'paid' || p.status === 'canceled').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    const revenueThisMonth = metrics.revenue_this_month ?? currentMonthItems.filter(p => p.status === 'paid' || p.status === 'canceled').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+
+    const setElText = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+
+    setElText('payStatTotal', finalTotalPayments);
+    setElText('payStatActive', finalPaidPayments);
+    setElText('payStatCanceled', finalCanceledPayments);
+    setElText('payStatRejected', finalRejectedPayments);
+    setElText('payStatThisMonth', finalPaymentsThisMonth);
+    setElText('payStatMonthlyCycle', finalMonthlyCycle);
+    setElText('payStatYearlyCycle', finalYearlyCycle);
+    
+    // Main Dashboard Total Revenue
+    const mainRevEl = document.getElementById('statRevenueVal');
+    if (mainRevEl) {
+      mainRevEl.innerHTML = `${Number(totalRevenue).toFixed(3)} <span style="font-size:13px;font-weight:400">KWD</span>`;
     }
-
-    // Calculate metrics and fallback values
-    const totalPaymentsCount = items.length;
-    const paidPayments = items.filter(p => p.status === 'paid');
-    const canceledPaymentsCount = items.filter(p => p.status === 'canceled' || p.status === 'rejected').length;
-    // Total revenue includes both paid and canceled status payments
-    const revenuePayments = items.filter(p => p.status === 'paid' || p.status === 'canceled');
-    const totalRevenue = revenuePayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
     
-    // Resolve metrics priority: Telemetry endpoint data first, then client-side computed fallback
-    const finalTotalPayments = totalFromTelemetry ?? totalPaymentsCount;
-    const finalPaidPayments = byStatus.paid ?? paidPayments.length;
-    const finalCanceledPayments = (byStatus.canceled !== undefined || byStatus.rejected !== undefined)
-      ? ((byStatus.canceled || 0) + (byStatus.rejected || 0))
-      : canceledPaymentsCount;
-
-    const totalEl = document.getElementById('payStatTotal');
-    if (totalEl) totalEl.textContent = finalTotalPayments;
-
-    const payActiveEl = document.getElementById('payStatActive');
-    if (payActiveEl) payActiveEl.textContent = finalPaidPayments;
-
-    const canceledEl = document.getElementById('payStatCanceled');
-    if (canceledEl) canceledEl.textContent = finalCanceledPayments;
-    
-    const revTotalEl = document.getElementById('payStatTotalRevenue');
-    if (revTotalEl) {
-      revTotalEl.textContent = Number(totalRevenue).toFixed(3) + ' KWD';
+    // Payments Page Revenue This Month
+    const revMonthEl = document.getElementById('payStatRevenueThisMonth');
+    if (revMonthEl) {
+      revMonthEl.innerHTML = `${Number(revenueThisMonth).toFixed(3)} <span style="font-size:13px;font-weight:400">KWD</span>`;
     }
     
     const activeEl = document.getElementById('statActive');
@@ -2183,6 +2205,9 @@ async function submitSubscription() {
     plan_id: parseInt(planId),
     amount: amount,
     billing_cycle: cycle,
+    status: {
+      status: "paid"
+    },
     start_date: start ? new Date(start).toISOString() : new Date().toISOString(),
     end_date: end ? new Date(end).toISOString() : new Date(Date.now() + 30*24*60*60*1000).toISOString()
   };
@@ -2277,10 +2302,14 @@ function renderPaymentsTable(items) {
           <div class="meta-item"><div class="meta-label">Created</div><div class="meta-value">${fmtDate(p.created_at)}</div></div>
         </div>
       </div>
-      <div class="payment-actions">
-        <button class="btn-update" onclick="openStatusModal(${p.id}, '${status}')">
+      <div class="payment-actions" style="display:flex; gap:8px;">
+        <button class="btn-update" onclick="openStatusModal(${p.id}, '${status}')" style="flex:1;">
+          <i class="fas fa-sync-alt" style="font-size:12px; margin-right:4px;"></i>
+          Status
+        </button>
+        <button class="btn-update" onclick="openEditPaymentModal(${p.id})" style="flex:1; background:var(--accent-dim); color:var(--accent);">
           <i class="fas fa-edit" style="font-size:12px; margin-right:4px;"></i>
-          Update status
+          Edit
         </button>
       </div>
     </div>`;
@@ -2365,9 +2394,9 @@ async function confirmStatusUpdate() {
   closeStatusModal();
 
   try {
-    await apiFetch(`/api/v1/admin/payments/${pid}/status`, {
+    await apiFetch(`/api/v1/admin/payments/${pid}`, {
       method: 'PATCH',
-      body: JSON.stringify({ status: st })
+      body: JSON.stringify({ status: { status: st } })
     });
     toast('Payment status updated successfully', 'success');
     loadPaymentsTelemetry();
@@ -2375,3 +2404,121 @@ async function confirmStatusUpdate() {
     toast('Failed to update payment status', 'error');
   }
 }
+
+function populateEditPaymentPlanDropdown(selectedPlanId) {
+  const select = document.getElementById('editPaymentPlan');
+  if (!select) return;
+  select.innerHTML = '';
+  _plans.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    if (String(p.id) === String(selectedPlanId)) {
+      opt.selected = true;
+    }
+    select.appendChild(opt);
+  });
+}
+
+function openEditPaymentModal(pid) {
+  const payment = _payments.find(p => String(p.id) === String(pid));
+  if (!payment) return toast('Payment not found', 'error');
+
+  document.getElementById('editPaymentId').value = pid;
+  document.getElementById('editPaymentSubtitle').textContent = `Payment ID: #${pid}`;
+  
+  populateEditPaymentPlanDropdown(payment.plan_id);
+  document.getElementById('editPaymentCycle').value = payment.billing_cycle || 'monthly';
+  document.getElementById('editPaymentAmount').value = payment.amount || '';
+  
+  const formatForInput = (d) => {
+    if (!d) return '';
+    return new Date(d).toISOString().split('T')[0];
+  };
+  
+  const startEl = document.getElementById('editPaymentStart');
+  const endEl = document.getElementById('editPaymentEnd');
+  
+  startEl.value = formatForInput(payment.start_date);
+  endEl.value = formatForInput(payment.end_date);
+  
+  const startFp = startEl._flatpickr || document.getElementById('edit-payment-start-container')?._flatpickr;
+  if (startFp) startFp.setDate(startEl.value);
+  
+  const endFp = endEl._flatpickr || document.getElementById('edit-payment-end-container')?._flatpickr;
+  if (endFp) endFp.setDate(endEl.value);
+
+  document.getElementById('editPaymentStatus').value = payment.status || 'pending';
+  toggleEditPaymentPaidNotice();
+
+  openModal('editPaymentModal');
+}
+
+function toggleEditPaymentPaidNotice() {
+  const sel = document.getElementById('editPaymentStatus');
+  const notice = document.getElementById('editPaymentPaidNotice');
+  const textEl = document.getElementById('editPaymentNoticeText');
+  if (sel && notice && textEl) {
+    notice.classList.remove('warning', 'danger');
+    if (sel.value === 'paid') {
+      notice.style.display = 'flex';
+      textEl.innerHTML = `Marking as <strong>Paid</strong> will automatically send a payment receipt to the user's email.`;
+    } else if (sel.value === 'rejected') {
+      notice.style.display = 'flex';
+      notice.classList.add('danger');
+      textEl.innerHTML = `Marking as <strong>Rejected</strong> will automatically send a rejection notification to the user's email.`;
+    } else if (sel.value === 'canceled') {
+      notice.style.display = 'flex';
+      notice.classList.add('warning');
+      textEl.innerHTML = `Marking as <strong>Canceled</strong> will automatically send a cancellation notification to the user's email.`;
+    } else {
+      notice.style.display = 'none';
+    }
+  }
+}
+
+async function savePayment() {
+  const pid = document.getElementById('editPaymentId').value;
+  const planId = document.getElementById('editPaymentPlan').value;
+  const cycle = document.getElementById('editPaymentCycle').value;
+  const amount = parseFloat(document.getElementById('editPaymentAmount').value);
+  const status = document.getElementById('editPaymentStatus').value;
+  const start = document.getElementById('editPaymentStart').value;
+  const end = document.getElementById('editPaymentEnd').value;
+
+  if (!planId) return toast('Please select a plan', 'error');
+  if (isNaN(amount) || amount < 0) return toast('Please enter a valid amount', 'error');
+  if (!start || !end) return toast('Start and end dates are required', 'error');
+
+  const payload = {
+    plan_id: parseInt(planId),
+    billing_cycle: cycle,
+    amount: amount,
+    status: {
+      status: status
+    },
+    start_date: new Date(start).toISOString(),
+    end_date: new Date(end).toISOString()
+  };
+
+  const btn = document.getElementById('savePaymentBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    await apiFetch(`/api/v1/admin/payments/${pid}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    });
+    toast('Payment updated successfully', 'success');
+    closeModal('editPaymentModal');
+    loadPaymentsTelemetry();
+  } catch (e) {
+    toast(`Failed to update payment: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+

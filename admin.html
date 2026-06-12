@@ -196,12 +196,12 @@
             <div class="stat-card">
               <div class="stat-card-inner">
                 <div class="stat-card-text">
-                  <div class="stat-label">Plans</div>
-                  <div class="stat-value" id="statPlans">—</div>
-                  <div class="stat-sub">Pricing tiers</div>
+                  <div class="stat-label">Total Revenue</div>
+                  <div class="stat-value green" id="statRevenueVal" style="color:var(--green)">—</div>
+                  <div class="stat-sub">All time revenue</div>
                 </div>
-                <div class="stat-icon-box" style="background:var(--purple-dim);color:var(--purple)">
-                  <i class="fas fa-tags" style="font-size:16px;"></i>
+                <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+                  <i class="fas fa-dollar-sign" style="font-size:16px;"></i>
                 </div>
               </div>
             </div>
@@ -231,25 +231,32 @@
                   <div class="stat-label">Total Emails sent</div>
                   <div class="stat-value" id="statEmailsVal">—</div>
                   
-                  <div class="storage-bar-wrap">
-                    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
-                      <span id="statEmailSub">Month: — | Year: —</span>
-                      <span id="statEmailPct">— / —</span>
+                  <div class="storage-bar-wrap" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+                    <!-- Month Bar Row -->
+                    <div>
+                      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
+                        <span style="font-weight:600;color:var(--text-2)"><i class="far fa-calendar-alt" style="margin-right:4px;color:#3b82f6"></i>This Month</span>
+                        <span id="statEmailMonthPct" style="font-family:'Geist Mono', monospace;font-size:.72rem">— / —</span>
+                      </div>
+                      <div class="storage-bar" style="margin-top:0">
+                        <div class="storage-bar-fill" id="statEmailMonthBar" style="width:0%"></div>
+                      </div>
                     </div>
 
-                    <!-- Month bar -->
-                    <div class="storage-bar" style="margin-bottom:6px">
-                      <div class="storage-bar-fill" id="statEmailMonthBar" style="width:0%"></div>
-                    </div>
-
-                    <!-- Daily bar -->
-                    <div class="storage-bar">
-                      <div class="storage-bar-fill" id="statEmailYearBar" style="width:0%"></div>
+                    <!-- Day Bar Row -->
+                    <div>
+                      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
+                        <span style="font-weight:600;color:var(--text-2)"><i class="far fa-clock" style="margin-right:4px;color:#3b82f6"></i>Today</span>
+                        <span id="statEmailDayPct" style="font-family:'Geist Mono', monospace;font-size:.72rem">— / —</span>
+                      </div>
+                      <div class="storage-bar" style="margin-top:0">
+                        <div class="storage-bar-fill" id="statEmailDayBar" style="width:0%"></div>
+                      </div>
                     </div>
                   </div>
 
                 </div>
-                <div class="stat-icon-box" style="background:rgba(59,130,246,.08);color:#3b82f6">
+                <div class="stat-icon-box" style="background:rgba(59,130,246,.08);color:#3b82f6; align-self: flex-start; margin-top: 4px;">
                   <i class="fas fa-envelope" style="font-size:16px;"></i>
                 </div>
               </div>
@@ -625,24 +632,15 @@
       </div>
 
       <!-- STATS -->
-      <div class="stats-grid">
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));">
         <div class="stat-card">
           <div class="stat-header">
-            <div class="stat-label">Total revenue</div>
+            <div class="stat-label">Revenue this month</div>
             <div class="stat-icon green">
-              <i class="fas fa-dollar-sign"></i>
+              <i class="fas fa-calendar-check"></i>
             </div>
           </div>
-          <div class="stat-value green" id="payStatTotalRevenue">— <span style="font-size:13px;font-weight:400">KWD</span></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Total active</div>
-            <div class="stat-icon blue">
-              <i class="fas fa-toggle-on"></i>
-            </div>
-          </div>
-          <div class="stat-value" id="payStatActive">—</div>
+          <div class="stat-value green" id="payStatRevenueThisMonth">— <span style="font-size:13px;font-weight:400">KWD</span></div>
         </div>
         <div class="stat-card">
           <div class="stat-header">
@@ -655,12 +653,57 @@
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <div class="stat-label">Canceled / Rejected</div>
+            <div class="stat-label">Paid payments</div>
+            <div class="stat-icon blue">
+              <i class="fas fa-toggle-on"></i>
+            </div>
+          </div>
+          <div class="stat-value" id="payStatActive">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">Canceled payments</div>
             <div class="stat-icon red">
               <i class="fas fa-circle-xmark"></i>
             </div>
           </div>
           <div class="stat-value red" id="payStatCanceled">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">Rejected payments</div>
+            <div class="stat-icon red">
+              <i class="fas fa-ban"></i>
+            </div>
+          </div>
+          <div class="stat-value red" id="payStatRejected">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">Payments this month</div>
+            <div class="stat-icon gold">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+          </div>
+          <div class="stat-value" id="payStatThisMonth">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">Monthly cycles</div>
+            <div class="stat-icon purple">
+              <i class="fas fa-arrows-spin"></i>
+            </div>
+          </div>
+          <div class="stat-value" id="payStatMonthlyCycle">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">Yearly cycles</div>
+            <div class="stat-icon purple">
+              <i class="fas fa-rotate"></i>
+            </div>
+          </div>
+          <div class="stat-value" id="payStatYearlyCycle">—</div>
         </div>
       </div>
 
@@ -852,6 +895,82 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeStatusModal()">Cancel</button>
       <button class="btn-confirm" onclick="confirmStatusUpdate()">Update status</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EDIT PAYMENT MODAL ────────────────────── -->
+<div class="modal-backdrop" id="editPaymentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon edit">
+        <i class="fas fa-credit-card" style="color:var(--accent)"></i>
+      </div>
+      <div>
+        <div class="modal-title">Edit Payment</div>
+        <div class="modal-subtitle" id="editPaymentSubtitle">Payment ID: #—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('editPaymentModal')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editPaymentId"/>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Plan <span class="req">*</span></label>
+          <select class="form-input" id="editPaymentPlan"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Billing Cycle <span class="req">*</span></label>
+          <select class="form-input" id="editPaymentCycle">
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Amount (KWD) <span class="req">*</span></label>
+          <input class="form-input" id="editPaymentAmount" type="number" step="0.001" placeholder="0.000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status <span class="req">*</span></label>
+          <select class="form-input" id="editPaymentStatus" onchange="toggleEditPaymentPaidNotice()">
+            <option value="paid">Paid</option>
+            <option value="rejected">Rejected</option>
+            <option value="canceled">Canceled</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Start Date <span class="req">*</span></label>
+          <div class="input-with-icon flatpickr" id="edit-payment-start-container" style="position: relative; display: flex; align-items: center; width: 100%;">
+            <input class="form-input" type="text" id="editPaymentStart" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input>
+            <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle>
+              <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
+            </a>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date <span class="req">*</span></label>
+          <div class="input-with-icon flatpickr" id="edit-payment-end-container" style="position: relative; display: flex; align-items: center; width: 100%;">
+            <input class="form-input" type="text" id="editPaymentEnd" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input>
+            <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle>
+              <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="paid-notice" id="editPaymentPaidNotice" style="display:none; margin-top: 14px;">
+        <i class="fas fa-envelope"></i>
+        <p id="editPaymentNoticeText">Marking as <strong>Paid</strong> will automatically send a payment receipt to the user's email.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editPaymentModal')">Cancel</button>
+      <button class="btn btn-accent" id="savePaymentBtn" onclick="savePayment()">Save Changes</button>
     </div>
   </div>
 </div>
