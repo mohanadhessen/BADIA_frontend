@@ -703,16 +703,12 @@
                 renderReviews(cachedRevs);
             }
 
-            // If no cache, fetch from API
-            if (!cached) {
-                await fetchUserProfile();
+            // Try cached requests
+            const cachedReqs = getCachedRequests();
+            if (cachedReqs) {
+                currentRequests = cachedReqs;
+                renderRequests(cachedReqs);
             }
-
-            // Fetch requests on init
-            await fetchRequests();
-
-            // Check for URL query params (like verify_token)
-            await handleAccountURLParams();
 
             // ── Direct-link hash routing ──────────────────────────────────────
             // Supports: account.html#partnership  account.html#feasibility  etc.
@@ -721,6 +717,17 @@
             if (hash && validSections.includes(hash)) {
                 showSection(hash, null);
             }
+
+            // Fetch everything in background after window finishes loading (non-blocking)
+            window.addEventListener('load', () => {
+                setTimeout(async () => {
+                    const profilePromise = fetchUserProfile();
+                    const requestsPromise = fetchRequests();
+                    const reviewsPromise = fetchReviews();
+                    const paramsPromise = handleAccountURLParams();
+                    await Promise.allSettled([profilePromise, requestsPromise, reviewsPromise, paramsPromise]);
+                }, 0);
+            });
         }
 
         // ===== Handle URL Params on Account Page =====
@@ -1162,14 +1169,39 @@
         // ===== Requests =====
         async function fetchRequests() {
             try {
-                const res = await apiFetch('/api/v1/users/me/requests');
+                const headers = {};
+                const storedEtag = localStorage.getItem('requests_etag');
+                if (storedEtag) {
+                    headers['If-None-Match'] = storedEtag;
+                }
+
+                const res = await apiFetch('/api/v1/users/me/requests', { headers });
+                
+                if (res.status === 304) {
+                    console.log('Requests unchanged (304). Using cache.');
+                    const cachedReqs = getCachedRequests();
+                    if (cachedReqs) {
+                        currentRequests = cachedReqs;
+                        renderRequests(cachedReqs);
+                    }
+                    return;
+                }
+
                 if (res.ok) {
                     const data = await res.json();
                     currentRequests = data.requests || data || [];
+                    setCachedRequests(currentRequests);
                     renderRequests(currentRequests);
+
+                    const newEtag = res.headers.get('ETag');
+                    if (newEtag) {
+                        localStorage.setItem('requests_etag', newEtag);
+                    } else {
+                        localStorage.removeItem('requests_etag');
+                    }
                 }
-            } catch {
-                // silently fail; empty state shows
+            } catch (err) {
+                console.error('Requests fetch error:', err);
             }
         }
 
@@ -1548,6 +1580,45 @@
             });
         }
 
+        // ===== Fetch Reviews from API =====
+        async function fetchReviews() {
+            try {
+                const headers = {};
+                const storedEtag = localStorage.getItem('reviews_etag');
+                if (storedEtag) {
+                    headers['If-None-Match'] = storedEtag;
+                }
+
+                const res = await apiFetch('/api/v1/users/me/reviews', { headers });
+
+                if (res.status === 304) {
+                    console.log('Reviews unchanged (304). Using cache.');
+                    const cachedRevs = getCachedReviews();
+                    if (cachedRevs) {
+                        currentReviews = cachedRevs;
+                        renderReviews(cachedRevs);
+                    }
+                    return;
+                }
+
+                if (res.ok) {
+                    const data = await res.json();
+                    currentReviews = data.reviews || data.items || data || [];
+                    setCachedReviews(currentReviews);
+                    renderReviews(currentReviews);
+
+                    const newEtag = res.headers.get('ETag');
+                    if (newEtag) {
+                        localStorage.setItem('reviews_etag', newEtag);
+                    } else {
+                        localStorage.removeItem('reviews_etag');
+                    }
+                }
+            } catch (err) {
+                console.error('Reviews fetch error:', err);
+            }
+        }
+
         function renderReviews(reviews) {
             const lang = getLang();
             const list = document.getElementById('reviewsList');
@@ -1605,6 +1676,7 @@
                     if (!currentReviews) currentReviews = [];
                     currentReviews.unshift(review);
                     showNotification(lang === 'ar' ? 'تم إرسال التقييم بنجاح' : 'Review submitted', 'success');
+                    localStorage.removeItem('reviews_etag'); // bust cache ETag
                     setCachedReviews(currentReviews);
                     renderReviews(currentReviews);
 
@@ -1685,6 +1757,7 @@
                     const review = await res.json();
                     const idx = currentReviews.findIndex(r => r.id === editingReviewId);
                     if (idx >= 0) currentReviews[idx] = review;
+                    localStorage.removeItem('reviews_etag'); // bust cache ETag
                     setCachedReviews(currentReviews);
                     renderReviews(currentReviews);
                     showNotification(lang === 'ar' ? 'تم تحديث التقييم' : 'Review updated', 'success');
@@ -1708,6 +1781,7 @@
                 const res = await apiFetch(`/api/v1/reviews/${id}`, { method: 'DELETE' });
                 if (res.ok) {
                     currentReviews = currentReviews.filter(r => r.id !== id);
+                    localStorage.removeItem('reviews_etag'); // bust cache ETag
                     setCachedReviews(currentReviews);
                     renderReviews(currentReviews);
                     showNotification(lang === 'ar' ? 'تم حذف التقييم' : 'Review deleted', 'success');

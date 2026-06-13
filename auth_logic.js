@@ -219,6 +219,7 @@ function handleSuccessfulAuth(role) {
             const accessToken = params.get('access_token');
             const refreshToken = params.get('refresh_token');
             if (accessToken) {
+                if (typeof clearUserDataCache === 'function') clearUserDataCache();
                 localStorage.setItem('access_token', accessToken);
                 if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
                 const lang = document.documentElement.getAttribute('lang') || 'en';
@@ -257,6 +258,7 @@ function handleSuccessfulAuth(role) {
                         const data = await res.json();
                         const authHeader = res.headers.get('Authorization') || res.headers.get('authorization');
                         const token = authHeader ? authHeader.replace('Bearer ', '') : data.access_token;
+                        if (typeof clearUserDataCache === 'function') clearUserDataCache();
                         if (token) localStorage.setItem('access_token', token);
                         if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
                         const role = data.user_info?.role;
@@ -364,6 +366,7 @@ function handleSuccessfulAuth(role) {
                     const data = await res.json();
                     const authHeader = res.headers.get('Authorization') || res.headers.get('authorization');
                     const token = authHeader ? authHeader.replace('Bearer ', '') : data.access_token;
+                    if (typeof clearUserDataCache === 'function') clearUserDataCache();
                     if (token) localStorage.setItem('access_token', token);
                     if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
 
@@ -466,6 +469,7 @@ function handleSuccessfulAuth(role) {
                 const data = await res.json();
 
                 if (res.ok || res.status === 201) {
+                    if (typeof clearUserDataCache === 'function') clearUserDataCache();
                     localStorage.setItem('access_token', data.access_token);
                     if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
                     showToast(lang === 'ar' ? 'تم إنشاء الحساب بنجاح! جاري التحويل...' : 'Account created successfully! Redirecting...', 'success');

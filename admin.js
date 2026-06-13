@@ -1987,7 +1987,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Init
-  loadAll();
+  window.addEventListener('load', () => {
+    setTimeout(loadAll, 0);
+  });
 });
 
 async function loadPaymentsTelemetry() {

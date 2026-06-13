@@ -283,7 +283,7 @@ const style = document.createElement('style');
 style.textContent = `@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}`;
 document.head.appendChild(style);
 
-// ===== LocalStorage Helpers for User Data & Reviews =====
+// ===== LocalStorage Helpers for User Data, Reviews & Requests =====
 function getCachedUser() {
     const user = localStorage.getItem('badia_user');
     return user ? JSON.parse(user) : null;
@@ -293,11 +293,19 @@ function setCachedUser(user) {
     localStorage.setItem('badia_user', JSON.stringify(user));
 }
 
-function clearCachedUser() {
+function clearUserDataCache() {
     localStorage.removeItem('badia_user');
     localStorage.removeItem('badia_reviews');
+    localStorage.removeItem('badia_requests');
+    localStorage.removeItem('requests_etag');
+    localStorage.removeItem('reviews_etag');
+}
+
+function clearCachedUser() {
+    clearUserDataCache();
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_role');
 }
 
 function getCachedReviews() {
@@ -307,6 +315,15 @@ function getCachedReviews() {
 
 function setCachedReviews(reviews) {
     localStorage.setItem('badia_reviews', JSON.stringify(reviews));
+}
+
+function getCachedRequests() {
+    const raw = localStorage.getItem('badia_requests');
+    return raw ? JSON.parse(raw) : null;
+}
+
+function setCachedRequests(requests) {
+    localStorage.setItem('badia_requests', JSON.stringify(requests));
 }
 
 // ===== API Helper =====
@@ -391,7 +408,7 @@ async function tryRefreshToken() {
 // ===== Load =====
 window.addEventListener('load', () => {
     console.log('✓ BADIA website loaded');
-    fetchPlans();
+    setTimeout(fetchPlans, 0);
 });
 
 
