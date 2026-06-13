@@ -79,7 +79,7 @@ async function apiFetch(path, opts = {}) {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         toast('Session expired. Redirecting to sign in…', 'error');
-        setTimeout(() => { window.location.href = 'Signin.html'; }, 1500);
+        setTimeout(() => { window.location.href = 'index.html?open_signin=true'; }, 1500);
         throw new Error('Session expired');
       }
     } else {

@@ -375,8 +375,7 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 /* ===== Footer ===== */
 .footer{background:var(--primary);color:var(--white);padding:3rem 0 1.5rem;border-top:1px solid rgba(255,255,255,.1)}
 .footer-content{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1.5rem}
-.footer-logo{height:35px;filter:brightness(0) invert(1);opacity:1}
-.footer-brand p{color:rgba(255,255,255,.6);font-size:.9rem;margin-top:.5rem}
+.footer-logo{height:35px;filter:drop-shadow(1px 0 0 rgba(255,255,255,.3)) drop-shadow(-1px 0 0 rgba(255,255,255,.3)) drop-shadow(0 1px 0 rgba(255,255,255,.3)) drop-shadow(0 -1px 0 rgba(255,255,255,.3));opacity:1}.footer-brand p{color:rgba(255,255,255,.6);font-size:.9rem;margin-top:.5rem}
 .footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
 .footer-links a{color:rgba(255,255,255,.7);text-decoration:none;font-size:.95rem;transition:color .3s}
 .footer-links a:hover{color:var(--accent)}

@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account | BADIA</title>
-    <link rel="icon" type="image/png" href="assets/logo.png">
-    <link rel="apple-touch-icon" href="assets/logo.png">
+    <link rel="icon" type="image/svg+xml" href="assets/badia-logo.svg">
+    <link rel="apple-touch-icon" href="assets/badia-logo.svg">
     <meta name="description" content="BADIA – Manage your account, profile, and services.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -526,7 +526,7 @@
         // ===== Auth Guard =====
         (function () {
             if (!localStorage.getItem('access_token')) {
-                window.location.href = 'Signin.html';
+                window.location.href = 'index.html?open_signin=true';
                 return;
             }
             initAccountPage();

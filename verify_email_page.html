@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verify Email | BADIA</title>
-  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="icon" type="image/svg+xml" href="assets/badia-logo.svg">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
 
@@ -214,7 +214,7 @@
     <p class="subtitle">This verification link has expired. Request a fresh one and check your inbox.</p>
     <button class="btn btn-primary" onclick="resendVerification(this)" aria-label="Resend verification email">Resend verification</button>
     <br>
-    <a href="Signin.html" class="btn btn-ghost">Back to sign in</a>
+    <a href="index.html?open_signin=true" class="btn btn-ghost">Back to sign in</a>
   </div>
 
   <!-- Invalid -->
@@ -224,7 +224,7 @@
     </div>
     <h2>Invalid link</h2>
     <p class="subtitle">This link is invalid or has already been used.</p>
-    <a href="Signin.html" class="btn btn-primary">Back to sign in</a>
+    <a href="index.html?open_signin=true" class="btn btn-primary">Back to sign in</a>
   </div>
 
   <!-- Resent -->
@@ -234,7 +234,7 @@
     </div>
     <h2>New link sent</h2>
     <p class="subtitle">Check your inbox for a fresh verification link.</p>
-    <a href="Signin.html" class="btn btn-ghost">Back to sign in</a>
+    <a href="index.html?open_signin=true" class="btn btn-ghost">Back to sign in</a>
   </div>
 
 </div>

@@ -202,6 +202,19 @@ function handleSuccessfulAuth(role) {
         async function handleURLParams() {
             const params = new URLSearchParams(window.location.search);
             
+            // Check for open_signin query param
+            const openSignin = params.get('open_signin');
+            if (openSignin === 'true') {
+                if (typeof openAuthModal === 'function') {
+                    openAuthModal('login');
+                }
+                const newParams = new URLSearchParams(window.location.search);
+                newParams.delete('open_signin');
+                const newSearch = newParams.toString();
+                const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
+                window.history.replaceState({}, document.title, newUrl);
+            }
+            
             // 1. Google OAuth Callback (Tokens in URL)
             const accessToken = params.get('access_token');
             const refreshToken = params.get('refresh_token');
