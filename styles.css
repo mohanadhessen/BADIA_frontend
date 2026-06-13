@@ -560,7 +560,7 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 
 /* ===== Plan Modal ===== */
 body.modal-open{overflow:hidden}
-.plan-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1.2rem;animation:modalFadeIn .2s ease}
+.plan-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1.2rem;animation:modalFadeIn .2s ease}
 @keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
 .plan-modal{background:var(--white);border-radius:16px;padding:2rem 2rem 1.8rem;max-width:480px;width:100%;position:relative;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.25);animation:modalSlideUp .25s ease}
 @keyframes modalSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
