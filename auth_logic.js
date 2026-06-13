@@ -283,7 +283,7 @@ function handleSuccessfulAuth(role) {
                 const lang = document.documentElement.getAttribute('lang') || 'en';
                 showToast(lang === 'ar' ? 'جاري التحقق من بريدك الإلكتروني...' : 'Verifying your email...', 'success');
                 try {
-                    const res = await fetch(`${API_BASE}/api/v1/email/auth/verify-email`, {
+                    const res = await fetch(`${API_BASE}/api/v1/auth/verify-email`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token: verifyToken })
@@ -501,7 +501,7 @@ function handleSuccessfulAuth(role) {
             btn.querySelector('span').textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
 
             try {
-                await fetch(`${API_BASE}/api/v1/email/auth/forgot-password?email=${encodeURIComponent(email)}`, {
+                await fetch(`${API_BASE}/api/v1/auth/forgot-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -553,7 +553,7 @@ function handleSuccessfulAuth(role) {
                 btn.querySelector('span').textContent = lang === 'ar' ? 'جاري إعادة التعيين...' : 'Resetting...';
 
                 try {
-                    const res = await fetch(`${API_BASE}/api/v1/email/auth/reset-password`, {
+                    const res = await fetch(`${API_BASE}/api/v1/auth/reset-password`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token, new_password: newPassword })

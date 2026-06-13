@@ -240,6 +240,10 @@
 </div>
 
 <script>
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:8000'
+    : 'https://badia-backend.onrender.com';
+
   function show(id) {
     document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id);
@@ -250,7 +254,7 @@
 
   async function verifyEmail(token) {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/email/auth/verify-email', {
+      const res = await fetch(`${API_BASE}/api/v1/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token })
@@ -258,7 +262,7 @@
       const data = await res.json();
       if (res.ok) {
         show('state-success');
-        setTimeout(() => { window.location.href = 'account.html'; }, 3000);
+        setTimeout(() => { window.location.href = 'account.html'; }, 2000);
       } else if (data.detail === 'Token expired') {
         show('state-expired');
       } else {
@@ -288,7 +292,7 @@
     btn.textContent = 'Sending…';
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/email/auth/request-verification', {
+      const res = await fetch(`${API_BASE}/api/v1/auth/request-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
