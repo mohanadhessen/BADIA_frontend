@@ -711,10 +711,47 @@ tbody tr.expanded-detail td{background:#fffbf0;border-bottom:1.5px solid var(--a
   .request-detail-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:768px){
-  .sidebar{left:auto;right:0;transform:translateX(100%);border-right:none;border-left:1px solid rgba(255,255,255,.08)}
-  .sidebar.open{transform:translateX(0)}
+  .sidebar{left:auto;right:-212px;transform:none;border-right:none;border-left:1px solid rgba(255,255,255,.08);transition:right .3s ease;}
+  .sidebar.open{right:0;transform:none;}
   .main{margin-left:0}
   .mobile-toggle{display:flex}
+  .topbar-actions {
+    margin-right: 40px;
+  }
+  
+  /* Admin page mobile floating hamburger styles */
+  #hamburger {
+    display: flex;
+    position: fixed;
+    top: 15px;
+    right: 16px;
+    z-index: 1100;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  #hamburger span {
+    background: var(--text); /* Black when closed */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Keep the white X style when pressed */
+  #hamburger.open span {
+    background: #FFFFFF !important;
+  }
+
+  #hamburger.open:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
   .topbar-brand{display:flex}
   .topbar-title{display:none}
   .topbar-search{display:none}

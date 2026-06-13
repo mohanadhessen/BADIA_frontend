@@ -22,7 +22,9 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo" onclick="window.location.href='index.html'" title="Return to Website" style="cursor:pointer">
     <div class="logo-name">BADIA</div>
-    <span class="admin-badge">Admin</span>
+    <button class="mobile-toggle" id="hamburger" onclick="event.stopPropagation(); toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 
   <div class="nav-section">
@@ -111,9 +113,6 @@
       <button class="topbar-btn" onclick="refreshAll()">
         <i class="fas fa-sync-alt" style="font-size:11px;"></i>
         Refresh
-      </button>
-      <button class="mobile-toggle" id="hamburger" onclick="toggleSidebar()">
-        <span></span><span></span><span></span>
       </button>
     </div>
   </header>

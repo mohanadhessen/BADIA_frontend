@@ -403,6 +403,8 @@ function handleSuccessfulAuth(role) {
             const password = document.getElementById('regPass').value;
             const confirmPassword = document.getElementById('regConfirmPass').value;
             const agreed = document.getElementById('agreeTerms').checked;
+            const regRememberMeEl = document.getElementById('regRememberMe');
+            const regRememberMe = regRememberMeEl ? regRememberMeEl.checked : false;
 
             // Validation
             if (!firstName || !lastName || !company || !email || !password || !confirmPassword) {
@@ -442,7 +444,8 @@ function handleSuccessfulAuth(role) {
                         company_name: company,
                         email: email,
                         password: password,
-                        phone: phone || null
+                        phone: phone || null,
+                        remember_me: regRememberMe
                     })
                 });
 
