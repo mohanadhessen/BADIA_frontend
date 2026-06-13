@@ -290,16 +290,22 @@ function handleSuccessfulAuth(role) {
 
             // 3. Password Reset Token
             const resetToken = params.get('reset_token');
-            if (resetToken) {
+            const resetTokenPanel = document.getElementById('panel-reset-token');
+            if (resetToken && resetTokenPanel) {
                 // Switch to reset password tab
-                document.getElementById('panel-login').classList.remove('active');
-                document.getElementById('panel-register').classList.remove('active');
-                document.getElementById('panel-forgot').classList.remove('active');
-                document.getElementById('panel-reset-token').classList.add('active');
-                document.querySelector('.auth-tabs').style.display = 'none';
+                const loginPanel = document.getElementById('panel-login');
+                const regPanel = document.getElementById('panel-register');
+                const forgotPanel = document.getElementById('panel-forgot');
+                if (loginPanel) loginPanel.classList.remove('active');
+                if (regPanel) regPanel.classList.remove('active');
+                if (forgotPanel) forgotPanel.classList.remove('active');
+                resetTokenPanel.classList.add('active');
+                const authTabs = document.querySelector('.auth-tabs');
+                if (authTabs) authTabs.style.display = 'none';
                 
                 // Pre-fill token input
-                document.getElementById('resetToken').value = resetToken;
+                const resetTokenInput = document.getElementById('resetToken');
+                if (resetTokenInput) resetTokenInput.value = resetToken;
                 
                 // Clean URL but keep token in field
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -517,51 +523,54 @@ function handleSuccessfulAuth(role) {
         });
 
         /* Reset Password with Token form */
-        document.getElementById('resetTokenForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const lang = document.documentElement.getAttribute('lang') || 'en';
-            const token = document.getElementById('resetToken').value.trim();
-            const newPassword = document.getElementById('resetNewPass').value;
+        const resetTokenForm = document.getElementById('resetTokenForm');
+        if (resetTokenForm) {
+            resetTokenForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const lang = document.documentElement.getAttribute('lang') || 'en';
+                const token = document.getElementById('resetToken').value.trim();
+                const newPassword = document.getElementById('resetNewPass').value;
 
-            if (!token) {
-                showToast(lang === 'ar' ? 'يرجى إدخال رمز إعادة التعيين' : 'Please enter the reset token', 'error');
-                return;
-            }
-            if (newPassword.length < 8) {
-                showToast(lang === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters', 'error');
-                return;
-            }
-
-            const btn = this.querySelector('.btn-submit');
-            btn.disabled = true;
-            btn.querySelector('span').textContent = lang === 'ar' ? 'جاري إعادة التعيين...' : 'Resetting...';
-
-            try {
-                const res = await fetch(`${API_BASE}/api/v1/email/auth/reset-password`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, new_password: newPassword })
-                });
-
-                if (res.ok) {
-                    showToast(lang === 'ar' ? 'تم إعادة تعيين كلمة المرور بنجاح!' : 'Password reset successfully!', 'success');
-                    setTimeout(() => {
-                        // Switch to login tab
-                        switchTab('login');
-                        // Clear fields
-                        document.getElementById('resetToken').value = '';
-                        document.getElementById('resetNewPass').value = '';
-                    }, 1500);
-                } else {
-                    const err = await res.json();
-                    showToast(err.detail || (lang === 'ar' ? 'فشل إعادة تعيين كلمة المرور' : 'Password reset failed'), 'error');
+                if (!token) {
+                    showToast(lang === 'ar' ? 'يرجى إدخال رمز إعادة التعيين' : 'Please enter the reset token', 'error');
+                    return;
                 }
-            } catch {
-                showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
-            }
-            btn.disabled = false;
-            btn.querySelector('span').textContent = lang === 'ar' ? 'إعادة تعيين كلمة المرور →' : 'Reset Password →';
-        });
+                if (newPassword.length < 8) {
+                    showToast(lang === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters', 'error');
+                    return;
+                }
+
+                const btn = this.querySelector('.btn-submit');
+                btn.disabled = true;
+                btn.querySelector('span').textContent = lang === 'ar' ? 'جاري إعادة التعيين...' : 'Resetting...';
+
+                try {
+                    const res = await fetch(`${API_BASE}/api/v1/email/auth/reset-password`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token, new_password: newPassword })
+                    });
+
+                    if (res.ok) {
+                        showToast(lang === 'ar' ? 'تم إعادة تعيين كلمة المرور بنجاح!' : 'Password reset successfully!', 'success');
+                        setTimeout(() => {
+                            // Switch to login tab
+                            switchTab('login');
+                            // Clear fields
+                            document.getElementById('resetToken').value = '';
+                            document.getElementById('resetNewPass').value = '';
+                        }, 1500);
+                    } else {
+                        const err = await res.json();
+                        showToast(err.detail || (lang === 'ar' ? 'فشل إعادة تعيين كلمة المرور' : 'Password reset failed'), 'error');
+                    }
+                } catch {
+                    showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
+                }
+                btn.disabled = false;
+                btn.querySelector('span').textContent = lang === 'ar' ? 'إعادة تعيين كلمة المرور →' : 'Reset Password →';
+            });
+        }
 
         handleURLParams();
         // Init

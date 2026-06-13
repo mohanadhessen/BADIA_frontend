@@ -696,39 +696,14 @@ We are a company specialized in developing and managing projects with high effic
                         </div>
                     </div>
                     <button type="submit" class="btn-submit comix-submit"><span data-en="Send Reset Link" data-ar="إرسال رابط إعادة التعيين">Send Reset Link</span></button>
-                    <div style="text-align:center;margin-top:1.5rem;">
-                        <a href="#" class="comix-create-link" data-en="Have a reset token? Reset here" data-ar="لديك رمز إعادة تعيين؟ أعد التعيين هنا" onclick="showResetWithToken(event)">Have a reset token? Reset here</a>
-                    </div>
+
                     <div style="text-align:center;margin-top:1rem;">
                         <a href="#" class="comix-create-link" data-en="← Back to Sign In" data-ar="→ العودة لتسجيل الدخول" onclick="backToLogin(event)">← Back to Sign In</a>
                     </div>
                 </form>
             </div>
 
-            <!-- RESET PASSWORD WITH TOKEN Panel -->
-            <div class="tab-panel" id="panel-reset-token">
-                <form id="resetTokenForm" novalidate>
-                    <div class="comix-form-group">
-                        <label for="resetToken" data-en="Reset Token" data-ar="رمز إعادة التعيين">Reset Token</label>
-                        <div class="input-wrap">
-                            <input type="text" id="resetToken" data-placeholder-en="Paste the token from your email" data-placeholder-ar="الصق الرمز من بريدك الإلكتروني" placeholder="Paste the token from your email">
-                        </div>
-                    </div>
-                    <div class="comix-form-group">
-                        <label for="resetNewPass" data-en="New Password" data-ar="كلمة المرور الجديدة">New Password</label>
-                        <div class="input-wrap">
-                            <input type="password" id="resetNewPass" class="password-field" data-placeholder-en="At least 8 characters" data-placeholder-ar="8 أحرف على الأقل" placeholder="At least 8 characters">
-                            <button type="button" class="password-toggle-btn" onclick="togglePass('resetNewPass', this)" aria-label="Toggle password visibility">
-                                <i class="fa-regular fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-submit comix-submit"><span data-en="Reset Password" data-ar="إعادة تعيين كلمة المرور">Reset Password</span></button>
-                    <div style="text-align:center;margin-top:1.5rem;">
-                        <a href="#" class="comix-create-link" data-en="← Back to Sign In" data-ar="→ العودة لتسجيل الدخول" onclick="backToLogin(event)">← Back to Sign In</a>
-                    </div>
-                </form>
-            </div>
+
         </div>
     </div>
 </div>

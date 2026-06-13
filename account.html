@@ -109,12 +109,7 @@
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <h1 id="sectionTitle" data-en="Profile" data-ar="الملف الشخصي">Profile</h1>
                 </div>
-                <div class="account-topbar-actions">
-                    <button class="lang-toggle" id="accountLangToggle" onclick="toggleAccountLang()">
-                        <i class="fa-solid fa-globe"></i>
-                        <span class="lang-toggle-text">عربي</span>
-                    </button>
-                </div>
+
             </div>
 
             <!-- Verification Banner -->
@@ -962,47 +957,7 @@
             btn.textContent = lang === 'ar' ? 'تحديث كلمة المرور' : 'Update Password';
         });
 
-        // ===== Reset Password with Token Submit =====
-        document.getElementById('resetPasswordWithTokenForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const lang = getLang();
-            const token = document.getElementById('resetTokenInput').value.trim();
-            const newPassword = document.getElementById('resetNewPassInput').value;
 
-            if (!token) {
-                showNotification(lang === 'ar' ? 'يرجى إدخال رمز إعادة التعيين' : 'Please enter the reset token', 'error');
-                return;
-            }
-            if (newPassword.length < 8) {
-                showNotification(lang === 'ar' ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters', 'error');
-                return;
-            }
-
-            const btn = this.querySelector('.btn-save');
-            btn.disabled = true;
-            btn.textContent = lang === 'ar' ? 'جاري إعادة التعيين...' : 'Resetting...';
-
-            try {
-                const res = await fetch(`${API_BASE}/api/v1/email/auth/reset-password`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, new_password: newPassword })
-                });
-
-                if (res.ok) {
-                    showNotification(lang === 'ar' ? 'تم إعادة تعيين كلمة المرور بنجاح!' : 'Password reset successfully!', 'success');
-                    document.getElementById('resetTokenInput').value = '';
-                    document.getElementById('resetNewPassInput').value = '';
-                } else {
-                    const err = await res.json();
-                    showNotification(err.detail || (lang === 'ar' ? 'فشل إعادة تعيين كلمة المرور' : 'Password reset failed'), 'error');
-                }
-            } catch {
-                showNotification(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
-            }
-            btn.disabled = false;
-            btn.textContent = lang === 'ar' ? 'إعادة تعيين كلمة المرور' : 'Reset Password';
-        });
 
         // ===== Delete Account =====
         function checkDeleteConfirmation() {

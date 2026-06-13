@@ -702,4 +702,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// Service Gates moved to auth_logic.js

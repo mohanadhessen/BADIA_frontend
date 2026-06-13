@@ -1065,8 +1065,8 @@
 
 /* Responsive modal */
 @media (max-width: 768px) {
-  .edit-modal { max-width: 100%; margin: 0; border-radius: var(--radius) var(--radius) 0 0; }
-  .edit-modal-overlay { align-items: flex-end; padding: 0; }
+  .edit-modal { max-width: calc(100% - 2rem); margin: 1.5rem auto; border-radius: var(--radius); }
+  .edit-modal-overlay { align-items: center; padding: 1rem; }
   .edit-modal-form-row { grid-template-columns: 1fr; }
   .request-item-footer { flex-direction: column; align-items: flex-start; }
   .request-actions { align-self: flex-end; }
@@ -2242,8 +2242,8 @@ html[lang="ar"] .form-locked::after { content: "فعّل بريدك الإلكت
   .profile-hero-info { display: flex; flex-direction: column; align-items: center; }
   .rsc-header { flex-direction: column; gap: .875rem; }
   .rsc-meta { gap: 1.25rem; }
-  .edit-modal { max-width: 100%; margin: 0; border-radius: var(--radius) var(--radius) 0 0; }
-  .edit-modal-overlay { align-items: flex-end; padding: 0; }
+  .edit-modal { max-width: calc(100% - 2rem); margin: 1.5rem auto; border-radius: var(--radius); }
+  .edit-modal-overlay { align-items: center; padding: 1rem; }
   .rsc-actions { padding: 1rem 1.25rem 1.25rem; }
   .rsc-meta { padding: 0 1.25rem; }
   .rsc-header { padding: 1.25rem 1.25rem 0; }
@@ -2320,9 +2320,9 @@ html[lang="ar"] .form-locked::after { content: "فعّل بريدك الإلكت
 
   #hamburger span {
     background: var(--text); /* Black when closed */
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Keep the white X style when pressed */

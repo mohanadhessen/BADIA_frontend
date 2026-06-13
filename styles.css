@@ -594,7 +594,19 @@ body.modal-open{overflow:hidden}
 .modal-whatsapp-link{display:inline-flex;align-items:center;gap:.4rem;color:#25D366;font-weight:700;text-decoration:none;margin-left:.3rem;transition:opacity .2s}
 .modal-whatsapp-link:hover{opacity:.8}
 .modal-subscribe-btn{width:100%;padding:.95rem;font-size:1.05rem;font-weight:700;border-radius:10px;margin-top:.2rem;box-sizing:border-box}
-@media(max-width:500px){.plan-modal{padding:1.5rem 1.2rem 1.4rem;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:88vh;max-width:100%;margin:0}.plan-modal-overlay{align-items:flex-end;padding:0}}
+@media(max-width:500px){
+    .plan-modal{
+        padding:1.5rem 1.2rem 1.4rem;
+        border-radius:16px;
+        max-height:88vh;
+        max-width:calc(100% - 2rem);
+        margin:1rem auto;
+    }
+    .plan-modal-overlay{
+        align-items:center;
+        padding:1rem;
+    }
+}
 
 /* ===== Payment Instructions Info (Pre-purchase) ===== */
 .pi-container {
