@@ -25,7 +25,7 @@
             align-items: center;
             justify-content: center;
         }
-        html[lang="ar"] body { font-family: 'Tajawal', sans-serif; }
+
 
         .auth-container {
             width: 100%;
@@ -46,7 +46,7 @@
             width: 4px; height: 100%;
             background: linear-gradient(to bottom, var(--accent), transparent 60%);
         }
-        html[lang="ar"] .auth-container::before { left: auto; right: 0; }
+
 
         .form-header { text-align: center; margin-bottom: 2.5rem; }
 
@@ -83,7 +83,7 @@
             font-size: 0.8rem; font-weight: 700;
             cursor: pointer; transition: var(--transition);
         }
-        html[lang="ar"] .auth-lang-toggle { right: auto; left: 1.5rem; }
+
         .auth-lang-toggle:hover { background: var(--accent); color: var(--primary); }
 
         .auth-tabs {
@@ -114,7 +114,7 @@
             position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
             color: var(--gray-400); font-size: 1.1rem; pointer-events: none;
         }
-        html[lang="ar"] .input-wrap .input-icon { left: auto; right: 1rem; }
+
 
         .form-group input,
         .form-group select {
@@ -126,8 +126,6 @@
             background: var(--white); transition: var(--transition);
             outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
-        html[lang="ar"] .form-group input,
-        html[lang="ar"] .form-group select { padding: 0.9rem 3rem 0.9rem 1rem; }
         .form-group input:focus,
         .form-group select:focus {
             border-color: var(--accent); background: var(--white);
@@ -146,7 +144,7 @@
             background: none; border: none; cursor: pointer;
             color: var(--gray-400); font-size: 0.9rem; padding: 0; transition: var(--transition);
         }
-        html[lang="ar"] .toggle-pass { right: auto; left: 1rem; }
+
         .toggle-pass:hover { color: var(--primary); }
 
         .form-options {
@@ -219,7 +217,7 @@
             font-size: 0.95rem; font-weight: 600; z-index: 9999;
             animation: slideNotif 0.3s ease-out; max-width: 350px;
         }
-        html[lang="ar"] .notification { right: auto; left: 1.5rem; }
+
         @keyframes slideNotif {
             from { transform: translateY(-20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -236,3 +234,31 @@
         .strength-bar.fair { background: #f39c12; }
         .strength-bar.strong { background: #27ae60; }
         .strength-label { font-size: 0.78rem; color: var(--gray-400); margin-top: 0.3rem; }
+
+        /* ===== Arabic Text Direction & Alignment ===== */
+        html[lang="ar"] label,
+        html[lang="ar"] p,
+        html[lang="ar"] .forgot-link,
+        html[lang="ar"] .terms-note,
+        html[lang="ar"] .form-error {
+            direction: rtl;
+            text-align: right;
+        }
+
+        html[lang="ar"] input,
+        html[lang="ar"] textarea,
+        html[lang="ar"] select {
+            direction: rtl;
+        }
+
+        html[lang="ar"] input[type="text"],
+        html[lang="ar"] input[type="email"],
+        html[lang="ar"] input[type="tel"],
+        html[lang="ar"] input[type="password"],
+        html[lang="ar"] textarea {
+            text-align: right;
+        }
+
+        html[lang="ar"] .form-header p {
+            text-align: center;
+        }

@@ -237,7 +237,7 @@ function handleSuccessfulAuth(role) {
                 const lang = document.documentElement.getAttribute('lang') || 'en';
                 showToast(lang === 'ar' ? 'جاري التحقق من حساب Google...' : 'Authenticating with Google...', 'success');
                 try {
-                    const res = await fetch(`${API_BASE}/api/v1/auth/google/callback?code=${code}&remember_me=true`, {
+                    const res = await fetch(`${API_BASE}/api/v1/auth/google/callback?code=${code}`, {
                         method: 'GET'
                     });
                     if (res.ok) {
@@ -340,14 +340,11 @@ function handleSuccessfulAuth(role) {
             btn.disabled = true;
             btn.querySelector('span').textContent = lang === 'ar' ? 'جاري التحقق...' : 'Signing in...';
 
-            const rememberMeEl = document.getElementById('rememberMe');
-            const rememberMe = rememberMeEl ? rememberMeEl.checked : false;
-
             try {
-                const res = await fetch(`${API_BASE}/api/v1/auth/login?remember_me=${rememberMe}`, {
+                const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email.value, password: pass.value, remember_me: rememberMe })
+                    body: JSON.stringify({ email: email.value, password: pass.value })
                 });
 
                 if (res.ok) {
@@ -409,8 +406,7 @@ function handleSuccessfulAuth(role) {
             const password = document.getElementById('regPass').value;
             const confirmPassword = document.getElementById('regConfirmPass').value;
             const agreed = document.getElementById('agreeTerms').checked;
-            const regRememberMeEl = document.getElementById('regRememberMe');
-            const regRememberMe = regRememberMeEl ? regRememberMeEl.checked : false;
+
 
             // Validation
             if (!firstName || !lastName || !company || !email || !password || !confirmPassword) {
@@ -450,8 +446,7 @@ function handleSuccessfulAuth(role) {
                         company_name: company,
                         email: email,
                         password: password,
-                        phone: phone || null,
-                        remember_me: regRememberMe
+                        phone: phone || null
                     })
                 });
 

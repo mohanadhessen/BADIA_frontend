@@ -2334,3 +2334,33 @@ html[lang="ar"] .form-locked::after { content: "فعّل بريدك الإلكت
     background: rgba(255, 255, 255, 0.08);
   }
 }
+
+/* ===== Arabic Text Direction & Alignment ===== */
+html[lang="ar"] .account-card p,
+html[lang="ar"] .account-card label,
+html[lang="ar"] .upload-label,
+html[lang="ar"] .upload-hint,
+html[lang="ar"] .profile-field label,
+html[lang="ar"] .profile-field span,
+html[lang="ar"] .edit-modal-body label,
+html[lang="ar"] .edit-modal-body p,
+html[lang="ar"] .delete-confirm-input p,
+html[lang="ar"] input,
+html[lang="ar"] textarea,
+html[lang="ar"] select {
+    direction: rtl;
+}
+
+html[lang="ar"] .account-card h3,
+html[lang="ar"] .edit-modal-header h3 {
+    text-align: right;
+}
+
+html[lang="ar"] input[type="text"],
+html[lang="ar"] input[type="email"],
+html[lang="ar"] input[type="tel"],
+html[lang="ar"] input[type="password"],
+html[lang="ar"] input[type="url"],
+html[lang="ar"] textarea {
+    text-align: right;
+}

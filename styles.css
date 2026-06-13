@@ -10,7 +10,6 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:'Inter','Tajawal','Segoe UI',sans-serif;line-height:1.6;color:var(--gray-800);background:var(--white);overflow-x:clip}
-html[lang="ar"] body{font-family:'Tajawal','Segoe UI',sans-serif}
 .container{max-width:1200px;margin:0 auto;padding:0 20px}
 h1,h2,h3,h4,h5,h6{font-weight:700;line-height:1.3;margin-bottom:.5em}
 h1{font-size:3.5rem;letter-spacing:-1px}
@@ -664,10 +663,6 @@ body.modal-open{overflow:hidden}
   counter-reset: pi-counter;
   list-style: none;
 }
-html[lang="ar"] .pi-steps {
-  padding-left: 0;
-  padding-right: 0;
-}
 .pi-steps li {
   font-size: 0.95rem;
   color: var(--gray-600);
@@ -675,10 +670,6 @@ html[lang="ar"] .pi-steps {
   padding-left: 2.2rem;
   position: relative;
   counter-increment: pi-counter;
-}
-html[lang="ar"] .pi-steps li {
-  padding-left: 0;
-  padding-right: 2.2rem;
 }
 .pi-steps li::before {
   content: counter(pi-counter);
@@ -695,10 +686,6 @@ html[lang="ar"] .pi-steps li {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-html[lang="ar"] .pi-steps li::before {
-  left: auto;
-  right: 0;
 }
 .pi-steps li strong {
   color: var(--primary);
@@ -793,7 +780,6 @@ html[lang="ar"] .pi-steps li::before {
     transition: all 0.2s;
     z-index: 10;
 }
-html[lang="ar"] .auth-modal-close { right: auto; left: 15px; }
 .auth-modal-close:hover { background: #e2e8f0; color: #0f172a; }
 
 /* Keep auth container styling inside modal */
@@ -820,10 +806,6 @@ html[lang="ar"] .auth-modal-close { right: auto; left: 15px; }
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-
-        
-        html[lang="ar"] body { font-family: 'Tajawal', sans-serif; }
 
         .auth-container {
             width: 100%;
@@ -844,7 +826,6 @@ html[lang="ar"] .auth-modal-close { right: auto; left: 15px; }
             width: 4px; height: 100%;
             background: linear-gradient(to bottom, var(--accent), transparent 60%);
         }
-        html[lang="ar"] .auth-container::before { left: auto; right: 0; }
 
         .form-header { text-align: center; margin-bottom: 2.5rem; }
 
@@ -881,7 +862,6 @@ html[lang="ar"] .auth-modal-close { right: auto; left: 15px; }
             font-size: 0.8rem; font-weight: 700;
             cursor: pointer; transition: var(--transition);
         }
-        html[lang="ar"] .auth-lang-toggle { right: auto; left: 1.5rem; }
         .auth-lang-toggle:hover { background: var(--accent); color: var(--primary); }
 
         .auth-tabs {
@@ -912,7 +892,6 @@ html[lang="ar"] .auth-modal-close { right: auto; left: 15px; }
             position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
             color: var(--gray-400); font-size: 1.1rem; pointer-events: none;
         }
-        html[lang="ar"] .input-wrap .input-icon { left: auto; right: 1rem; }
 
         .form-group input,
         .form-group select {
@@ -924,8 +903,6 @@ html[lang="ar"] .auth-modal-close { right: auto; left: 15px; }
             background: var(--white); transition: var(--transition);
             outline: none; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
-        html[lang="ar"] .form-group input,
-        html[lang="ar"] .form-group select { padding: 0.9rem 3rem 0.9rem 1rem; }
         .form-group input:focus,
         .form-group select:focus {
             border-color: var(--accent); background: var(--white);
@@ -944,7 +921,6 @@ html[lang="ar"] .auth-modal-close { right: auto; left: 15px; }
             background: none; border: none; cursor: pointer;
             color: var(--gray-400); font-size: 0.9rem; padding: 0; transition: var(--transition);
         }
-        html[lang="ar"] .toggle-pass { right: auto; left: 1rem; }
         .toggle-pass:hover { color: var(--primary); }
 
         .form-options {
@@ -1017,7 +993,6 @@ html[lang="ar"] .auth-modal-close { right: auto; left: 15px; }
             font-size: 0.95rem; font-weight: 600; z-index: 9999;
             animation: slideNotif 0.3s ease-out; max-width: 350px;
         }
-        html[lang="ar"] .notification { right: auto; left: 1.5rem; }
         @keyframes slideNotif {
             from { transform: translateY(-20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -1214,10 +1189,6 @@ html[lang="ar"] .auth-modal.comix-style .comix-form-group {
     height: 18px;
     margin-right: 8px;
 }
-html[lang="ar"] .google-icon-svg {
-    margin-right: 0;
-    margin-left: 8px;
-}
 
 .auth-modal.comix-style .comix-footer-text {
     text-align: center;
@@ -1251,10 +1222,6 @@ html[lang="ar"] .google-icon-svg {
 .auth-modal.comix-style .input-wrap input.password-field {
     padding-right: 2.8rem !important;
 }
-html[lang="ar"] .auth-modal.comix-style .input-wrap input.password-field {
-    padding-right: 1rem !important;
-    padding-left: 2.8rem !important;
-}
 .auth-modal.comix-style .password-toggle-btn {
     position: absolute;
     right: 12px;
@@ -1275,7 +1242,34 @@ html[lang="ar"] .auth-modal.comix-style .input-wrap input.password-field {
 .auth-modal.comix-style .password-toggle-btn:hover {
     color: var(--primary);
 }
-html[lang="ar"] .auth-modal.comix-style .password-toggle-btn {
-    right: auto;
-    left: 12px;
+
+/* ===== Arabic Text Direction & Alignment ===== */
+html[lang="ar"] p,
+html[lang="ar"] label,
+html[lang="ar"] .gate-message,
+html[lang="ar"] .gate-open-message,
+html[lang="ar"] .tq-text,
+html[lang="ar"] .upload-label,
+html[lang="ar"] .upload-hint,
+html[lang="ar"] li:not(.timeline-item):not(.tq-slide),
+html[lang="ar"] input,
+html[lang="ar"] select,
+html[lang="ar"] textarea {
+    direction: rtl;
+}
+
+html[lang="ar"] input[type="text"],
+html[lang="ar"] input[type="email"],
+html[lang="ar"] input[type="tel"],
+html[lang="ar"] input[type="password"],
+html[lang="ar"] input[type="url"],
+html[lang="ar"] textarea {
+    text-align: right;
+}
+
+html[lang="ar"] .section-desc,
+html[lang="ar"] .hero-subtitle,
+html[lang="ar"] .form-header p,
+html[lang="ar"] .tq-text {
+    text-align: center;
 }

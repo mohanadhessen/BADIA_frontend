@@ -54,11 +54,7 @@
                     <div class="form-error" id="loginPassErr" data-en="Password is required" data-ar="كلمة المرور مطلوبة">Password is required</div>
                 </div>
 
-                <div class="form-options">
-                    <label class="checkbox-wrap">
-                        <input type="checkbox" id="rememberMe" checked>
-                        <span data-en="Remember Me" data-ar="تذكرني">Remember Me</span>
-                    </label>
+                <div class="form-options" style="justify-content: flex-end;">
                     <a href="#" class="forgot-link" data-en="Forgot password?" data-ar="نسيت كلمة المرور؟" onclick="showForgotPassword(event)">Forgot password?</a>
                 </div>
 
@@ -143,12 +139,7 @@
                     </label>
                 </div>
 
-                <div class="form-group">
-                    <label class="checkbox-wrap" style="margin-top:0.5rem;">
-                        <input type="checkbox" id="regRememberMe" checked>
-                        <span data-en="Remember Me" data-ar="تذكرني">Remember Me</span>
-                    </label>
-                </div>
+
 
                 <button type="submit" class="btn-submit"><span data-en="Create Account →" data-ar="إنشاء الحساب →">Create Account →</span></button>
 
@@ -350,7 +341,7 @@
                 const lang = document.documentElement.getAttribute('lang') || 'en';
                 showToast(lang === 'ar' ? 'جاري التحقق من حساب Google...' : 'Authenticating with Google...', 'success');
                 try {
-                    const res = await fetch(`${API_BASE}/api/v1/auth/google/callback?code=${code}&remember_me=true`, {
+                    const res = await fetch(`${API_BASE}/api/v1/auth/google/callback?code=${code}`, {
                         method: 'GET'
                     });
                     if (res.ok) {
@@ -447,13 +438,11 @@
             btn.disabled = true;
             btn.querySelector('span').textContent = lang === 'ar' ? 'جاري التحقق...' : 'Signing in...';
 
-            const rememberMe = document.getElementById('rememberMe').checked;
-
             try {
-                const res = await fetch(`${API_BASE}/api/v1/auth/login?remember_me=${rememberMe}`, {
+                const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email.value, password: pass.value, remember_me: rememberMe })
+                    body: JSON.stringify({ email: email.value, password: pass.value })
                 });
 
                 if (res.ok) {
@@ -514,7 +503,6 @@
             const phone = document.getElementById('regPhone').value.trim();
             const password = document.getElementById('regPass').value;
             const agreed = document.getElementById('agreeTerms').checked;
-            const regRememberMe = document.getElementById('regRememberMe').checked;
 
             // Validation
             if (!firstName || !lastName || !company || !email || !password) {
@@ -550,8 +538,7 @@
                         company_name: company,
                         email: email,
                         password: password,
-                        phone: phone || null,
-                        remember_me: regRememberMe
+                        phone: phone || null
                     })
                 });
 
