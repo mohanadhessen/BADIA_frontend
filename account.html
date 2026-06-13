@@ -82,21 +82,17 @@
                     <span class="nav-icon"><i class="far fa-edit"></i></span>
                     <span data-en="Settings" data-ar="الإعدادات">Settings</span>
                 </div>
-                <div class="nav-item logout-nav-item" onclick="handleLogout()">
-                    <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
-                    <span data-en="Sign Out" data-ar="تسجيل الخروج">Sign Out</span>
+                <div class="nav-item lang-toggle-nav-item" onclick="toggleAccountLang()">
+                    <span class="nav-icon"><i class="fa-solid fa-globe"></i></span>
+                    <span class="lang-toggle-text">عربي</span>
                 </div>
             </div>
 
             <div class="sidebar-footer">
-                <div class="avatar" id="sidebarAvatar">👤</div>
-                <div style="min-width: 0; flex: 1; display: flex; flex-direction: column;">
-                    <div class="sidebar-user-name" id="sidebarName">Loading...</div>
-                    <div class="sidebar-user-role" id="sidebarEmail">—</div>
+                <div class="nav-item logout-nav-item" onclick="handleLogout()">
+                    <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+                    <span data-en="Sign Out" data-ar="تسجيل الخروج">Sign Out</span>
                 </div>
-                <button class="sidebar-logout" onclick="handleLogout()" title="Log out" data-title-en="Log out" data-title-ar="تسجيل الخروج">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                </button>
             </div>
         </aside>
 
@@ -565,8 +561,9 @@
                 el.title = el.getAttribute(`data-title-${lang}`);
             });
 
-            const toggleBtn = document.querySelector('.lang-toggle-text');
-            if (toggleBtn) toggleBtn.textContent = lang === 'en' ? 'عربي' : 'English';
+            document.querySelectorAll('.lang-toggle-text').forEach(el => {
+                el.textContent = lang === 'en' ? 'عربي' : 'English';
+            });
 
             if (save) localStorage.setItem('badia_lang', lang);
 
@@ -658,7 +655,7 @@
         }
 
         // Click handler for sidebar links
-        document.querySelectorAll('.nav-item').forEach(link => {
+        document.querySelectorAll('.nav-item[data-section]').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 showSection(link.dataset.section, link);
@@ -785,14 +782,22 @@
 
             // Sidebar — overwrite text and clear stale data-* values so setAccountLang doesn't clobber it
             const sidebarNameEl = document.getElementById('sidebarName');
-            sidebarNameEl.textContent = `${user.first_name} ${user.last_name}`;
-            sidebarNameEl.removeAttribute('data-en');
-            sidebarNameEl.removeAttribute('data-ar');
-            document.getElementById('sidebarEmail').textContent = user.email;
+            if (sidebarNameEl) {
+                sidebarNameEl.textContent = `${user.first_name} ${user.last_name}`;
+                sidebarNameEl.removeAttribute('data-en');
+                sidebarNameEl.removeAttribute('data-ar');
+            }
+            const sidebarEmailEl = document.getElementById('sidebarEmail');
+            if (sidebarEmailEl) {
+                sidebarEmailEl.textContent = user.email;
+            }
 
+            const sidebarAvatarEl = document.getElementById('sidebarAvatar');
             if (user.avatar_url) {
-                document.getElementById('sidebarAvatar').innerHTML = `<img src="${user.avatar_url}" class="sidebar-avatar" alt="avatar">`;
-                document.getElementById('sidebarAvatar').className = '';
+                if (sidebarAvatarEl) {
+                    sidebarAvatarEl.innerHTML = `<img src="${user.avatar_url}" class="sidebar-avatar" alt="avatar">`;
+                    sidebarAvatarEl.className = '';
+                }
                 document.getElementById('profileAvatarLg').innerHTML = `<img src="${user.avatar_url}" class="profile-avatar-lg" alt="avatar">`;
                 document.getElementById('profileAvatarLg').className = '';
             }

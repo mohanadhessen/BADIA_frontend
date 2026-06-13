@@ -1270,6 +1270,7 @@ body {
   padding: .625rem .6rem .875rem;
   border-top: 1px solid var(--sidebar-border);
   flex-shrink: 0;
+  margin-top: auto;
 }
 .sidebar-footer a {
   display: flex;
@@ -1292,6 +1293,7 @@ body {
   margin-left: 248px;
   padding: 2rem 2.5rem 3.5rem;
   min-width: 0;
+  background: var(--surface);
 }
 
 
@@ -1305,7 +1307,8 @@ body {
   position: sticky;
   top: 0;
   z-index: 90;
-  background: var(--bg);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   padding: 1.5rem 0 1rem;
   margin-top: -1.5rem;
 }
