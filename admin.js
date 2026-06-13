@@ -1396,28 +1396,65 @@ function _bindDragDrop() {
       _dragSrcIdx = null;
     });
     
-    // Touch drag
-    let touchStartY = 0;
-    let touchSrcIdx = null;
- 
+
+    // Touch drag (only initiates from the grab handle to allow normal list scrolling elsewhere)
     row.addEventListener('touchstart', e => {
-      touchSrcIdx = parseInt(row.dataset.idx);
-      touchStartY = e.touches[0].clientY;
-    }, { passive: true });
+      const handle = e.target.closest('.fb-drag-handle');
+      if (!handle) return; // Allow normal scrolling if they didn't touch the handle
+
+      e.preventDefault(); // Prevent page/container scrolling during drag
+      row.classList.add('dragging');
+
+      const touchMoveHandler = ev => {
+        ev.preventDefault();
+        const touchY = ev.touches[0].clientY;
+
+        let swapped = true;
+        while (swapped) {
+          swapped = false;
+          const prev = row.previousElementSibling;
+          if (prev && prev.classList.contains('fb-feature-item')) {
+            const prevRect = prev.getBoundingClientRect();
+            if (touchY < prevRect.top + prevRect.height / 2) {
+              row.parentNode.insertBefore(row, prev);
+              swapped = true;
+              continue;
+            }
+          }
+          const next = row.nextElementSibling;
+          if (next && next.classList.contains('fb-feature-item')) {
+            const nextRect = next.getBoundingClientRect();
+            if (touchY > nextRect.top + nextRect.height / 2) {
+              row.parentNode.insertBefore(row, next.nextElementSibling);
+              swapped = true;
+              continue;
+            }
+          }
+        }
+      };
+
+      const touchEndHandler = () => {
+        row.classList.remove('dragging');
+        document.removeEventListener('touchmove', touchMoveHandler);
+        document.removeEventListener('touchend', touchEndHandler);
+        document.removeEventListener('touchcancel', touchEndHandler);
+
+        // Rebuild features array from current DOM order
+        const newFeatures = [];
+        list.querySelectorAll('.fb-feature-item').forEach(item => {
+          const idx = parseInt(item.dataset.idx, 10);
+          newFeatures.push(_currentFeatures[idx]);
+        });
+        _currentFeatures = newFeatures;
+        _renderFeaturesList(); // Re-render to refresh indexes and bind handlers
+      };
+
+      document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+      document.addEventListener('touchend', touchEndHandler, { passive: false });
+      document.addEventListener('touchcancel', touchEndHandler, { passive: false });
+    }, { passive: false });
  
-    row.addEventListener('touchend', e => {
-      if (touchSrcIdx === null) return;
-      const dy        = e.changedTouches[0].clientY - touchStartY;
-      const threshold = 30;
-      if (Math.abs(dy) < threshold) { touchSrcIdx = null; return; }
-      const dir  = dy > 0 ? 1 : -1;
-      const next = touchSrcIdx + dir;
-      if (next >= 0 && next < _currentFeatures.length) {
-        [_currentFeatures[touchSrcIdx], _currentFeatures[next]] = [_currentFeatures[next], _currentFeatures[touchSrcIdx]];
-        _renderFeaturesList();
-      }
-      touchSrcIdx = null;
-    }, { passive: true });
+
   });
 }
  
@@ -1775,14 +1812,14 @@ function renderDashboard() {
   } else {
     const DASHBOARD_COLORS = ['#8b5cf6', '#3b82f6', '#d4af37', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9', '#ec4899', '#14b8a6', '#6366f1'];
     function getColor(name) {
-      if (name.toLowerCase() === 'none') return '#d1d5db';
+      if (name.toLowerCase() === 'none') return '#64748b';
       let hash = 0;
       for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
       return DASHBOARD_COLORS[Math.abs(hash) % DASHBOARD_COLORS.length];
     }
 
-    // Build SVG donut
-    const R = 70, CX = 90, CY = 80, INNER_R = 48;
+    // Build SVG pie chart
+    const R = 90, CX = 110, CY = 100;
     let startAngle = -Math.PI / 2;
     const slices = entries.map(([name, count]) => {
       const angle = (count / total) * 2 * Math.PI;
@@ -1795,15 +1832,17 @@ function renderDashboard() {
       const color = getColor(name);
       const pct = Math.round(count / total * 100);
       const midA = startAngle - angle / 2;
-      return { name, count, pct, x1, y1, x2, y2, large, color, midA };
+      return { name, count, pct, x1, y1, x2, y2, large, color, midA, angle };
     });
 
-    const labelSlices = slices.filter(s => s.pct >= 8);
+    const labelSlices = slices.filter(s => s.pct >= 4);
     const svgLabels = labelSlices.map(s => {
-      const lx = CX + (R * 0.78) * Math.cos(s.midA);
-      const ly = CY + (R * 0.78) * Math.sin(s.midA);
+      const alpha = s.angle / 2;
+      const d = alpha === 0 ? 0 : (2 / 3) * R * Math.sin(alpha) / alpha;
+      const lx = CX + d * Math.cos(s.midA);
+      const ly = CY + d * Math.sin(s.midA);
       return `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle"
-        fill="#fff" font-size="9" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${s.pct}%</text>`;
+        fill="#fff" font-size="11" font-weight="700" font-family="'Geist', sans-serif" style="pointer-events:none">${s.pct}%</text>`;
     }).join('');
 
     const svgPaths = slices.map(s =>
@@ -1816,24 +1855,20 @@ function renderDashboard() {
     ).join('');
 
     const legend = slices.map(s =>
-      `<div style="display:flex;align-items:center;gap:7px;padding:4px 0">
-        <span style="width:9px;height:9px;border-radius:50%;background:${s.color};flex-shrink:0;display:inline-block"></span>
-        <span style="font-size:.78rem;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.name}</span>
-        <span style="font-size:.75rem;color:var(--text-3);font-weight:500;flex-shrink:0">${s.count}</span>
-        <span style="font-size:.72rem;color:var(--text-3);flex-shrink:0;min-width:32px;text-align:right">${s.pct}%</span>
+      `<div class="pie-legend-item">
+        <span class="pie-legend-dot" style="background:${s.color}"></span>
+        <span class="pie-legend-name">${s.name}</span>
+        <span class="pie-legend-value">${s.count}</span>
       </div>`
     ).join('');
 
     distEl.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:14px;width:100%">
-        <svg width="180" height="160" viewBox="0 0 180 160" style="flex-shrink:0;overflow:visible;display:block">
+      <div style="display:flex;flex-direction:column;align-items:center;width:100%">
+        <svg width="100%" height="200" viewBox="0 0 220 200" style="flex-shrink:0;overflow:visible;display:block">
           ${svgPaths}
-          <circle cx="${CX}" cy="${CY}" r="${INNER_R}" fill="var(--white)" />
           ${svgLabels}
-          <text x="${CX}" y="${CY-2}" text-anchor="middle" dominant-baseline="middle" font-size="16" font-weight="800" fill="var(--text)">${total}</text>
-          <text x="${CX}" y="${CY+12}" text-anchor="middle" dominant-baseline="middle" font-size="8" font-weight="700" fill="var(--text-3)">USERS</text>
         </svg>
-        <div style="width:100%">${legend}</div>
+        <div class="pie-legend-container">${legend}</div>
       </div>`;
   }
 

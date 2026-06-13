@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BADIA — Admin</title>
 <link rel="icon" type="image/svg+xml" href="assets/badia-logo.svg">
 <link rel="apple-touch-icon" href="assets/badia-logo.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <link rel="stylesheet" href="admin.css">
@@ -31,7 +29,7 @@
     <div class="nav-label">Overview</div>
     <div class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard">
       <span class="nav-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
       </span>
       Dashboard
     </div>
@@ -41,34 +39,34 @@
     <div class="nav-label">Management</div>
     <div class="nav-item" onclick="showPage('requests')" data-page="requests">
       <span class="nav-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path><rect x="9" y="3" width="6" height="4" rx="1"></rect><path d="M9 12h6M9 16h4"></path></svg>
       </span>
       Requests
       <span class="badge-count red" id="sidebarPendingCount">—</span>
     </div>
     <div class="nav-item" onclick="showPage('users')" data-page="users">
       <span class="nav-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
       </span>
       Users
       <span class="badge-count" id="sidebarUserCount">—</span>
     </div>
     <div class="nav-item" onclick="showPage('plans')" data-page="plans">
       <span class="nav-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
       </span>
       Plans
     </div>
     <div class="nav-item" onclick="showPage('reviews')" data-page="reviews">
       <span class="nav-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
       </span>
       Reviews
       <span class="badge-count" id="sidebarReviewsCount">—</span>
     </div>
     <div class="nav-item" onclick="showPage('payments')" data-page="payments">
       <span class="nav-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
       </span>
       Payments
     </div>
@@ -78,7 +76,7 @@
     <div class="nav-label">System</div>
     <div class="nav-item" onclick="showPage('settings')" data-page="settings">
       <span class="nav-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"></path></svg>
       </span>
       Settings
     </div>
@@ -91,7 +89,7 @@
       <div class="sidebar-user-role">Super Admin</div>
     </div>
     <button class="sidebar-logout" onclick="handleLogout()" title="Log out">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16,17 21,12 16,7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
     </button>
   </div>
 </aside>
@@ -100,14 +98,14 @@
 
   <header class="topbar">
     <div class="topbar-brand">
-      <img src="assets/badia-logo.svg" alt="BADIA" onerror="this.style.display='none'"/>
+      <img src="assets/badia-logo.svg" alt="BADIA" onerror="this.style.display='none'">
       <span class="topbar-brand-text">BADIA</span>
     </div>
     <div class="topbar-title" id="topbarTitle">Dashboard</div>
     <div class="topbar-spacer"></div>
     <div class="topbar-search">
       <i class="fas fa-search" style="color:#a0a5b1; font-size:12px;"></i>
-      <input type="text" id="globalSearch" placeholder="Search anything…" oninput="handleGlobalSearch(this.value)"/>
+      <input type="text" id="globalSearch" placeholder="Search anything…" oninput="handleGlobalSearch(this.value)">
     </div>
     <div class="topbar-actions">
       <button class="topbar-btn" onclick="refreshAll()">
@@ -131,143 +129,75 @@
 
       <div class="dash-overview">
         <div class="dash-overview-left">
-          <div class="stats-grid stats-grid-2col">
-            <div class="stat-card">
-              <div class="stat-card-inner">
-                <div class="stat-card-text">
-                  <div class="stat-label">Total Users</div>
-                  <div class="stat-value" id="statUsers">—</div>
-                  <div class="stat-sub">Registered accounts</div>
-                </div>
-                <div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
-                  <i class="fas fa-users" style="font-size:16px;"></i>
-                </div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-inner">
-                <div class="stat-card-text">
-                  <div class="stat-label">Active Plans</div>
-                  <div class="stat-value" id="statActive">—</div>
-                  <div class="stat-sub">Paid subscriptions</div>
-                </div>
-                <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-                  <i class="fas fa-check-circle" style="font-size:16px;"></i>
-                </div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-inner">
-                <div class="stat-card-text">
-                  <div class="stat-label">Total Requests</div>
-                  <div class="stat-value" id="statRequests">—</div>
-                  <div class="stat-sub">All time</div>
-                </div>
-                <div class="stat-icon-box" style="background:var(--accent-dim);color:#9a7920">
-                  <i class="fas fa-clipboard-list" style="font-size:16px;"></i>
-                </div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-inner">
-                <div class="stat-card-text">
-                  <div class="stat-label">Pending Review</div>
-                  <div class="stat-value" id="statPending">—</div>
-                  <div class="stat-sub">Awaiting action</div>
-                </div>
-                <div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
-                  <i class="fas fa-clock" style="font-size:16px;"></i>
-                </div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-inner">
-                <div class="stat-card-text">
-                  <div class="stat-label">Approved</div>
-                  <div class="stat-value" id="statApproved">—</div>
-                  <div class="stat-sub">Requests approved</div>
-                </div>
-                <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-                  <i class="fas fa-thumbs-up" style="font-size:16px;"></i>
-                </div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-inner">
-                <div class="stat-card-text">
-                  <div class="stat-label">Total Revenue</div>
-                  <div class="stat-value green" id="statRevenueVal" style="color:var(--green)">—</div>
-                  <div class="stat-sub">All time revenue</div>
-                </div>
-                <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-                  <i class="fas fa-dollar-sign" style="font-size:16px;"></i>
-                </div>
-              </div>
-            </div>
-            <div class="stat-card stat-card-storage">
-              <div class="stat-card-inner">
-                <div class="stat-card-text" style="flex:1;min-width:0">
-                  <div class="stat-label">Storage Used</div>
-                  <div class="stat-value" id="statStorageVal">—</div>
-                  <div class="storage-bar-wrap">
-                    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
+          <!-- Numeric Cards Grid: 3 columns -->
+          <div class="stats-grid-3col">
+            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total Users</div><div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
+                  <i class="fas fa-users"></i>
+                </div></div><div class="stat-card-body"><div class="stat-value" id="statUsers">—</div></div></div>
+            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Active Plans</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+                  <i class="fas fa-check-circle"></i>
+                </div></div><div class="stat-card-body"><div class="stat-value" id="statActive">—</div></div></div>
+            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total Revenue</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+                  <i class="fas fa-dollar-sign"></i>
+                </div></div><div class="stat-card-body"><div class="stat-value green" id="statRevenueVal" style="color:var(--green)">—</div></div></div>
+            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total Requests</div><div class="stat-icon-box" style="background:var(--accent-dim);color:#9a7920">
+                  <i class="fas fa-clipboard-list"></i>
+                </div></div><div class="stat-card-body"><div class="stat-value" id="statRequests">—</div></div></div>
+            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Pending Review</div><div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
+                  <i class="fas fa-clock"></i>
+                </div></div><div class="stat-card-body"><div class="stat-value" id="statPending">—</div></div></div>
+            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Approved</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+                  <i class="fas fa-thumbs-up"></i>
+                </div></div><div class="stat-card-body"><div class="stat-value" id="statApproved">—</div></div></div>
+          </div>
+
+          <!-- Telemetry Cards Grid: 2 columns -->
+          <div class="stats-grid-2col" style="margin-top: 16px;">
+            <div class="stat-card stat-card-storage"><div class="stat-card-header"><div class="stat-label">Storage Used</div><div class="stat-icon-box" style="background:rgba(16,185,129,.08);color:var(--green)">
+                  <i class="fas fa-database"></i>
+                </div></div><div class="stat-card-body"><div class="stat-value" id="statStorageVal">—</div><div class="storage-bar-wrap">
+                    <div class="storage-bar"><div class="storage-bar-fill" id="statStorageBar" style="width:0%"></div></div>
+                    <div class="storage-details">
                       <span id="statStorageSub">Loading…</span>
                       <span id="statStoragePct"></span>
                     </div>
-                    <div class="storage-bar"><div class="storage-bar-fill" id="statStorageBar" style="width:0%"></div></div>
-                  </div>
-                </div>
-                <div class="stat-icon-box" style="background:rgba(16,185,129,.08);color:var(--green)">
-                  <i class="fas fa-database" style="font-size:16px;"></i>
-                </div>
-              </div>
-            </div>
+                  </div></div></div>
             
-            <!-- Target Card: Total Emails Card with Multi-bar Config -->
-            <div class="stat-card stat-card-emails">
-              <div class="stat-card-inner">
-                <div class="stat-card-text" style="flex:1;min-width:0">
-                  <div class="stat-label">Total Emails sent</div>
-                  <div class="stat-value" id="statEmailsVal">—</div>
-                  
-                  <div class="storage-bar-wrap" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
-                    <!-- Month Bar Row -->
-                    <div>
-                      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
-                        <span style="font-weight:600;color:var(--text-2)"><i class="far fa-calendar-alt" style="margin-right:4px;color:#3b82f6"></i>Monthly Limit</span>
-                        <span id="statEmailMonthPct" style="font-family:'Geist Mono', monospace;font-size:.72rem">— / —</span>
+            <div class="stat-card stat-card-emails"><div class="stat-card-header"><div class="stat-label">Total Emails sent</div><div class="stat-icon-box" style="background:rgba(59,130,246,.08);color:#3b82f6">
+                  <i class="fas fa-envelope"></i>
+                </div></div><div class="stat-card-body"><div class="stat-value" id="statEmailsVal">—</div>
+                  <div class="email-limits-wrap">
+                    <div class="email-limit-row">
+                      <div class="limit-labels">
+                        <span class="limit-name">Monthly Limit</span>
+                        <span id="statEmailMonthPct" class="limit-pct">— / —</span>
                       </div>
-                      <div class="storage-bar" style="margin-top:0">
+                      <div class="storage-bar">
                         <div class="storage-bar-fill" id="statEmailMonthBar" style="width:0%"></div>
                       </div>
                     </div>
-
-                    <!-- Day Bar Row -->
-                    <div>
-                      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-3);margin-bottom:2px">
-                        <span style="font-weight:600;color:var(--text-2)"><i class="far fa-clock" style="margin-right:4px;color:#3b82f6"></i>Daily Limit</span>
-                        <span id="statEmailDayPct" style="font-family:'Geist Mono', monospace;font-size:.72rem">— / —</span>
+                    <div class="email-limit-row">
+                      <div class="limit-labels">
+                        <span class="limit-name">Daily Limit</span>
+                        <span id="statEmailDayPct" class="limit-pct">— / —</span>
                       </div>
-                      <div class="storage-bar" style="margin-top:0">
+                      <div class="storage-bar">
                         <div class="storage-bar-fill" id="statEmailDayBar" style="width:0%"></div>
                       </div>
                     </div>
                   </div>
-
-                </div>
-                <div class="stat-icon-box" style="background:rgba(59,130,246,.08);color:#3b82f6; align-self: flex-start; margin-top: 4px;">
-                  <i class="fas fa-envelope" style="font-size:16px;"></i>
-                </div>
-              </div>
-            </div>
+                </div></div>
           </div>
         </div>
 
         <div class="dash-pie-card">
-          <div class="dash-card-header">
-            <span class="dash-card-title">Plan Distribution</span>
+          <div class="stat-card-header">
+            <div class="stat-label">Plan Distribution</div>
+            <div class="stat-icon-box" style="background:var(--purple-dim);color:var(--purple)">
+              <i class="fas fa-chart-pie"></i>
+            </div>
           </div>
-          <div class="dash-card-body" id="planDistribution">
+          <div class="stat-card-body" id="planDistribution">
             <div style="color:var(--text-3);font-size:.82rem">Loading…</div>
           </div>
         </div>
@@ -306,56 +236,24 @@
       </div>
 
       <div class="stats-grid" style="margin-bottom:18px">
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div>
-              <div class="stat-label">Total</div>
-              <div class="stat-value" id="reqStatTotal">—</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--bg2);color:var(--text-3)">
-              <i class="fas fa-clipboard-list" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div>
-              <div class="stat-label">Pending</div>
-              <div class="stat-value" style="color:#92710d" id="reqStatPending">—</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
-              <i class="fas fa-clock" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div>
-              <div class="stat-label">Approved</div>
-              <div class="stat-value" style="color:var(--green)" id="reqStatApproved">—</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-              <i class="fas fa-check-circle" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div>
-              <div class="stat-label">Rejected</div>
-              <div class="stat-value" style="color:var(--red)" id="reqStatRejected">—</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--red-dim);color:var(--red)">
-              <i class="fas fa-times-circle" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total</div><div class="stat-icon-box" style="background:var(--bg2);color:var(--text-3)">
+              <i class="fas fa-clipboard-list"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" id="reqStatTotal">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Pending</div><div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
+              <i class="fas fa-clock"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" style="color:#92710d" id="reqStatPending">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Approved</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+              <i class="fas fa-check-circle"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" style="color:var(--green)" id="reqStatApproved">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Rejected</div><div class="stat-icon-box" style="background:var(--red-dim);color:var(--red)">
+              <i class="fas fa-times-circle"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" style="color:var(--red)" id="reqStatRejected">—</div></div></div>
       </div>
 
       <div class="filter-bar">
         <div class="search-box" style="flex:1;min-width:180px">
           <i class="fas fa-search" style="color:#a0a5b1; font-size:12px; margin-right:4px;"></i>
-          <input type="text" id="reqSearch" placeholder="Search by user, email, type…" oninput="filterRequests()"/>
+          <input type="text" id="reqSearch" placeholder="Search by user, email, type…" oninput="filterRequests()">
         </div>
         <div class="filter-divider"></div>
         <select class="filter-select" id="reqTypeFilter" onchange="filterRequests()">
@@ -389,7 +287,7 @@
         <div class="pagination-bar" id="reqPaginationBar">
           <span class="pagination-info" id="reqPaginationInfo">Page 1</span>
           <div class="pagination-controls">
-            <button class="pagination-page" id="reqPrevBtn" onclick="changeReqPage(_reqPage - 1)" disabled>
+            <button class="pagination-page" id="reqPrevBtn" onclick="changeReqPage(_reqPage - 1)" disabled="">
               <i class="fas fa-chevron-left" style="font-size:11px;"></i>
             </button>
             <span class="pagination-page current" id="reqPageNum">1</span>
@@ -413,7 +311,7 @@
       <div class="filter-bar">
         <div class="search-box" style="flex:1;min-width:180px">
           <i class="fas fa-search" style="color:#a0a5b1; font-size:12px; margin-right:4px;"></i>
-          <input type="text" id="userSearch" placeholder="Search by name, email, ID…" oninput="filterUsers(this.value)"/>
+          <input type="text" id="userSearch" placeholder="Search by name, email, ID…" oninput="filterUsers(this.value)">
         </div>
         <div class="filter-divider"></div>
         <select class="filter-select" id="planFilter" onchange="filterUsers(document.getElementById('userSearch').value)">
@@ -435,7 +333,7 @@
       <div class="pagination-bar" id="userPaginationBar">
         <span class="pagination-info" id="userPaginationInfo">Page 1</span>
         <div class="pagination-controls">
-          <button class="pagination-page" id="userPrevBtn" onclick="changeUserPage(_userPage - 1)" disabled>
+          <button class="pagination-page" id="userPrevBtn" onclick="changeUserPage(_userPage - 1)" disabled="">
             <i class="fas fa-chevron-left" style="font-size:11px;"></i>
           </button>
           <span class="pagination-page current" id="userPageNum">1</span>
@@ -457,56 +355,24 @@
       </div>
 
       <div class="stats-grid" style="margin-bottom:18px">
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div>
-              <div class="stat-label">Total</div>
-              <div class="stat-value" id="revStatTotal">—</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--bg2);color:var(--text-3)">
-              <i class="fas fa-comments" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div>
-              <div class="stat-label">Pending</div>
-              <div class="stat-value" style="color:#92710d" id="revStatPending">—</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
-              <i class="fas fa-clock" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div>
-              <div class="stat-label">Accepted</div>
-              <div class="stat-value" style="color:var(--green)" id="revStatAccepted">—</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-              <i class="fas fa-check-circle" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div>
-              <div class="stat-label">This Page</div>
-              <div class="stat-value" id="revStatPage">—</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
-              <i class="fas fa-file-alt" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total</div><div class="stat-icon-box" style="background:var(--bg2);color:var(--text-3)">
+              <i class="fas fa-comments"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" id="revStatTotal">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Pending</div><div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
+              <i class="fas fa-clock"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" style="color:#92710d" id="revStatPending">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Accepted</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+              <i class="fas fa-check-circle"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" style="color:var(--green)" id="revStatAccepted">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">This Page</div><div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
+              <i class="fas fa-file-alt"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" id="revStatPage">—</div></div></div>
       </div>
 
       <div class="filter-bar">
         <div class="search-box" style="flex:1;min-width:180px">
           <i class="fas fa-search" style="color:#a0a5b1; font-size:12px; margin-right:4px;"></i>
-          <input type="text" id="revSearch" placeholder="Search by user, email, review text…" oninput="filterReviews()"/>
+          <input type="text" id="revSearch" placeholder="Search by user, email, review text…" oninput="filterReviews()">
         </div>
         <div class="filter-divider"></div>
         <select class="filter-select" id="revStatusFilter" onchange="filterReviews()">
@@ -538,7 +404,7 @@
       <div class="pagination-bar" id="revPaginationBar">
         <span class="pagination-info" id="revPaginationInfo">Page 1</span>
         <div class="pagination-controls">
-          <button class="pagination-page" id="revPrevBtn" onclick="changeRevPage(_revPage - 1)" disabled>
+          <button class="pagination-page" id="revPrevBtn" onclick="changeRevPage(_revPage - 1)" disabled="">
             <i class="fas fa-chevron-left" style="font-size:11px;"></i>
           </button>
           <span class="pagination-page current" id="revPageNum">1</span>
@@ -564,30 +430,12 @@
       </div>
 
       <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-bottom:18px">
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div class="stat-card-text">
-              <div class="stat-label">Total Plans</div>
-              <div class="stat-value" id="planStatTotal">—</div>
-              <div class="stat-sub">Pricing tiers</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--purple-dim);color:var(--purple)">
-              <i class="fas fa-tags" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-inner">
-            <div class="stat-card-text">
-              <div class="stat-label">With Details</div>
-              <div class="stat-value" id="planStatWithDetails">—</div>
-              <div class="stat-sub">Have plan_details set</div>
-            </div>
-            <div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
-              <i class="fas fa-info-circle" style="font-size:16px;"></i>
-            </div>
-          </div>
-        </div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total Plans</div><div class="stat-icon-box" style="background:var(--purple-dim);color:var(--purple)">
+              <i class="fas fa-tags"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" id="planStatTotal">—</div><div class="stat-sub">Pricing tiers</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">With Details</div><div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
+              <i class="fas fa-info-circle"></i>
+            </div></div><div class="stat-card-body"><div class="stat-value" id="planStatWithDetails">—</div><div class="stat-sub">Have plan_details set</div></div></div>
       </div>
 
       <div class="section-header">
@@ -608,78 +456,30 @@
 
       <!-- STATS -->
       <div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));">
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Revenue this month</div>
-            <div class="stat-icon green">
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Revenue this month</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
               <i class="fas fa-calendar-check"></i>
-            </div>
-          </div>
-          <div class="stat-value green" id="payStatRevenueThisMonth">— <span style="font-size:13px;font-weight:400">KWD</span></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Total payments</div>
-            <div class="stat-icon gold">
+            </div></div><div class="stat-card-body"><div class="stat-value green" id="payStatRevenueThisMonth">— <span style="font-size:13px;font-weight:400">KWD</span></div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total payments</div><div class="stat-icon-box" style="background:var(--gold-dim);color:var(--gold)">
               <i class="fas fa-credit-card"></i>
-            </div>
-          </div>
-          <div class="stat-value" id="payStatTotal">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Paid payments</div>
-            <div class="stat-icon blue">
+            </div></div><div class="stat-card-body"><div class="stat-value" id="payStatTotal">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Paid payments</div><div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
               <i class="fas fa-toggle-on"></i>
-            </div>
-          </div>
-          <div class="stat-value" id="payStatActive">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Canceled payments</div>
-            <div class="stat-icon red">
+            </div></div><div class="stat-card-body"><div class="stat-value" id="payStatActive">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Canceled payments</div><div class="stat-icon-box" style="background:var(--red-dim);color:var(--red)">
               <i class="fas fa-circle-xmark"></i>
-            </div>
-          </div>
-          <div class="stat-value red" id="payStatCanceled">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Rejected payments</div>
-            <div class="stat-icon red">
+            </div></div><div class="stat-card-body"><div class="stat-value red" id="payStatCanceled">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Rejected payments</div><div class="stat-icon-box" style="background:var(--red-dim);color:var(--red)">
               <i class="fas fa-ban"></i>
-            </div>
-          </div>
-          <div class="stat-value red" id="payStatRejected">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Payments this month</div>
-            <div class="stat-icon gold">
+            </div></div><div class="stat-card-body"><div class="stat-value red" id="payStatRejected">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Payments this month</div><div class="stat-icon-box" style="background:var(--gold-dim);color:var(--gold)">
               <i class="fas fa-calendar-alt"></i>
-            </div>
-          </div>
-          <div class="stat-value" id="payStatThisMonth">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Monthly cycles</div>
-            <div class="stat-icon purple">
+            </div></div><div class="stat-card-body"><div class="stat-value" id="payStatThisMonth">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Monthly cycles</div><div class="stat-icon-box" style="background:rgba(139,92,246,0.1);color:#8b5cf6">
               <i class="fas fa-arrows-spin"></i>
-            </div>
-          </div>
-          <div class="stat-value" id="payStatMonthlyCycle">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <div class="stat-label">Yearly cycles</div>
-            <div class="stat-icon purple">
+            </div></div><div class="stat-card-body"><div class="stat-value" id="payStatMonthlyCycle">—</div></div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Yearly cycles</div><div class="stat-icon-box" style="background:rgba(139,92,246,0.1);color:#8b5cf6">
               <i class="fas fa-rotate"></i>
-            </div>
-          </div>
-          <div class="stat-value" id="payStatYearlyCycle">—</div>
-        </div>
+            </div></div><div class="stat-card-body"><div class="stat-value" id="payStatYearlyCycle">—</div></div></div>
       </div>
 
       <!-- CREATE SUBSCRIPTION — full width -->
@@ -705,7 +505,7 @@
             <div class="form-col">
               <label class="form-label">Plan <span class="req">*</span></label>
               <select class="form-input" id="sub-plan" onchange="autoFillPlanAmount()">
-                <option value="" disabled selected>Select plan...</option>
+                <option value="" disabled="" selected="">Select plan...</option>
               </select>
             </div>
             <div class="form-col">
@@ -715,15 +515,15 @@
             <div class="form-col">
               <label class="form-label">Billing cycle <span class="req">*</span></label>
               <select class="form-input" id="sub-cycle" onchange="autoFillPlanAmount()">
-                <option value="monthly" selected>Monthly</option>
+                <option value="monthly" selected="">Monthly</option>
                 <option value="yearly">Yearly</option>
               </select>
             </div>
             <div class="form-col">
               <label class="form-label">Start date <span class="req">*</span></label>
               <div class="input-with-icon flatpickr" id="start-date-container" style="position: relative; display: flex; align-items: center; width: 100%;">
-                <input class="form-input" type="text" id="sub-start" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input onchange="autoFillPlanAmount()">
-                <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle>
+                <input class="form-input" type="text" id="sub-start" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="" onchange="autoFillPlanAmount()">
+                <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle="">
                   <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
                 </a>
               </div>
@@ -731,8 +531,8 @@
             <div class="form-col">
               <label class="form-label">End date <span class="req">*</span></label>
               <div class="input-with-icon flatpickr" id="end-date-container" style="position: relative; display: flex; align-items: center; width: 100%;">
-                <input class="form-input" type="text" id="sub-end" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input>
-                <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle>
+                <input class="form-input" type="text" id="sub-end" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="">
+                <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle="">
                   <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
                 </a>
               </div>
@@ -740,7 +540,7 @@
           </div>
 
           <div style="display:flex;justify-content:flex-end;">
-            <button class="btn-primary-redesign" id="createPaymentBtn" onclick="showCreateConfirm()" disabled>
+            <button class="btn-primary-redesign" id="createPaymentBtn" onclick="showCreateConfirm()" disabled="">
               <i class="fas fa-plus"></i>
               Create subscription
             </button>
@@ -783,7 +583,7 @@
           <div class="form-section-title">API Configuration</div>
           <div class="form-group">
             <label class="form-label">API Base URL</label>
-            <input class="form-input" id="settingsApiBase" type="text" value="http://127.0.0.1:8000"/>
+            <input class="form-input" id="settingsApiBase" type="text" value="http://127.0.0.1:8000">
           </div>
         </div>
         <div class="form-section">
@@ -791,11 +591,11 @@
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Admin Email</label>
-              <input class="form-input" type="email" placeholder="admin@badia.com"/>
+              <input class="form-input" type="email" placeholder="admin@badia.com">
             </div>
             <div class="form-group">
               <label class="form-label">New Password</label>
-              <input class="form-input" type="password" placeholder="Leave blank to keep current"/>
+              <input class="form-input" type="password" placeholder="Leave blank to keep current">
             </div>
           </div>
         </div>
@@ -890,7 +690,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="editPaymentId"/>
+      <input type="hidden" id="editPaymentId">
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Plan <span class="req">*</span></label>
@@ -907,7 +707,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Amount (KWD) <span class="req">*</span></label>
-          <input class="form-input" id="editPaymentAmount" type="number" step="0.001" placeholder="0.000"/>
+          <input class="form-input" id="editPaymentAmount" type="number" step="0.001" placeholder="0.000">
         </div>
         <div class="form-group">
           <label class="form-label">Status <span class="req">*</span></label>
@@ -922,8 +722,8 @@
         <div class="form-group">
           <label class="form-label">Start Date <span class="req">*</span></label>
           <div class="input-with-icon flatpickr" id="edit-payment-start-container" style="position: relative; display: flex; align-items: center; width: 100%;">
-            <input class="form-input" type="text" id="editPaymentStart" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input>
-            <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle>
+            <input class="form-input" type="text" id="editPaymentStart" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="">
+            <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle="">
               <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
             </a>
           </div>
@@ -931,8 +731,8 @@
         <div class="form-group">
           <label class="form-label">End Date <span class="req">*</span></label>
           <div class="input-with-icon flatpickr" id="edit-payment-end-container" style="position: relative; display: flex; align-items: center; width: 100%;">
-            <input class="form-input" type="text" id="editPaymentEnd" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input>
-            <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle>
+            <input class="form-input" type="text" id="editPaymentEnd" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="">
+            <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle="">
               <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
             </a>
           </div>
@@ -998,35 +798,35 @@
       </button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="editUserId"/>
+      <input type="hidden" id="editUserId">
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">First Name</label>
-          <input class="form-input" id="editFirstName" type="text" placeholder="First name"/>
+          <input class="form-input" id="editFirstName" type="text" placeholder="First name">
         </div>
         <div class="form-group">
           <label class="form-label">Last Name</label>
-          <input class="form-input" id="editLastName" type="text" placeholder="Last name"/>
+          <input class="form-input" id="editLastName" type="text" placeholder="Last name">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Company Name</label>
-          <input class="form-input" id="editCompanyName" type="text" placeholder="Company Name"/>
+          <input class="form-input" id="editCompanyName" type="text" placeholder="Company Name">
         </div>
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input class="form-input" id="editEmail" type="email" placeholder="email@example.com"/>
+          <input class="form-input" id="editEmail" type="email" placeholder="email@example.com">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Phone</label>
-          <input class="form-input" id="editPhone" type="tel" placeholder="+965 XXXX XXXX"/>
+          <input class="form-input" id="editPhone" type="tel" placeholder="+965 XXXX XXXX">
         </div>
         <div class="form-group">
           <label class="form-label">New Password</label>
-          <input class="form-input" id="editPassword" type="text" placeholder="Leave blank to keep current"/>
+          <input class="form-input" id="editPassword" type="text" placeholder="Leave blank to keep current">
         </div>
       </div>
       <div class="form-row">
@@ -1044,7 +844,7 @@
       </div>
       <div class="form-row">
         <div class="form-group" style="display:flex; align-items:center; margin-top:10px; gap:8px;">
-          <input type="checkbox" id="editEmailVerified" style="width:16px; height:16px;" />
+          <input type="checkbox" id="editEmailVerified" style="width:16px; height:16px;">
           <label for="editEmailVerified" class="form-label" style="margin:0;">Email Verified</label>
         </div>
       </div>
@@ -1071,25 +871,19 @@
       </button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="editPlanId"/>
+      <input type="hidden" id="editPlanId">
 
       <div class="form-section">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">
           <span style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-3)">Basic Info</span>
-          <button
-            id="clearAllPlanDataBtn"
-            class="btn btn-ghost btn-sm"
-            style="font-size:.72rem;padding:3px 9px;height:auto;color:var(--red);border-color:var(--red);opacity:.75;display:none"
-            onclick="confirmClearAllPlanForm()"
-            type="button"
-          >
+          <button id="clearAllPlanDataBtn" class="btn btn-ghost btn-sm" style="font-size:.72rem;padding:3px 9px;height:auto;color:var(--red);border-color:var(--red);opacity:.75;display:none" onclick="confirmClearAllPlanForm()" type="button">
             <i class="fas fa-trash-alt" style="margin-right:3px"></i>
             Clear All Data
           </button>
         </div>
         <div class="form-group">
           <label class="form-label">Plan Name *</label>
-          <input class="form-input" id="editPlanName" type="text" placeholder="e.g. Professional"/>
+          <input class="form-input" id="editPlanName" type="text" placeholder="e.g. Professional">
           <div id="errPlanName" style="font-size:.75rem;color:var(--red);margin-top:3px"></div>
         </div>
       </div>
@@ -1099,12 +893,12 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Monthly Price *</label>
-            <input class="form-input" id="editPlanMonthly" type="number" step="0.001" min="0" placeholder="49.900"/>
+            <input class="form-input" id="editPlanMonthly" type="number" step="0.001" min="0" placeholder="49.900">
             <div id="errPlanMonthly" style="font-size:.75rem;color:var(--red);margin-top:3px"></div>
           </div>
           <div class="form-group">
             <label class="form-label">Yearly Price *</label>
-            <input class="form-input" id="editPlanYearly" type="number" step="0.001" min="0" placeholder="509.000"/>
+            <input class="form-input" id="editPlanYearly" type="number" step="0.001" min="0" placeholder="509.000">
           </div>
         </div>
       </div>
@@ -1119,11 +913,11 @@
           <div class="fb-inputs-row">
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label" style="font-size:.72rem">English Name *</label>
-              <input type="text" class="form-input" id="fbInputEn" placeholder="e.g. 10 Users" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}"/>
+              <input type="text" class="form-input" id="fbInputEn" placeholder="e.g. 10 Users" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}">
             </div>
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label" style="font-size:.72rem">Arabic Name *</label>
-              <input type="text" class="form-input" id="fbInputAr" placeholder="مثال: ١٠ مستخدمين" style="direction:rtl" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}"/>
+              <input type="text" class="form-input" id="fbInputAr" placeholder="مثال: ١٠ مستخدمين" style="direction:rtl" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}">
             </div>
             <div class="form-group" style="margin-bottom:0; display:flex; flex-direction:column; align-items:center">
               <label class="form-label" style="font-size:.72rem">Enabled</label>
@@ -1214,7 +1008,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <input type="hidden" id="rejectReqId"/>
+      <input type="hidden" id="rejectReqId">
       <p style="font-size:.85rem;color:var(--text-2);line-height:1.6;margin-bottom:14px">
         Optionally provide a reason for the rejection. The user may see this note.
       </p>
@@ -1309,5 +1103,5 @@
 </div>
 
 <script src="admin.js"></script>
-</body>
-</html>
+
+</body></html>
