@@ -555,8 +555,9 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 .plan-card-actions .btn{width:100%}
 .btn-ghost-small{background:transparent;border:1px solid var(--gray-300);color:var(--gray-500);padding:.5rem 1rem;border-radius:8px;font-size:.88rem;font-weight:500;cursor:pointer;transition:var(--transition);width:100%}
 .btn-ghost-small:hover{border-color:var(--accent);color:var(--accent);background:rgba(212,175,55,.06)}
-.plan-feat-more-hint{color:var(--accent)!important;font-style:italic;font-size:.85rem!important;border-bottom:none!important}
+.plan-feat-more-hint{color:var(--accent)!important;font-style:italic;font-size:.85rem!important;border-bottom:none!important;cursor:pointer}
 .plan-feat-more-hint::before{content:'+'!important;color:var(--accent)!important}
+.plan-feat-more-hint:hover{text-decoration:underline}
 
 /* ===== Plan Modal ===== */
 body.modal-open{overflow:hidden}

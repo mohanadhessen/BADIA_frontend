@@ -652,7 +652,7 @@ function renderPlans(plans, billing) {
 
         const featureHTML = vis.length
             ? vis.map(f => `<li>${f}</li>`).join('')
-            + (moreCount > 0 ? `<li class="plan-feat-more-hint">${lang === 'ar' ? `+ ${moreCount} ميزة إضافية` : `+ ${moreCount} more features`}</li>` : '')
+            + (moreCount > 0 ? `<li class="plan-feat-more-hint" onclick="openPlanModal(${idx})">${lang === 'ar' ? `+ ${moreCount} ميزة إضافية` : `+ ${moreCount} more features`}</li>` : '')
             : `<li>${lang === 'ar' ? 'تفاصيل عبر الاتصال بنا' : 'Details via consultation'}</li>`;
 
         // Yearly savings badge
