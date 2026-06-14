@@ -244,9 +244,9 @@
                     <h3 data-en="Operational Partnership Application" data-ar="طلب الشراكة التشغيلية">Operational
                         Partnership Application</h3>
                     <p style="color:var(--gray-500);font-size:.95rem;margin-bottom:1.5rem;"
-                        data-en="Upload the required documents below. All files must be in PDF format."
-                        data-ar="ارفع المستندات المطلوبة أدناه. جميع الملفات يجب أن تكون بصيغة PDF.">Upload the required
-                        documents below. All files must be in PDF format.</p>
+                        data-en="Upload the required documents below. All files must be in PDF format. (Max 24MB per PDF)"
+                        data-ar="ارفع المستندات المطلوبة أدناه. جميع الملفات يجب أن تكون بصيغة PDF. (الحد الأقصى 24 ميجابايت لكل ملف)">Upload the required
+                        documents below. All files must be in PDF format. (Max 24MB per PDF)</p>
                     <div id="partnershipFormContainer">
                         <form class="account-form" id="partnershipForm">
                             <div class="upload-grid">
@@ -1242,7 +1242,7 @@
                     const fname = f.filename || f.name || 'file.pdf';
                     const fileId = f.file_id || f.id || '';
                     const fsize = f.size ? (f.size < 1048576 ? `${(f.size / 1024).toFixed(0)} KB` : `${(f.size / 1048576).toFixed(1)} MB`) : '';
-                    return `<div class="request-file-chip">
+                    return `<div class="request-file-chip" onclick="previewMyFile(${r.id},'${fileId}')" style="cursor:pointer" title="${lang === 'ar' ? 'عرض' : 'Preview'}">
                                 <span class="request-file-icon">📄</span>
                                 <span class="request-file-name">${fname.length > 25 ? fname.slice(0, 22) + '…' : fname}</span>
                                 ${fsize ? `<span class="request-file-size">${fsize}</span>` : ''}
@@ -1315,16 +1315,45 @@
                 if (!res.ok) throw new Error('API Error');
                 
                 const data = await res.json();
-                const url = data.url || data.presigned_url;
+                const url = data.download_url || data.url || data.presigned_url;
 
                 if (url) {
                     window.location.href = url;
                 } else {
-                    throw new Error('No presigned URL returned');
+                    throw new Error('No download URL returned');
                 }
             } catch (err) {
                 console.error('Download error:', err);
                 showNotification(lang === 'ar' ? 'فشل تحميل الملف' : 'Failed to download file', 'error');
+            }
+        }
+
+        // ===== Preview user's own file =====
+        async function previewMyFile(requestId, fileId) {
+            const lang = getLang();
+            if (!fileId) {
+                showNotification(lang === 'ar' ? 'معرف الملف غير موجود' : 'File ID missing', 'error');
+                return;
+            }
+            
+            const newWin = window.open('about:blank', '_blank');
+            
+            try {
+                const res = await apiFetch(`/api/v1/users/requests/${requestId}/files/${fileId}`);
+                if (!res.ok) throw new Error('API Error');
+                
+                const data = await res.json();
+                const url = data.url || data.presigned_url;
+
+                if (url) {
+                    newWin.location.href = url;
+                } else {
+                    throw new Error('No preview URL returned');
+                }
+            } catch (err) {
+                if (newWin) newWin.close();
+                console.error('Preview error:', err);
+                showNotification(lang === 'ar' ? 'فشل عرض الملف' : 'Failed to preview file', 'error');
             }
         }
 

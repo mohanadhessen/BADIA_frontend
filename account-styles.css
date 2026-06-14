@@ -1118,7 +1118,7 @@
   --status-rejected-text:#991b1b;
 
   /* Sidebar */
-  --sidebar-bg:     #0e0d08;
+  --sidebar-bg:     #1a1a1b;
   --sidebar-border: rgba(255,255,255,.065);
 
   --t: 200ms cubic-bezier(.4,0,.2,1);

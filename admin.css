@@ -222,7 +222,7 @@ a{text-decoration:none}button{font-family:inherit}
 
 /* ── Stat Cards & Pie Card ──────────────────────────────────────────────── */
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-.stats-grid-6 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.stats-grid-6 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
 
 .stat-card, .dash-pie-card {
   background: var(--white);
@@ -638,7 +638,7 @@ tbody tr.expanded-detail td{background:#fffbf0;border-bottom:1.5px solid var(--a
 }
 
 /* ── Plans Grid ──────────────────────────────────────────────── */
-.plans-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.plans-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
 .plan-admin-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:var(--transition);display:flex;flex-direction:column}
 .plan-admin-card:hover{border-color:var(--accent-mid);box-shadow:var(--shadow)}
 .plan-admin-card.featured{border-color:var(--accent)}
@@ -780,7 +780,7 @@ tbody tr.expanded-detail td{background:#fffbf0;border-bottom:1.5px solid var(--a
 .item-info-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .item-info-title{font-size:.93rem;font-weight:700;color:var(--text)}
 .item-info-sub{font-size:.78rem;color:var(--text-3);margin-top:1px}
-.item-info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px 20px}
+.item-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 20px}
 .item-info-field{display:flex;flex-direction:column;gap:2px}
 .item-info-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3)}
 .item-info-value{font-size:.84rem;color:var(--text-2);font-weight:500}

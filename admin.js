@@ -224,7 +224,7 @@ async function downloadFileById(reqId, fileId, filename) {
 
   try {
     const data = await apiFetch(`/api/v1/admin/requests/${reqId}/files/${fileId}`);
-    const url = data.url || data.presigned_url;
+    const url = data.download_url || data.url || data.presigned_url;
 
     if (!url) throw new Error('No URL');
 
@@ -233,6 +233,29 @@ async function downloadFileById(reqId, fileId, filename) {
 
   } catch (e) {
     toast('Failed to get download link', 'error');
+  }
+}
+
+async function previewFileById(reqId, fileId, filename) {
+  if (!fileId) {
+    toast('File ID missing', 'error');
+    return;
+  }
+
+  const newWin = window.open('about:blank', '_blank');
+
+  try {
+    const data = await apiFetch(`/api/v1/admin/requests/${reqId}/files/${fileId}`);
+    const url = data.url || data.presigned_url;
+
+    if (!url) throw new Error('No URL');
+
+    newWin.location.href = url;
+
+  } catch (e) {
+    if (newWin) newWin.close();
+    console.error('Preview error:', e);
+    toast('Failed to get preview link', 'error');
   }
 }
 
@@ -730,7 +753,7 @@ function renderRequests(requests) {
       const fname  = f.filename || f.name || 'file.pdf';
       const sz     = fmtSize(f.size || 0);
       const fileId = f.file_id || f.id || '';
-      return `<span class="file-chip" onclick="event.stopPropagation();downloadFileById(${req.id},'${fileId}','${fname}')" title="Download ${fname}">
+      return `<span class="file-chip" onclick="event.stopPropagation();previewFileById(${req.id},'${fileId}','${fname}')" title="Preview ${fname}">
         <i class="fas fa-paperclip" style="margin-right:4px;"></i>
         ${fname.length > 18 ? fname.slice(0,15)+'…' : fname}
         ${sz ? `<span class="file-size">${sz}</span>` : ''}
@@ -912,14 +935,14 @@ function viewRequest(reqId) {
         const fdate  = fmtDate(f.uploaded_at||f.upload_date);
         const fileId = f.file_id || f.id || '';
         return `<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:9px;min-width:200px;flex:1">
-          <div style="width:34px;height:34px;border-radius:8px;background:var(--red-dim);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" onclick="downloadFileById(${req.id},'${fileId}','${fname}')" title="Download ${fname}">
+          <div style="width:34px;height:34px;border-radius:8px;background:var(--red-dim);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" onclick="previewFileById(${req.id},'${fileId}','${fname}')" title="Preview ${fname}">
             <i class="fas fa-file-pdf"></i>
           </div>
           <div style="flex:1;min-width:0">
             <div style="font-size:.81rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fname}</div>
             <div style="font-size:.72rem;color:var(--text-3)">${[fsize,fdate].filter(Boolean).join(' · ')}</div>
           </div>
-          <button class="btn-icon download btn-xs" onclick="downloadFileById(${req.id},'${fileId}','${fname}')">
+          <button class="btn-icon download btn-xs" onclick="downloadFileById(${req.id},'${fileId}','${fname}')" title="Download ${fname}">
             <i class="fas fa-download"></i>
           </button>
         </div>`;
@@ -1812,7 +1835,7 @@ function renderDashboard() {
   } else {
     const DASHBOARD_COLORS = ['#8b5cf6', '#3b82f6', '#d4af37', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9', '#ec4899', '#14b8a6', '#6366f1'];
     function getColor(name) {
-      if (name.toLowerCase() === 'none') return '#64748b';
+      if (name.toLowerCase() === 'none' || name.toLowerCase() === 'no plan') return '#C0C0C0';
       let hash = 0;
       for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
       return DASHBOARD_COLORS[Math.abs(hash) % DASHBOARD_COLORS.length];
@@ -2209,6 +2232,20 @@ function autoFillPlanAmount() {
   }
 }
 
+function checkDuplicatePaidPayment(email, excludePaymentId = null) {
+  if (!email) return false;
+  return _payments.some(p => {
+    if (excludePaymentId && String(p.id) === String(excludePaymentId)) return false;
+    let pEmail = p.user_email;
+    if (!pEmail && p.user) pEmail = p.user.email;
+    if (!pEmail && p.user_id) {
+      const u = _users.find(usr => String(usr.id) === String(p.user_id));
+      if (u) pEmail = u.email;
+    }
+    return pEmail && pEmail.toLowerCase() === email.toLowerCase() && p.status === 'paid';
+  });
+}
+
 function showCreateConfirm() {
   const email  = document.getElementById('sub-email').value.trim();
   const planId = document.getElementById('sub-plan').value;
@@ -2223,6 +2260,15 @@ function showCreateConfirm() {
   }
   if (!planId) {
     toast('Please select a plan', 'error');
+    return;
+  }
+  if (!start || !end) {
+    toast('Please fill all required fields', 'error');
+    return;
+  }
+
+  if (checkDuplicatePaidPayment(email)) {
+    toast('User already has an active paid payment', 'error');
     return;
   }
   const parseFloatAmount = parseFloat(amount);
@@ -2451,6 +2497,22 @@ async function confirmStatusUpdate() {
   const st = document.getElementById('newStatusSelect').value;
   if (!pid) return toast('Please select a payment ID', 'error');
 
+  if (st === 'paid') {
+    const payment = _payments.find(p => String(p.id) === String(pid));
+    if (payment) {
+      let email = payment.user_email;
+      if (!email && payment.user) email = payment.user.email;
+      if (!email && payment.user_id) {
+        const u = _users.find(usr => String(usr.id) === String(payment.user_id));
+        if (u) email = u.email;
+      }
+      if (checkDuplicatePaidPayment(email, pid)) {
+        toast('User already has an active paid payment', 'error');
+        return;
+      }
+    }
+  }
+
   closeStatusModal();
 
   try {
@@ -2549,6 +2611,22 @@ async function savePayment() {
   if (!planId) return toast('Please select a plan', 'error');
   if (isNaN(amount) || amount < 0) return toast('Please enter a valid amount', 'error');
   if (!start || !end) return toast('Start and end dates are required', 'error');
+
+  if (status === 'paid') {
+    const payment = _payments.find(p => String(p.id) === String(pid));
+    if (payment) {
+      let email = payment.user_email;
+      if (!email && payment.user) email = payment.user.email;
+      if (!email && payment.user_id) {
+        const u = _users.find(usr => String(usr.id) === String(payment.user_id));
+        if (u) email = u.email;
+      }
+      if (checkDuplicatePaidPayment(email, pid)) {
+        toast('User already has an active paid payment', 'error');
+        return;
+      }
+    }
+  }
 
   const payload = {
     plan_id: parseInt(planId),

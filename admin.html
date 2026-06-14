@@ -193,7 +193,7 @@
         <div class="dash-pie-card">
           <div class="stat-card-header">
             <div class="stat-label">Plan Distribution</div>
-            <div class="stat-icon-box" style="background:var(--purple-dim);color:var(--purple)">
+            <div class="stat-icon-box" style="background:rgba(192,192,192,0.15);color:#C0C0C0">
               <i class="fas fa-chart-pie"></i>
             </div>
           </div>
@@ -429,7 +429,7 @@
         </div>
       </div>
 
-      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-bottom:18px">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:18px">
         <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total Plans</div><div class="stat-icon-box" style="background:var(--purple-dim);color:var(--purple)">
               <i class="fas fa-tags"></i>
             </div></div><div class="stat-card-body"><div class="stat-value" id="planStatTotal">—</div><div class="stat-sub">Pricing tiers</div></div></div>
@@ -455,7 +455,7 @@
       </div>
 
       <!-- STATS -->
-      <div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));">
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));">
         <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Revenue this month</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
               <i class="fas fa-calendar-check"></i>
             </div></div><div class="stat-card-body"><div class="stat-value green" id="payStatRevenueThisMonth">— <span style="font-size:13px;font-weight:400">KWD</span></div></div></div>
@@ -1008,6 +1008,10 @@
       </button>
     </div>
     <div class="modal-body">
+      <div class="form-notice" style="margin-bottom:14px">
+        <i class="fas fa-envelope"></i>
+        <p><strong>A rejection email will be sent</strong> to the user once you reject this request. Include a clear reason if needed.</p>
+      </div>
       <input type="hidden" id="rejectReqId">
       <p style="font-size:.85rem;color:var(--text-2);line-height:1.6;margin-bottom:14px">
         Optionally provide a reason for the rejection. The user may see this note.
