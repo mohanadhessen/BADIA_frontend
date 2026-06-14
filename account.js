@@ -525,6 +525,12 @@
                 return;
             }
 
+            if (!currentUser.phone || !currentUser.company_name) {
+                showNotification(lang === 'ar' ? 'يرجى استكمال بيانات الملف الشخصي (رقم الهاتف واسم الشركة) أولاً' : 'Please complete your profile (Phone and Company Name) first', 'error');
+                showSection('edit-profile', null);
+                return;
+            }
+
             // Validate all files uploaded
             const fileInputs = this.querySelectorAll('input[type="file"]');
             let allFilled = true;
@@ -605,6 +611,12 @@
 
             if (!currentUser || !currentUser.is_email_verified) {
                 showNotification(lang === 'ar' ? 'يجب تفعيل بريدك الإلكتروني أولاً' : 'You must verify your email first', 'error');
+                return;
+            }
+
+            if (!currentUser.phone || !currentUser.company_name) {
+                showNotification(lang === 'ar' ? 'يرجى استكمال بيانات الملف الشخصي (رقم الهاتف واسم الشركة) أولاً' : 'Please complete your profile (Phone and Company Name) first', 'error');
+                showSection('edit-profile', null);
                 return;
             }
 
