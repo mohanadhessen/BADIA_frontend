@@ -214,13 +214,16 @@ function handleSuccessfulAuth(role) {
                 window.history.replaceState({}, document.title, newUrl);
             }
             
-            // 1. Google OAuth Callback — cookies are set by the redirect, check auth status
-            const oauthComplete = params.get('oauth_complete');
-            if (oauthComplete) {
+            // 1. Google OAuth Callback — exchange token for HttpOnly cookies
+            const oauthToken = params.get('oauth_token');
+            if (oauthToken) {
                 const lang = document.documentElement.getAttribute('lang') || 'en';
                 showToast(lang === 'ar' ? 'جاري التحقق...' : 'Authenticating...', 'success');
                 try {
-                    const res = await fetch(`${API_BASE}/api/v1/auth/check`, {
+                    const res = await fetch(`${API_BASE}/api/v1/auth/google/exchange`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ token: oauthToken }),
                         credentials: 'include'
                     });
                     if (res.ok) {
