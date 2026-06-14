@@ -407,6 +407,7 @@
                     setCachedUser(currentUser);
                     renderProfile(currentUser);
                     populateEditForm(currentUser);
+                    checkVerificationGate(currentUser);
                     showNotification(lang === 'ar' ? 'تم تحديث الملف الشخصي بنجاح' : 'Profile updated successfully', 'success');
                 } else {
                     const err = await res.json();
