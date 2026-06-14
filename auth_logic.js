@@ -226,10 +226,14 @@ function handleSuccessfulAuth(role) {
                     if (res.ok) {
                         const data = await res.json();
                         if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                        const role = data.user?.role;
-                        showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
+                        const role = data.user?.role || 'user';
+                        
+                        localStorage.setItem('user_role', role);
+                        if (typeof setCachedUser === 'function') setCachedUser(data.user);
+                        
+                        showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح! جاري التوجيه...' : 'Signed in successfully! Redirecting...', 'success');
                         window.history.replaceState({}, document.title, window.location.pathname);
-                        setTimeout(() => window.location.href = role === 'admin' ? 'admin.html' : 'account.html', 1000);
+                        setTimeout(() => handleSuccessfulAuth(role), 1500);
                     } else {
                         showToast(lang === 'ar' ? 'فشل تسجيل الدخول' : 'Sign-in failed', 'error');
                         window.history.replaceState({}, document.title, window.location.pathname);
