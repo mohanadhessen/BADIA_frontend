@@ -326,18 +326,29 @@
 
         // ===== Verification Gate =====
         function checkVerificationGate(user) {
-            const banner = document.getElementById('verificationBanner');
+            const verificationBanner = document.getElementById('verificationBanner');
+            const profileBanner = document.getElementById('profileCompletionBanner');
             const partnershipCard = document.getElementById('partnershipCard');
             const feasibilityCard = document.getElementById('feasibilityCard');
 
-            if (!user.is_email_verified) {
-                banner.style.display = 'flex';
-                partnershipCard.classList.add('form-locked');
-                feasibilityCard.classList.add('form-locked');
+            const isEmailVerified = user.is_email_verified;
+            const isProfileComplete = !!(user.phone && user.company_name);
+
+            if (!isEmailVerified) {
+                if (verificationBanner) verificationBanner.style.display = 'flex';
+                if (profileBanner) profileBanner.style.display = 'none';
+                if (partnershipCard) partnershipCard.classList.add('form-locked');
+                if (feasibilityCard) feasibilityCard.classList.add('form-locked');
+            } else if (!isProfileComplete) {
+                if (verificationBanner) verificationBanner.style.display = 'none';
+                if (profileBanner) profileBanner.style.display = 'flex';
+                if (partnershipCard) partnershipCard.classList.add('form-locked');
+                if (feasibilityCard) feasibilityCard.classList.add('form-locked');
             } else {
-                banner.style.display = 'none';
-                partnershipCard.classList.remove('form-locked');
-                feasibilityCard.classList.remove('form-locked');
+                if (verificationBanner) verificationBanner.style.display = 'none';
+                if (profileBanner) profileBanner.style.display = 'none';
+                if (partnershipCard) partnershipCard.classList.remove('form-locked');
+                if (feasibilityCard) feasibilityCard.classList.remove('form-locked');
             }
         }
 
