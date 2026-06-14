@@ -1316,7 +1316,18 @@
         }
 
         // ===== Logout =====
-        function handleLogout() {
+        async function handleLogout() {
+            const refreshToken = localStorage.getItem('refresh_token');
+            if (refreshToken) {
+                try {
+                    await apiFetch('/api/v1/auth/revoke', {
+                        method: 'POST',
+                        body: JSON.stringify({ refresh_token: refreshToken })
+                    });
+                } catch (e) {
+                    console.error('Failed to revoke token:', e);
+                }
+            }
             clearCachedUser();
             window.location.href = 'index.html';
         }

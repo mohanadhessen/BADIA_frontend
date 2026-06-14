@@ -1986,9 +1986,40 @@ function saveSettings() {
   toast('Settings saved', 'success');
 }
 
+async function flushRevokedTokens() {
+  if (!confirm('Are you sure you want to flush all revoked tokens? This action cannot be undone.')) return;
+  
+  const btn = document.getElementById('flushTokensBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Flushing...';
+
+  try {
+    const res = await apiFetch('/api/v1/auth/flush-revoked', { method: 'DELETE' });
+    toast('Revoked tokens flushed successfully', 'success');
+  } catch (e) {
+    toast(`Failed to flush tokens: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
 // ── Logout ───────────────────────────────────────────────────────
-function handleLogout() {
+async function handleLogout() {
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (refreshToken) {
+    try {
+      await apiFetch('/api/v1/auth/revoke', {
+        method: 'POST',
+        body: JSON.stringify({ refresh_token: refreshToken })
+      });
+    } catch (e) {
+      console.error('Failed to revoke token:', e);
+    }
+  }
   localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
   window.location.href = 'index.html';
 }
 
