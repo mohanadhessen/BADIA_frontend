@@ -198,7 +198,6 @@ function handleSuccessfulAuth(role) {
         const googleRegBtn = document.getElementById('googleRegBtn');
         if (googleRegBtn) googleRegBtn.addEventListener('click', handleGoogleAuth);
 
-        /* Handle URL params (OAuth, Verification, Password Reset) on page load */
         async function handleURLParams() {
             const params = new URLSearchParams(window.location.search);
             
@@ -215,60 +214,24 @@ function handleSuccessfulAuth(role) {
                 window.history.replaceState({}, document.title, newUrl);
             }
             
-            // 1. Google OAuth Callback (Tokens in URL)
-            const accessToken = params.get('access_token');
-            const refreshToken = params.get('refresh_token');
-            if (accessToken) {
-                if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                localStorage.setItem('access_token', accessToken);
-                if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+            // 1. Google OAuth Callback — cookies are set by the redirect, check auth status
+            const oauthComplete = params.get('oauth_complete');
+            if (oauthComplete) {
                 const lang = document.documentElement.getAttribute('lang') || 'en';
-                showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
-                // Clean URL query parameters
-                window.history.replaceState({}, document.title, window.location.pathname);
-                // Fetch user profile to determine role for redirect
+                showToast(lang === 'ar' ? 'جاري التحقق...' : 'Authenticating...', 'success');
                 try {
-                    const res = await fetch(`${API_BASE}/api/v1/users/me`, {
-                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                    const res = await fetch(`${API_BASE}/api/v1/auth/check`, {
+                        credentials: 'include'
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        const role = data.user_info?.role;
-                        if (role) localStorage.setItem('user_role', role);
-                        setTimeout(() => window.location.href = role === 'admin' ? 'admin.html' : 'account.html', 1000);
-                    } else {
-                        setTimeout(() => window.location.href = 'account.html', 1000);
-                    }
-                } catch {
-                    setTimeout(() => window.location.href = 'account.html', 1000);
-                }
-                return;
-            }
-
-            // 1b. Google OAuth Callback (Code in URL)
-            const code = params.get('code');
-            if (code) {
-                const lang = document.documentElement.getAttribute('lang') || 'en';
-                showToast(lang === 'ar' ? 'جاري التحقق من حساب Google...' : 'Authenticating with Google...', 'success');
-                try {
-                    const res = await fetch(`${API_BASE}/api/v1/auth/google/callback?code=${code}`, {
-                        method: 'GET'
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        const authHeader = res.headers.get('Authorization') || res.headers.get('authorization');
-                        const token = authHeader ? authHeader.replace('Bearer ', '') : data.access_token;
                         if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                        if (token) localStorage.setItem('access_token', token);
-                        if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-                        const role = data.user_info?.role;
-                        if (role) localStorage.setItem('user_role', role);
+                        const role = data.user?.role;
                         showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
                         window.history.replaceState({}, document.title, window.location.pathname);
                         setTimeout(() => window.location.href = role === 'admin' ? 'admin.html' : 'account.html', 1000);
                     } else {
-                        const err = await res.json();
-                        showToast(err.detail || (lang === 'ar' ? 'فشل تسجيل الدخول باستخدام Google' : 'Google sign-in failed'), 'error');
+                        showToast(lang === 'ar' ? 'فشل تسجيل الدخول' : 'Sign-in failed', 'error');
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }
                 } catch {
@@ -278,7 +241,6 @@ function handleSuccessfulAuth(role) {
                 return;
             }
 
-
             // 2. Email Verification Token
             const verifyToken = params.get('verify_token');
             if (verifyToken) {
@@ -287,8 +249,9 @@ function handleSuccessfulAuth(role) {
                 try {
                     const res = await fetch(`${API_BASE}/api/v1/auth/verify-email`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: verifyToken })
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ token: verifyToken }),
+                        credentials: 'include'
                     });
                     if (res.ok) {
                         showToast(lang === 'ar' ? 'تم تفعيل البريد الإلكتروني بنجاح!' : 'Email verified successfully!', 'success');
@@ -358,44 +321,17 @@ function handleSuccessfulAuth(role) {
             try {
                 const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email.value, password: pass.value })
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ email: email.value, password: pass.value }),
+                    credentials: 'include'
                 });
 
                 if (res.ok) {
                     const data = await res.json();
-                    const authHeader = res.headers.get('Authorization') || res.headers.get('authorization');
-                    const token = authHeader ? authHeader.replace('Bearer ', '') : data.access_token;
                     if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                    if (token) localStorage.setItem('access_token', token);
-                    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-
-                    // Try to get role from login response first
-                    let role = data.user_info?.role;
-
-                    // If login response doesn't include role, fetch it from /users/me
-                    if (!role && token) {
-                        try {
-                            const meRes = await fetch(`${API_BASE}/api/v1/users/me`, {
-                                headers: { 'Authorization': `Bearer ${token}` }
-                            });
-                            if (meRes.ok) {
-                                const meData = await meRes.json();
-                                role = meData.user_info?.role;
-                            }
-                        } catch { /* ignore, will default to account.html */ }
-                    }
-
-                    if (role) localStorage.setItem('user_role', role);
+                    const role = data.user?.role;
                     showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح! جاري التحويل...' : 'Signed in successfully! Redirecting...', 'success');
                     setTimeout(() => handleSuccessfulAuth(role), 1500);
-
-
-
-
-
-
-
                 } else {
                     const err = await res.json();
                     showToast(err.detail || (lang === 'ar' ? 'بيانات الدخول غير صحيحة' : 'Invalid credentials'), 'error');
@@ -455,7 +391,7 @@ function handleSuccessfulAuth(role) {
             try {
                 const res = await fetch(`${API_BASE}/api/v1/auth/register_local`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     body: JSON.stringify({
                         first_name: firstName,
                         last_name: lastName,
@@ -463,17 +399,17 @@ function handleSuccessfulAuth(role) {
                         email: email,
                         password: password,
                         phone: phone || null
-                    })
+                    }),
+                    credentials: 'include'
                 });
 
                 const data = await res.json();
 
                 if (res.ok || res.status === 201) {
                     if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                    localStorage.setItem('access_token', data.access_token);
-                    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
+                    const role = data.user?.role || 'user';
                     showToast(lang === 'ar' ? 'تم إنشاء الحساب بنجاح! جاري التحويل...' : 'Account created successfully! Redirecting...', 'success');
-                    setTimeout(() => handleSuccessfulAuth('user'), 1500);
+                    setTimeout(() => handleSuccessfulAuth(role), 1500);
                 } else {
                     showToast(data.detail || (lang === 'ar' ? 'حدث خطأ أثناء التسجيل' : 'Registration error'), 'error');
                     btn.disabled = false;
@@ -507,8 +443,9 @@ function handleSuccessfulAuth(role) {
             try {
                 await fetch(`${API_BASE}/api/v1/auth/forgot-password`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ email }),
+                    credentials: 'include'
                 });
                 // Always show success (security — don't reveal if email exists)
                 showToast(lang === 'ar' ? 'إذا كان البريد مسجلاً، تم إرسال رابط إعادة التعيين' : 'If the email exists, a reset link has been sent', 'success');
@@ -559,8 +496,9 @@ function handleSuccessfulAuth(role) {
                 try {
                     const res = await fetch(`${API_BASE}/api/v1/auth/reset-password`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token, new_password: newPassword })
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ token, new_password: newPassword }),
+                        credentials: 'include'
                     });
 
                     if (res.ok) {
@@ -588,10 +526,28 @@ function handleSuccessfulAuth(role) {
         // Init
         initAuthLang();
         // ===== Nav Auth & Service Gates (Moved from script.js) =====
-        window.handlePaymentClick = function(url) { if (localStorage.getItem('access_token')) { window.open(url, '_blank'); } else { if(typeof openAuthModal === 'function') { openAuthModal('login', 'payment'); } } };
+        window.checkAuthStatus = async function() {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/auth/check`, { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('user_role', data.user.role);
+                    if (typeof setCachedUser === 'function') setCachedUser(data.user);
+                    return true;
+                }
+            } catch(e) {}
+            if (typeof clearCachedUser === 'function') clearCachedUser();
+            localStorage.removeItem('user_role');
+            return false;
+        };
 
-        window.handleServiceRequest = function(serviceType) {
-            var isLoggedIn = !!localStorage.getItem('access_token');
+        window.handlePaymentClick = async function(url) { 
+            if (await window.checkAuthStatus()) { window.open(url, '_blank'); } 
+            else { if(typeof openAuthModal === 'function') { openAuthModal('login', 'payment'); } } 
+        };
+
+        window.handleServiceRequest = async function(serviceType) {
+            var isLoggedIn = await window.checkAuthStatus();
             if (isLoggedIn) {
                 var destinations = {
                     partnership: 'account.html#partnership',
@@ -605,13 +561,13 @@ function handleSuccessfulAuth(role) {
             }
         };
 
-        window.updateNavAuthLink = function() {
+        window.updateNavAuthLink = async function() {
             const desktopAuth = document.getElementById('navAuthDesktop');
             const mobileAuth = document.getElementById('navMobileAuth');
-            const token = localStorage.getItem('access_token');
+            const isLoggedIn = await window.checkAuthStatus();
             const lang = document.documentElement.getAttribute('lang') || 'en';
 
-            if (token) {
+            if (isLoggedIn) {
                 const role = localStorage.getItem('user_role');
                 const targetUrl = role === 'admin' ? 'admin.html' : 'account.html';
 
@@ -644,13 +600,11 @@ function handleSuccessfulAuth(role) {
             }
             // Sync service gates with current auth state
             if (typeof updateServiceGates === 'function') {
-                updateServiceGates();
+                updateServiceGates(isLoggedIn);
             }
         };
 
-        window.updateServiceGates = function() {
-            const token = localStorage.getItem('access_token');
-            const isLoggedIn = !!token;
+        window.updateServiceGates = function(isLoggedIn) {
             const lang = document.documentElement.getAttribute('lang') || 'en';
 
             document.querySelectorAll('.service-gate').forEach(gate => {

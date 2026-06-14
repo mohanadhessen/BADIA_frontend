@@ -53,7 +53,7 @@ function setLanguage(lang, save = true) {
     }
 
     // Update nav auth link
-    updateNavAuthLink();
+    if (typeof updateNavAuthLink === 'function') updateNavAuthLink();
 
     // Re-render plans in new language if already loaded
     if (_cachedPlans) renderPlans(_cachedPlans, _currentBilling);
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Update nav auth link on load
-    updateNavAuthLink();
+    if (typeof updateNavAuthLink === 'function') updateNavAuthLink();
 });
 
 // ===== Nav Auth & Service Gates moved to auth_logic.js =====
@@ -302,9 +302,6 @@ function clearUserDataCache() {
 
 function clearCachedUser() {
     clearUserDataCache();
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_role');
 }
 
 function getCachedReviews() {
@@ -327,21 +324,23 @@ function setCachedRequests(requests) {
 
 // ===== API Helper =====
 async function apiFetch(path, options = {}) {
-    const token = localStorage.getItem('access_token');
     const headers = { ...(options.headers || {}) };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    // CSRF protection for mutating requests
+    const method = (options.method || 'GET').toUpperCase();
+    if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+        headers['X-Requested-With'] = 'XMLHttpRequest';
+    }
     if (!(options.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
     }
 
-    const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    let res = await fetch(`${API_BASE}${path}`, { ...options, headers, credentials: 'include' });
 
-    // If 401, try refreshing the token
+    // If 401, try refreshing the token via cookie
     if (res.status === 401) {
         const refreshed = await tryRefreshToken();
         if (refreshed) {
-            headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
-            return fetch(`${API_BASE}${path}`, { ...options, headers });
+            return fetch(`${API_BASE}${path}`, { ...options, headers, credentials: 'include' });
         } else {
             clearCachedUser();
             if (typeof openAuthModal === 'function') {
@@ -354,20 +353,16 @@ async function apiFetch(path, options = {}) {
 }
 
 async function tryRefreshToken() {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return false;
     try {
         const res = await fetch(`${API_BASE}/api/v1/refresh`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refresh_token: refreshToken })
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
         });
-        if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('access_token', data.access_token);
-            if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-            return true;
-        }
+        return res.ok;
     } catch (e) { /* ignore */ }
     return false;
 }
@@ -439,7 +434,7 @@ async function fetchPlans() {
             headers['If-None-Match'] = storedEtag;
         }
 
-        const res = await fetch(`${API_BASE}/api/v1/plans/`, { headers });
+        const res = await fetch(`${API_BASE}/api/v1/plans/`, { headers, credentials: 'include' });
 
         // 3. 304 Not Modified → plans unchanged, cached version is already rendered
         if (res.status === 304) {

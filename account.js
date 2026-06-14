@@ -8,8 +8,11 @@
         let editingRequestId = null;
 
         // ===== Auth Guard =====
-        (function () {
-            if (!localStorage.getItem('access_token')) {
+        (async function () {
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/auth/check`, { credentials: 'include' });
+                if (!res.ok) throw new Error();
+            } catch {
                 window.location.href = 'index.html?open_signin=true';
                 return;
             }
@@ -578,12 +581,8 @@
                     }
                 });
 
-                const token = localStorage.getItem('access_token');
-                const res = await fetch(`${API_BASE}/api/v1/files/operational_partnership/submit`, {
+                const res = await apiFetch(`/api/v1/files/operational_partnership/submit`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
                     body: formData
                 });
 
@@ -1006,10 +1005,8 @@
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const token = localStorage.getItem('access_token');
-                const res = await fetch(`${API_BASE}/api/v1/files/operational_partnership/files/${fileId}`, {
+                const res = await apiFetch(`/api/v1/files/operational_partnership/files/${fileId}`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
                 });
 

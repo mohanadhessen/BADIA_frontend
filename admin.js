@@ -1,7 +1,7 @@
 // https://badia-backend.onrender.com
 
 let API = localStorage.getItem('badia_admin_api') || API_BASE;
-const TOKEN = () => localStorage.getItem('access_token') || '';
+
 
 // ── State ───────────────────────────────────────────────────────
 let _users    = [];
@@ -25,18 +25,13 @@ let _refreshing = false;
 let _refreshQueue = [];
 
 async function doRefreshToken() {
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (!refreshToken) throw new Error('No refresh token');
   const res = await fetch(`${API}/api/v1/refresh`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: refreshToken }),
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    credentials: 'include'
   });
   if (!res.ok) throw new Error('Refresh failed');
-  const data = await res.json();
-  if (data.access_token) localStorage.setItem('access_token', data.access_token);
-  if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-  return data.access_token;
+  return true;
 }
 
 async function apiFetch(path, opts = {}) {
@@ -44,7 +39,9 @@ async function apiFetch(path, opts = {}) {
   const isGet = method === 'GET';
   
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
-  if (TOKEN()) headers['Authorization'] = `Bearer ${TOKEN()}`;
+  if (!isGet && method !== 'HEAD' && method !== 'OPTIONS') {
+    headers['X-Requested-With'] = 'XMLHttpRequest';
+  }
   
   const cacheKeyData = `api_cache_data_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
   const cacheKeyEtag = `api_cache_etag_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
@@ -56,38 +53,34 @@ async function apiFetch(path, opts = {}) {
     }
   }
 
-  let res = await fetch(`${API}${path}`, { ...opts, headers });
+  let res = await fetch(`${API}${path}`, { ...opts, headers, credentials: 'include' });
 
   if (res.status === 401) {
     // Try refreshing once
     if (!_refreshing) {
       _refreshing = true;
       try {
-        const newToken = await doRefreshToken();
+        await doRefreshToken();
         _refreshing = false;
         // Drain queued resolvers
-        _refreshQueue.forEach(r => r(newToken));
+        _refreshQueue.forEach(r => r(true));
         _refreshQueue = [];
         // Retry original request
-        headers['Authorization'] = `Bearer ${newToken}`;
-        res = await fetch(`${API}${path}`, { ...opts, headers });
+        res = await fetch(`${API}${path}`, { ...opts, headers, credentials: 'include' });
       } catch (e) {
         _refreshing = false;
-        _refreshQueue.forEach(r => r(null));
+        _refreshQueue.forEach(r => r(false));
         _refreshQueue = [];
         // Refresh token expired — redirect to sign in
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
         toast('Session expired. Redirecting to sign in…', 'error');
         setTimeout(() => { window.location.href = 'index.html?open_signin=true'; }, 1500);
         throw new Error('Session expired');
       }
     } else {
       // Another request is already refreshing — queue this one
-      const newToken = await new Promise(resolve => _refreshQueue.push(resolve));
-      if (!newToken) throw new Error('Session expired');
-      headers['Authorization'] = `Bearer ${newToken}`;
-      res = await fetch(`${API}${path}`, { ...opts, headers });
+      const success = await new Promise(resolve => _refreshQueue.push(resolve));
+      if (!success) throw new Error('Session expired');
+      res = await fetch(`${API}${path}`, { ...opts, headers, credentials: 'include' });
     }
   }
 
@@ -1067,11 +1060,10 @@ async function loadPlans(forceRefetch = false) {
   // 2. Validate with ETag
   try {
     const reqHeaders = { 'Content-Type': 'application/json' };
-    if (TOKEN()) reqHeaders['Authorization'] = `Bearer ${TOKEN()}`;
     const storedEtag = localStorage.getItem('admin_plans_etag');
     if (storedEtag && !forceRefetch) reqHeaders['If-None-Match'] = storedEtag;
  
-    const res = await fetch(`${API}/api/v1/plans/`, { headers: reqHeaders });
+    const res = await fetch(`${API}/api/v1/plans/`, { headers: reqHeaders, credentials: 'include' });
     if (res.status === 304 && !forceRefetch) return;  // cache still fresh
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
  
@@ -2007,19 +1999,12 @@ async function flushRevokedTokens() {
 
 // ── Logout ───────────────────────────────────────────────────────
 async function handleLogout() {
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (refreshToken) {
-    try {
-      await apiFetch('/api/v1/auth/revoke', {
-        method: 'POST',
-        body: JSON.stringify({ refresh_token: refreshToken })
-      });
-    } catch (e) {
-      console.error('Failed to revoke token:', e);
-    }
+  try {
+    await apiFetch('/api/v1/auth/logout', { method: 'POST' });
+  } catch (e) {
+    console.error('Failed to logout:', e);
   }
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('user_role');
   window.location.href = 'index.html';
 }
 

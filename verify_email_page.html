@@ -253,7 +253,8 @@
     try {
       const res = await fetch(`${API_BASE}/api/v1/auth/verify-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'include',
         body: JSON.stringify({ token })
       });
       const data = await res.json();
@@ -291,7 +292,8 @@
     try {
       const res = await fetch(`${API_BASE}/api/v1/auth/request-verification`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'include',
         body: JSON.stringify({ email })
       });
       if (res.ok) {
