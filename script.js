@@ -554,18 +554,11 @@ function openPlanModal(planIdx) {
         : (lang === 'ar' ? 'د.ك / شهر' : 'KWD / month');
 
     const features = decodePlanDetails(plan.plan_details, lang);
-    const MAX_VIS = 5;
-    const hid = features.slice(MAX_VIS);
-
     const featureListHTML = features.length
-        ? features.map((f, i) => `<li class="modal-feat-item${i >= MAX_VIS ? ' modal-feat-hidden' : ''}">${f}</li>`).join('')
+        ? features.map(f => `<li class="modal-feat-item">${f}</li>`).join('')
         : `<li>${lang === 'ar' ? 'تفاصيل عبر الاتصال بنا' : 'Details via consultation'}</li>`;
 
-    const showAllText = lang === 'ar' ? `عرض كل الميزات (${features.length})` : `Show all features (${features.length})`;
-    const showLessText = lang === 'ar' ? '↑ عرض أقل' : '↑ Show less';
-    const showAllBtn = hid.length
-        ? `<button class="modal-show-all-btn" data-expanded="0" data-more="${showAllText}" data-less="${showLessText}" onclick="toggleModalFeatures(this)">${showAllText}</button>`
-        : '';
+    const showAllBtn = '';
 
     let savingsHTML = '';
     if (isYearly && monthlyPrice > 0) {
@@ -619,16 +612,7 @@ function handleModalKeydown(e) {
     if (e.key === 'Escape') closePlanModal();
 }
 
-function toggleModalFeatures(btn) {
-    const expanded = btn.dataset.expanded === '1';
-    const modal = btn.closest('.plan-modal');
-    const hidden = modal.querySelectorAll('.modal-feat-hidden');
-    hidden.forEach(li => {
-        li.style.display = expanded ? 'none' : 'flex';
-    });
-    btn.dataset.expanded = expanded ? '0' : '1';
-    btn.textContent = expanded ? btn.dataset.more : btn.dataset.less;
-}
+
 
 function renderPlans(plans, billing) {
     const grid = document.getElementById('plansGrid');
