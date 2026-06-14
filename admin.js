@@ -1,6 +1,6 @@
 // https://badia-backend.onrender.com
 
-let API = localStorage.getItem('badia_admin_api') || 'https://badia-backend.onrender.com';
+let API = localStorage.getItem('badia_admin_api') || API_BASE;
 const TOKEN = () => localStorage.getItem('access_token') || '';
 
 // ── State ───────────────────────────────────────────────────────
@@ -49,7 +49,7 @@ async function apiFetch(path, opts = {}) {
   const cacheKeyData = `api_cache_data_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
   const cacheKeyEtag = `api_cache_etag_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
   
-  if (isGet) {
+  if (isGet && !opts.forceRefresh) {
     const cachedEtag = localStorage.getItem(cacheKeyEtag);
     if (cachedEtag) {
       headers['If-None-Match'] = cachedEtag;
@@ -384,13 +384,13 @@ async function loadStorageUsage() {
 
 
 // ── USERS ────────────────────────────────────────────────────────
-async function loadUsers(page) {
+async function loadUsers(page, silent = false, forceRefresh = false) {
   if (_userLoading) return;
   _userLoading = true;
   _userPage = page || 1;
-  setUserPaginationLoading(true);
+  if (!silent) setUserPaginationLoading(true);
   try {
-    const data = await apiFetch(`/api/v1/admin/users?page=${_userPage}`);
+    const data = await apiFetch(`/api/v1/admin/users?page=${_userPage}`, { forceRefresh });
     _users = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.users || []));
     _userHasMore = data && data.has_next !== undefined ? !!data.has_next : (_users.length === PAGE_LIMIT);
     _totalUsers = data?.metrics?.total_users ?? _users.length;
@@ -398,13 +398,15 @@ async function loadUsers(page) {
     updateUserCount();
     populatePlanFilter();
   } catch (e) {
-    _users = [];
-    _totalUsers = 0;
-    renderUsersTable([]);
+    if (!silent) {
+      _users = [];
+      _totalUsers = 0;
+      renderUsersTable([]);
+    }
     toast('Could not load users — API not yet available', 'error');
   }
   _userLoading = false;
-  setUserPaginationLoading(false);
+  if (!silent) setUserPaginationLoading(false);
   updateUserPagination();
 }
 
@@ -607,9 +609,18 @@ async function saveUser() {
       body: JSON.stringify(payload),
     });
     const idx = _users.findIndex(u => String(u.id||u.user_id) === String(id));
-    if (idx >= 0) { _users[idx] = { ..._users[idx], ...payload }; renderUsersTable(_users); }
+    if (idx >= 0) { 
+      _users[idx] = { ..._users[idx], ...payload }; 
+      if (payload.current_plan_id) {
+        const planObj = _plans.find(p => p.id === payload.current_plan_id);
+        if (planObj) _users[idx].plan_name = planObj.name;
+      }
+      filterUsers(); // update table based on current filters
+    }
     closeModal('editUserModal');
     toast('User updated successfully', 'success');
+    loadPlanDistribution();
+    loadUsers(_userPage, true, true);
   } catch (e) {
     toast('Failed to update user', 'error');
   }
@@ -627,34 +638,40 @@ async function deleteUser(userId) {
   try {
     await apiFetch(`/api/v1/admin/users/${encodeURIComponent(email || userId)}`, { method: 'DELETE' });
     _users = _users.filter(u => String(u.id||u.user_id) !== String(userId));
-    renderUsersTable(_users);
+    _totalUsers = Math.max(0, _totalUsers - 1);
+    filterUsers();
     updateUserCount();
     toast('User deleted', 'info');
+    loadPlanDistribution();
+    loadStorageUsage();
+    loadUsers(_userPage, true, true);
   } catch (e) {
     toast('Failed to delete user', 'error');
   }
 }
 
 // ── REQUESTS ─────────────────────────────────────────────────────
-async function loadRequests(page) {
+async function loadRequests(page, silent = false, forceRefresh = false) {
   if (_reqLoading) return;
   _reqLoading = true;
   _reqPage = page || 1;
-  setReqPaginationLoading(true);
+  if (!silent) setReqPaginationLoading(true);
   try {
-    const data = await apiFetch(`/api/v1/admin/requests?page=${_reqPage}`);
+    const data = await apiFetch(`/api/v1/admin/requests?page=${_reqPage}`, { forceRefresh });
     _requests = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.requests || []));
     _requests = _requests.map(r => ({ ...r, id: r.request_id || r.id }));
     _reqHasMore = data && data.has_next !== undefined ? !!data.has_next : (_requests.length === PAGE_LIMIT);
     _totalRequests = data?.metrics?.total ?? _requests.length;
   } catch (e) {
-    _requests = [];
-    _totalRequests = 0;
+    if (!silent) {
+      _requests = [];
+      _totalRequests = 0;
+    }
   }
-  renderRequests(_requests);
+  if (!silent) renderRequests(_requests);
   updateRequestStats();
   _reqLoading = false;
-  setReqPaginationLoading(false);
+  if (!silent) setReqPaginationLoading(false);
   updateReqPagination();
 }
 
@@ -853,6 +870,7 @@ async function approveRequest(reqId) {
       updateRequestStats();
       renderDashboard();
       toast('Request approved successfully', 'success');
+      loadRequests(_reqPage, true, true);
     } catch (e) {
       toast('Failed to approve request', 'error');
     }
@@ -875,6 +893,7 @@ async function setPendingRequest(reqId) {
       updateRequestStats();
       renderDashboard();
       toast('Request set back to pending', 'info');
+      loadRequests(_reqPage, true, true);
     } catch (e) {
       toast('Failed to update request status', 'error');
     }
@@ -911,6 +930,7 @@ async function confirmRejectRequest() {
       updateRequestStats();
       renderDashboard();
       toast('Request rejected', 'info');
+      loadRequests(_reqPage, true, true);
     } catch (e) {
       toast('Failed to reject request', 'error');
     }
@@ -1014,6 +1034,8 @@ async function deleteRequest(reqId) {
     updateRequestStats();
     renderDashboard();
     toast('Request deleted', 'info');
+    loadStorageUsage();
+    loadRequests(_reqPage, true, true);
   } catch (e) {
     toast('Failed to delete request', 'error');
   }
@@ -1605,24 +1627,26 @@ async function deletePlan(planId, planName) {
 
 
 // ── REVIEWS ──────────────────────────────────────────────────────
-async function loadReviews(page) {
+async function loadReviews(page, silent = false, forceRefresh = false) {
   if (_revLoading) return;
   _revLoading = true;
   _revPage = page || 1;
-  setRevPaginationLoading(true);
+  if (!silent) setRevPaginationLoading(true);
   try {
-    const data = await apiFetch(`/api/v1/admin/reviews?page=${_revPage}`);
+    const data = await apiFetch(`/api/v1/admin/reviews?page=${_revPage}`, { forceRefresh });
     _reviews = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.reviews || []));
     _revHasMore = data && data.has_next !== undefined ? !!data.has_next : (_reviews.length === PAGE_LIMIT);
     _totalReviews = data && data.total !== undefined ? data.total : _reviews.length;
   } catch (e) {
-    _reviews = [];
-    _totalReviews = 0;
+    if (!silent) {
+      _reviews = [];
+      _totalReviews = 0;
+    }
   }
-  renderReviews(_reviews);
+  if (!silent) renderReviews(_reviews);
   updateReviewStats();
   _revLoading = false;
-  setRevPaginationLoading(false);
+  if (!silent) setRevPaginationLoading(false);
   updateRevPagination();
 }
 
@@ -1771,6 +1795,7 @@ async function acceptReview(revId) {
     }
     updateReviewStats();
     toast('Review accepted and published', 'success');
+    loadReviews(_revPage, true, true);
   } catch (e) {
     toast('Failed to accept review', 'error');
   }
@@ -1789,6 +1814,7 @@ async function pendingReview(revId) {
     }
     updateReviewStats();
     toast('Review set to pending', 'info');
+    loadReviews(_revPage, true, true);
   } catch (e) {
     toast('Failed to update review', 'error');
   }
@@ -1812,6 +1838,7 @@ async function deleteReview(revId) {
     updateReviewStats();
     closeModal('deleteRevModal');
     toast('Review deleted', 'info');
+    loadReviews(_revPage, true, true);
   } catch (e) {
     toast('Failed to delete review', 'error');
   }
@@ -2050,9 +2077,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-async function loadPaymentsTelemetry() {
+async function loadPaymentsTelemetry(silent = false, forceRefresh = false) {
   try {
-    const data = await apiFetch('/api/v1/admin/payments');
+    const data = await apiFetch('/api/v1/admin/payments', { forceRefresh });
     
     const items = data && Array.isArray(data.items) ? data.items : [];
     _payments = items;
@@ -2521,7 +2548,7 @@ async function confirmStatusUpdate() {
       body: JSON.stringify({ status: { status: st } })
     });
     toast('Payment status updated successfully', 'success');
-    loadPaymentsTelemetry();
+    loadPaymentsTelemetry(true, true);
   } catch (e) {
     toast('Failed to update payment status', 'error');
   }
@@ -2651,7 +2678,7 @@ async function savePayment() {
     });
     toast('Payment updated successfully', 'success');
     closeModal('editPaymentModal');
-    loadPaymentsTelemetry();
+    loadPaymentsTelemetry(true, true);
   } catch (e) {
     toast(`Failed to update payment: ${e.message}`, 'error');
   } finally {
