@@ -236,7 +236,7 @@ function handleSuccessfulAuth(role) {
                         
                         showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح! جاري التوجيه...' : 'Signed in successfully! Redirecting...', 'success');
                         window.history.replaceState({}, document.title, window.location.pathname);
-                        setTimeout(() => handleSuccessfulAuth(role), 1500);
+                        setTimeout(() => handleSuccessfulAuth(role), 300);
                     } else {
                         showToast(lang === 'ar' ? 'فشل تسجيل الدخول' : 'Sign-in failed', 'error');
                         window.history.replaceState({}, document.title, window.location.pathname);
@@ -336,9 +336,11 @@ function handleSuccessfulAuth(role) {
                 if (res.ok) {
                     const data = await res.json();
                     if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                    const role = data.user?.role;
+                    const role = data.user?.role || 'user';
+                    localStorage.setItem('user_role', role);
+                    if (typeof setCachedUser === 'function') setCachedUser(data.user);
                     showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح! جاري التحويل...' : 'Signed in successfully! Redirecting...', 'success');
-                    setTimeout(() => handleSuccessfulAuth(role), 1500);
+                    setTimeout(() => handleSuccessfulAuth(role), 300);
                 } else {
                     const err = await res.json();
                     showToast(err.detail || (lang === 'ar' ? 'بيانات الدخول غير صحيحة' : 'Invalid credentials'), 'error');
@@ -415,8 +417,10 @@ function handleSuccessfulAuth(role) {
                 if (res.ok || res.status === 201) {
                     if (typeof clearUserDataCache === 'function') clearUserDataCache();
                     const role = data.user?.role || 'user';
+                    localStorage.setItem('user_role', role);
+                    if (typeof setCachedUser === 'function') setCachedUser(data.user);
                     showToast(lang === 'ar' ? 'تم إنشاء الحساب بنجاح! جاري التحويل...' : 'Account created successfully! Redirecting...', 'success');
-                    setTimeout(() => handleSuccessfulAuth(role), 1500);
+                    setTimeout(() => handleSuccessfulAuth(role), 300);
                 } else {
                     showToast(data.detail || (lang === 'ar' ? 'حدث خطأ أثناء التسجيل' : 'Registration error'), 'error');
                     btn.disabled = false;
