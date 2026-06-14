@@ -403,7 +403,7 @@
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    currentUser = data.user_info;
+                    currentUser = { ...currentUser, ...data.user_info };
                     setCachedUser(currentUser);
                     renderProfile(currentUser);
                     populateEditForm(currentUser);
