@@ -2467,6 +2467,10 @@ function renderPaymentsTable(items) {
       plan = _plans.find(pln => pln.id === p.plan_id);
     }
     plan = plan || {};
+    let planName = plan.name || '—';
+    if (p.plan_id && !_plans.some(pln => pln.id === p.plan_id)) {
+      planName = `[Deleted Plan #${p.plan_id}]`;
+    }
 
     const name = p.name || p.user_name || [u.first_name, u.last_name].filter(Boolean).join(' ') || u.company_name || '—';
     const email = p.email || p.user_email || u.email || '—';
@@ -2514,7 +2518,7 @@ function renderPaymentsTable(items) {
       <div class="payment-card-body">
         <div class="payment-meta">
           <div class="meta-item"><div class="meta-label">ID</div><div class="meta-value">#${p.id}</div></div>
-          <div class="meta-item"><div class="meta-label">Plan</div><div class="meta-value">${plan.name || '—'}</div></div>
+          <div class="meta-item"><div class="meta-label">Plan</div><div class="meta-value">${planName}</div></div>
           <div class="meta-item"><div class="meta-label">Amount</div><div class="meta-value amount">${p.amount} KWD</div></div>
           <div class="meta-item"><div class="meta-label">Cycle</div><div class="meta-value">${p.billing_cycle || '—'}</div></div>
           <div class="meta-item"><div class="meta-label">Period</div><div class="meta-value">${fmtDate(p.start_date)} – ${fmtDate(p.end_date)}</div></div>
@@ -2568,6 +2572,16 @@ function filterPayments() {
 }
 
 async function changePaymentStatus(pid, newStatus) {
+  const payment = _payments.find(p => String(p.id) === String(pid));
+  if (payment) {
+    const planId = payment.plan_id || (payment.plan && payment.plan.id);
+    const planExists = _plans.some(pl => String(pl.id) === String(planId));
+    if (!planExists) {
+      toast("This plan has been deleted. Please create a new subscription instead.", "error");
+      return;
+    }
+  }
+
   const statusLabels = { paid: 'Paid', rejected: 'Rejected', canceled: 'Canceled' };
   const emailMessages = {
     paid: 'A payment receipt email will be sent to the user.',
@@ -2617,6 +2631,17 @@ function populateEditPaymentPlanDropdown(selectedPlanId) {
   const select = document.getElementById('editPaymentPlan');
   if (!select) return;
   select.innerHTML = '';
+  
+  const hasPlan = _plans.some(p => String(p.id) === String(selectedPlanId));
+  if (selectedPlanId && !hasPlan) {
+    const opt = document.createElement('option');
+    opt.value = selectedPlanId;
+    opt.textContent = `[Deleted Plan #${selectedPlanId}]`;
+    opt.selected = true;
+    opt.disabled = true;
+    select.appendChild(opt);
+  }
+  
   _plans.forEach(p => {
     const opt = document.createElement('option');
     opt.value = p.id;
@@ -2695,6 +2720,8 @@ async function savePayment() {
   const end = document.getElementById('editPaymentEnd').value;
 
   if (!planId) return toast('Please select a plan', 'error');
+  const planExists = _plans.some(pl => String(pl.id) === String(planId));
+  if (!planExists) return toast('This plan has been deleted. Please select an active plan instead.', 'error');
   if (isNaN(amount) || amount < 0) return toast('Please enter a valid amount', 'error');
   if (!start || !end) return toast('Start and end dates are required', 'error');
 
