@@ -165,17 +165,17 @@ function showPage(id) {
 
   // Call the specific endpoints when clicking on sections
   if (id === 'users') {
-    loadUsers(_userPage, false, true);
+    loadUsers(_userPage, false, false);
   } else if (id === 'requests') {
-    loadRequests(_reqPage, false, true);
+    loadRequests(_reqPage, false, false);
   } else if (id === 'plans') {
-    loadPlans(true);
+    loadPlans(false);
   } else if (id === 'reviews') {
-    loadReviews(_revPage, false, true);
+    loadReviews(_revPage, false, false);
   } else if (id === 'payments') {
-    loadPaymentsTelemetry(false, true);
+    loadPaymentsTelemetry(false, false);
   } else if (id === 'dashboard') {
-    loadDashboardConsolidated(true);
+    loadDashboardConsolidated(false);
   }
 }
 
@@ -548,8 +548,10 @@ async function loadStorageUsage() {
 
 async function loadAll() {
   // On initial load, call the consolidated dashboard endpoint
-  // This will use cache first, then fetch fresh data silently
-  await loadDashboardConsolidated(false);
+  // if the dashboard is not already loaded as the initial page.
+  if (_currentPage !== 'dashboard') {
+    await loadDashboardConsolidated(false);
+  }
 }
 
 
@@ -2202,9 +2204,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Restore section from URL hash (e.g. admin.html#plans survives F5)
   const hash = (location.hash || '').replace('#', '').trim();
   const validPages = ['dashboard','requests','users','plans','reviews','payments','settings'];
-  if (hash && validPages.includes(hash)) {
-    showPage(hash);
-  }
+  const initialPage = (hash && validPages.includes(hash)) ? hash : 'dashboard';
+  showPage(initialPage);
 
   // Keyboard: Esc closes any open modal
   document.addEventListener('keydown', e => {
