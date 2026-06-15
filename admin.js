@@ -121,8 +121,10 @@ async function apiFetch(path, opts = {}) {
 async function swrFetch(path, forceRefresh, onData) {
   let cachedStr = null;
   let didRenderCache = false;
+  const cacheKey = `api_cache_data_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
   if (!forceRefresh) {
-    cachedStr = localStorage.getItem(`api_cache_data_${path.replace(/[^a-zA-Z0-9]/g, '_')}`);
+    cachedStr = localStorage.getItem(cacheKey);
     if (cachedStr) {
       try {
         const parsed = JSON.parse(cachedStr);
@@ -131,11 +133,20 @@ async function swrFetch(path, forceRefresh, onData) {
       } catch (e) {}
     }
   }
-  const freshData = await apiFetch(path, { forceRefresh });
-  const freshStr = JSON.stringify(freshData);
-  if (freshStr !== cachedStr) {
-    onData(freshData);
-  }
+
+  // Defer the network request to ensure the cached UI builds first
+  setTimeout(async () => {
+    try {
+      const freshData = await apiFetch(path, { forceRefresh });
+      const freshStr = JSON.stringify(freshData);
+      if (freshStr !== cachedStr) {
+        onData(freshData);
+      }
+    } catch (e) {
+      console.error(`SWR revalidation failed for ${path}:`, e);
+    }
+  }, 100);
+
   return didRenderCache;
 }
 
