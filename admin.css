@@ -657,7 +657,7 @@ tbody tr.expanded-detail td{background:#fffbf0;border-bottom:1.5px solid var(--a
 .feat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .feat-on{background:var(--green)}
 .feat-off{background:var(--border)}
-.plan-card-footer{padding:10px 18px;border-top:1px solid var(--border);background:var(--surface2);display:flex;gap:8px;flex-direction:column;margin-top:auto}
+.plan-card-footer{padding:10px 18px;border-top:1px solid var(--border);background:var(--surface2);display:flex;gap:8px;flex-direction:row;margin-top:auto;flex-wrap:wrap}
 
 /* ── Modal ───────────────────────────────────────────────────── */
 .modal-backdrop{

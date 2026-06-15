@@ -2316,23 +2316,14 @@ function autoFillPlanAmount() {
   const plan = _plans.find(p => String(p.id) === String(planId));
   if (!plan) return;
   
-  const planName = (plan.name || '').toLowerCase();
-  let monthlyPrice = plan.price_monthly ?? plan.monthly_price ?? 0;
-  let yearlyPrice = plan.price_yearly ?? plan.yearly_price ?? (monthlyPrice * 12);
+  const monthlyPrice = parseFloat(plan.price_monthly ?? plan.monthly_price ?? 0);
+  const yearlyPrice = parseFloat(plan.price_yearly ?? plan.yearly_price ?? 0);
   
-  if (planName.includes('starter')) {
-    monthlyPrice = 49;
-    yearlyPrice = 490;
-  } else if (planName.includes('growth')) {
-    monthlyPrice = 99;
-    yearlyPrice = 990;
-  } else if (planName.includes('enterprise')) {
-    monthlyPrice = 199;
-    yearlyPrice = 1990;
-  }
+  const selectedPrice = cycle === 'yearly' ? yearlyPrice : monthlyPrice;
   
   if (amountInput) {
-    amountInput.value = cycle === 'yearly' ? yearlyPrice : monthlyPrice;
+    // Only auto-fill if the price is non-zero; leave empty for custom-priced plans
+    amountInput.value = selectedPrice > 0 ? selectedPrice : '';
   }
 }
 
