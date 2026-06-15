@@ -151,6 +151,21 @@ function showPage(id) {
   // Persist section in URL hash so F5 restores it
   history.replaceState(null, '', '#' + id);
   closeSidebar();
+
+  // Call the specific endpoints when clicking on sections
+  if (id === 'users') {
+    loadUsers(_userPage, false, true);
+  } else if (id === 'requests') {
+    loadRequests(_reqPage, false, true);
+  } else if (id === 'plans') {
+    loadPlans(true);
+  } else if (id === 'reviews') {
+    loadReviews(_revPage, false, true);
+  } else if (id === 'payments') {
+    loadPaymentsTelemetry(false, true);
+  } else if (id === 'dashboard') {
+    loadDashboardConsolidated(true);
+  }
 }
 
 // ── Sidebar ─────────────────────────────────────────────────────
@@ -319,6 +334,178 @@ function downloadFileAuth(url, filename) { triggerDownload(url, filename); }
 function downloadFile(url, filename)     { triggerDownload(url, filename); }
 let _planDistributionData = [];
 
+// ── UI Updaters ──────────────────────────────────────────────────
+function updatePaymentsUI(data) {
+  const items = data && Array.isArray(data.items) ? data.items : [];
+  _payments = items;
+
+  const metrics = data.metrics || {};
+  
+  const finalTotalPayments = metrics.total_payments ?? items.length;
+  const finalPaidPayments = metrics.paid_payments ?? items.filter(p => p.status === 'paid').length;
+  const finalCanceledPayments = metrics.canceled_payments ?? items.filter(p => p.status === 'canceled').length;
+  const finalRejectedPayments = metrics.rejected_payments ?? items.filter(p => p.status === 'rejected').length;
+  const finalMonthlyCycle = metrics.monthly_payments ?? items.filter(p => p.billing_cycle === 'monthly').length;
+  const finalYearlyCycle = metrics.yearly_payments ?? items.filter(p => p.billing_cycle === 'yearly').length;
+  
+  const now = new Date();
+  const currentMonthItems = items.filter(p => {
+    const pDate = new Date(p.created_at);
+    return pDate.getFullYear() === now.getFullYear() && pDate.getMonth() === now.getMonth();
+  });
+  
+  const finalPaymentsThisMonth = metrics.payments_this_month ?? currentMonthItems.length;
+
+  const totalRevenue = metrics.total_revenue ?? items.filter(p => p.status === 'paid' || p.status === 'canceled').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+  const revenueThisMonth = metrics.revenue_this_month ?? currentMonthItems.filter(p => p.status === 'paid' || p.status === 'canceled').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+
+  const setElText = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  setElText('payStatTotal', finalTotalPayments);
+  setElText('payStatActive', finalPaidPayments);
+  setElText('payStatCanceled', finalCanceledPayments);
+  setElText('payStatRejected', finalRejectedPayments);
+  setElText('payStatThisMonth', finalPaymentsThisMonth);
+  setElText('payStatMonthlyCycle', finalMonthlyCycle);
+  setElText('payStatYearlyCycle', finalYearlyCycle);
+  
+  // Main Dashboard Total Revenue
+  const mainRevEl = document.getElementById('statRevenueVal');
+  if (mainRevEl) {
+    mainRevEl.innerHTML = `${Number(totalRevenue).toFixed(3)} <span style="font-size:13px;font-weight:400">KWD</span>`;
+  }
+  
+  // Payments Page Revenue This Month
+  const revMonthEl = document.getElementById('payStatRevenueThisMonth');
+  if (revMonthEl) {
+    revMonthEl.innerHTML = `${Number(revenueThisMonth).toFixed(3)} <span style="font-size:13px;font-weight:400">KWD</span>`;
+  }
+  
+  const activeEl = document.getElementById('statActive');
+  if (activeEl) {
+    activeEl.textContent = finalPaidPayments;
+  }
+  
+  renderPaymentsTable(items);
+}
+
+function updateStorageUI(data) {
+  const mb  = data.used_mb  ?? 0;
+  const gb  = data.used_gb  ?? 0;
+  const pct = data.usage_percent ?? 0;
+  const rem = data.remaining_gb ?? 0;
+  const files = data.total_files ?? 0;
+  const displayVal = gb >= 1 ? `${gb.toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
+  
+  const valEl = document.getElementById('statStorageVal');
+  if (valEl) valEl.textContent = displayVal;
+  
+  const subEl = document.getElementById('statStorageSub');
+  if (subEl) subEl.textContent = `${files} file${files!==1?'s':''} · ${rem.toFixed(2)} GB free`;
+  
+  const pctEl = document.getElementById('statStoragePct');
+  if (pctEl) pctEl.textContent = `${pct.toFixed(1)}%`;
+  
+  const bar = document.getElementById('statStorageBar');
+  if (bar) {
+    bar.style.width = `${Math.min(pct, 100)}%`;
+    bar.className = 'storage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '');
+  }
+}
+
+function updateEmailsUI(data) {
+  const thisMonth  = data.monthly_count ?? 0;
+  const thisDay    = data.daily_count   ?? 0;
+  const monthLimit = data.month_limit   ?? null;
+  const dayLimit   = data.day_limit     ?? null;
+
+  const valEl = document.getElementById('statEmailsVal');
+  if (valEl) valEl.textContent = thisMonth.toLocaleString();
+
+  // Month stats
+  const monthPctVal = monthLimit ? Math.min((thisMonth / monthLimit) * 100, 100) : (thisMonth > 0 ? 100 : 0);
+  const monthPctText = monthLimit ? `${thisMonth.toLocaleString()} / ${monthLimit.toLocaleString()} (${Math.round(monthPctVal)}%)` : thisMonth.toLocaleString();
+  const elMonthPct = document.getElementById('statEmailMonthPct');
+  if (elMonthPct) elMonthPct.textContent = monthPctText;
+
+  const monthBar = document.getElementById('statEmailMonthBar');
+  if (monthBar) {
+    monthBar.style.width = `${monthPctVal}%`;
+    monthBar.className = 'storage-bar-fill' + (monthLimit && monthPctVal >= 90 ? ' danger' : monthLimit && monthPctVal >= 70 ? ' warn' : '');
+  }
+
+  // Daily stats
+  const dayPctVal = dayLimit ? Math.min((thisDay / dayLimit) * 100, 100) : (thisDay > 0 ? 100 : 0);
+  const dayPctText = dayLimit ? `${thisDay.toLocaleString()} / ${dayLimit.toLocaleString()} (${Math.round(dayPctVal)}%)` : thisDay.toLocaleString();
+  const elDayPct = document.getElementById('statEmailDayPct');
+  if (elDayPct) elDayPct.textContent = dayPctText;
+
+  const dayBar = document.getElementById('statEmailDayBar');
+  if (dayBar) {
+    dayBar.style.width = `${dayPctVal}%`;
+    dayBar.className = 'storage-bar-fill' + (dayLimit && dayPctVal >= 90 ? ' danger' : dayLimit && dayPctVal >= 70 ? ' warn' : '');
+  }
+}
+
+// ── Consolidated Dashboard Loading ──────────────────────────────
+async function loadDashboardConsolidated(forceRefresh = false) {
+  const path = '/api/v1/admin/dashboard';
+  try {
+    await swrFetch(path, forceRefresh, (data) => {
+      // 1. Populate all states
+      if (data.users) {
+        _users = data.users && Array.isArray(data.users.items) ? data.users.items : [];
+        _totalUsers = data.users.metrics?.total_users ?? _users.length;
+      }
+      if (data.plans) {
+        _plans = Array.isArray(data.plans) ? data.plans : [];
+      }
+      if (data.requests) {
+        _requests = Array.isArray(data.requests) ? data.requests.map(r => ({ ...r, id: r.request_id || r.id })) : [];
+        _totalRequests = _requests.length;
+      }
+      if (data.reviews) {
+        _reviews = data.reviews && Array.isArray(data.reviews.items) ? data.reviews.items : [];
+        _totalReviews = data.reviews.metrics?.total_reviews ?? _reviews.length;
+      }
+      if (data.payments) {
+        _payments = data.payments && Array.isArray(data.payments.items) ? data.payments.items : [];
+        updatePaymentsUI(data.payments);
+      }
+      if (data.plans_distribution) {
+        _planDistributionData = data.plans_distribution;
+      }
+      if (data.storage) {
+        updateStorageUI(data.storage);
+      }
+      if (data.emails) {
+        updateEmailsUI(data.emails);
+      }
+      
+      // 2. Render and Sync
+      renderDashboard();
+      updateUserCount();
+      updateRequestStats();
+      updateReviewStats();
+      populatePlanFilter();
+      populatePlanDropdown();
+      
+      // If we are currently on a page other than dashboard, make sure to render its table as well
+      if (_currentPage === 'users') renderUsersTable(_users);
+      else if (_currentPage === 'requests') renderRequests(_requests);
+      else if (_currentPage === 'plans') renderPlansAdmin(_plans);
+      else if (_currentPage === 'reviews') renderReviews(_reviews);
+      else if (_currentPage === 'payments') renderPaymentsTable(_payments);
+    });
+  } catch (e) {
+    console.error('Failed to load consolidated dashboard data:', e);
+  }
+}
+
+// ── Legacy small endpoints fallback logic ──────────────────────
 async function loadPlanDistribution() {
   try {
     const data = await apiFetch('/api/v1/admin/users/plan-distribution');
@@ -327,117 +514,31 @@ async function loadPlanDistribution() {
     } else if (data && typeof data === 'object') {
       _planDistributionData = Object.entries(data).map(([name, count]) => ({ name, count }));
     }
-  } catch (e) {
-    // silently fail
-  }
+  } catch (e) {}
 }
 
 async function loadEmailsThisMonth() {
   try {
     const data = await apiFetch('/api/v1/admin/emails/sent-this-month');
-
-    const thisMonth  = data.monthly_count ?? 0;
-    const thisDay    = data.daily_count   ?? 0;
-    const monthLimit = data.month_limit   ?? null;
-    const dayLimit   = data.day_limit     ?? null;
-
-    document.getElementById('statEmailsVal').textContent = thisMonth.toLocaleString();
-
-    // Month stats (e.g. "120 / 3,000 (4%)")
-    const monthPctVal = monthLimit ? Math.min((thisMonth / monthLimit) * 100, 100) : (thisMonth > 0 ? 100 : 0);
-    const monthPctText = monthLimit ? `${thisMonth.toLocaleString()} / ${monthLimit.toLocaleString()} (${Math.round(monthPctVal)}%)` : thisMonth.toLocaleString();
-    const elMonthPct = document.getElementById('statEmailMonthPct');
-    if (elMonthPct) elMonthPct.textContent = monthPctText;
-
-    const monthBar = document.getElementById('statEmailMonthBar');
-    if (monthBar) {
-      monthBar.style.width = `${monthPctVal}%`;
-      monthBar.className = 'storage-bar-fill' + (monthLimit && monthPctVal >= 90 ? ' danger' : monthLimit && monthPctVal >= 70 ? ' warn' : '');
-    }
-
-    // Daily stats (e.g. "5 / 300 (2%)")
-    const dayPctVal = dayLimit ? Math.min((thisDay / dayLimit) * 100, 100) : (thisDay > 0 ? 100 : 0);
-    const dayPctText = dayLimit ? `${thisDay.toLocaleString()} / ${dayLimit.toLocaleString()} (${Math.round(dayPctVal)}%)` : thisDay.toLocaleString();
-    const elDayPct = document.getElementById('statEmailDayPct');
-    if (elDayPct) elDayPct.textContent = dayPctText;
-
-    const dayBar = document.getElementById('statEmailDayBar');
-    if (dayBar) {
-      dayBar.style.width = `${dayPctVal}%`;
-      dayBar.className = 'storage-bar-fill' + (dayLimit && dayPctVal >= 90 ? ' danger' : dayLimit && dayPctVal >= 70 ? ' warn' : '');
-    }
-
+    updateEmailsUI(data);
   } catch (e) {
     document.getElementById('statEmailsVal').textContent = '—';
-    const elMonthPct = document.getElementById('statEmailMonthPct');
-    if (elMonthPct) elMonthPct.textContent = 'Unavailable';
-    const elDayPct = document.getElementById('statEmailDayPct');
-    if (elDayPct) elDayPct.textContent = 'Unavailable';
   }
 }
-
-async function loadAll() {
-  const defer = window.requestIdleCallback || (fn => setTimeout(fn, 200));
-
-  // High priority - current page data
-  if (_currentPage === 'users') {
-    await loadUsers(_userPage);
-  } else if (_currentPage === 'requests') {
-    await loadRequests(_reqPage);
-  } else if (_currentPage === 'plans') {
-    await loadPlans(true);
-  } else if (_currentPage === 'reviews') {
-    await loadReviews(_revPage);
-  } else if (_currentPage === 'payments') {
-    await loadPaymentsTelemetry();
-  } else if (_currentPage === 'dashboard') {
-    await Promise.allSettled([
-      loadPlanDistribution(),
-      loadEmailsThisMonth(),
-      loadStorageUsage()
-    ]);
-  }
-  
-  // Render dashboard immediately if data is loaded
-  renderDashboard();
-
-  // Defer loading other pages and telemetry
-  defer(() => {
-    if (_currentPage !== 'users') loadUsers(_userPage, true);
-    if (_currentPage !== 'requests') loadRequests(_reqPage, true);
-    if (_currentPage !== 'plans') loadPlans();
-    if (_currentPage !== 'reviews') loadReviews(_revPage, true);
-    if (_currentPage !== 'payments') loadPaymentsTelemetry(true);
-    
-    if (_currentPage !== 'dashboard') {
-      loadPlanDistribution();
-      loadEmailsThisMonth();
-      loadStorageUsage();
-    }
-  });
-}
-
-
 
 async function loadStorageUsage() {
   try {
     const data = await apiFetch('/api/v1/admin/storage/usage');
-    const mb  = data.used_mb  ?? 0;
-    const gb  = data.used_gb  ?? 0;
-    const pct = data.usage_percent ?? 0;
-    const rem = data.remaining_gb ?? 0;
-    const files = data.total_files ?? 0;
-    const displayVal = gb >= 1 ? `${gb.toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
-    document.getElementById('statStorageVal').textContent = displayVal;
-    document.getElementById('statStorageSub').textContent = `${files} file${files!==1?'s':''} · ${rem.toFixed(2)} GB free`;
-    document.getElementById('statStoragePct').textContent = `${pct.toFixed(1)}%`;
-    const bar = document.getElementById('statStorageBar');
-    bar.style.width = `${Math.min(pct, 100)}%`;
-    bar.className = 'storage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '');
+    updateStorageUI(data);
   } catch (e) {
     document.getElementById('statStorageVal').textContent = '—';
-    document.getElementById('statStorageSub').textContent = 'Storage data unavailable';
   }
+}
+
+async function loadAll() {
+  // On initial load, call the consolidated dashboard endpoint
+  // This will use cache first, then fetch fresh data silently
+  await loadDashboardConsolidated(false);
 }
 
 
@@ -2019,9 +2120,24 @@ function handleGlobalSearch(q) {
 }
 
 // ── Refresh ──────────────────────────────────────────────────────
+// ── Refresh ──────────────────────────────────────────────────────
 async function refreshAll() {
   toast('Refreshing data…', 'info');
-  await loadAll();
+  if (_currentPage === 'dashboard') {
+    await loadDashboardConsolidated(true);
+  } else if (_currentPage === 'users') {
+    await loadUsers(_userPage, false, true);
+  } else if (_currentPage === 'requests') {
+    await loadRequests(_reqPage, false, true);
+  } else if (_currentPage === 'plans') {
+    await loadPlans(true);
+  } else if (_currentPage === 'reviews') {
+    await loadReviews(_revPage, false, true);
+  } else if (_currentPage === 'payments') {
+    await loadPaymentsTelemetry(false, true);
+  } else {
+    await loadAll();
+  }
 }
 
 // ── Settings ─────────────────────────────────────────────────────
@@ -2153,60 +2269,7 @@ async function loadPaymentsTelemetry(silent = false, forceRefresh = false) {
   const path = '/api/v1/admin/payments';
   try {
     await swrFetch(path, forceRefresh, (data) => {
-      const items = data && Array.isArray(data.items) ? data.items : [];
-      _payments = items;
-
-      const metrics = data.metrics || {};
-      
-      const finalTotalPayments = metrics.total_payments ?? items.length;
-      const finalPaidPayments = metrics.paid_payments ?? items.filter(p => p.status === 'paid').length;
-      const finalCanceledPayments = metrics.canceled_payments ?? items.filter(p => p.status === 'canceled').length;
-      const finalRejectedPayments = metrics.rejected_payments ?? items.filter(p => p.status === 'rejected').length;
-      const finalMonthlyCycle = metrics.monthly_payments ?? items.filter(p => p.billing_cycle === 'monthly').length;
-      const finalYearlyCycle = metrics.yearly_payments ?? items.filter(p => p.billing_cycle === 'yearly').length;
-      
-      const now = new Date();
-      const currentMonthItems = items.filter(p => {
-        const pDate = new Date(p.created_at);
-        return pDate.getFullYear() === now.getFullYear() && pDate.getMonth() === now.getMonth();
-      });
-      
-      const finalPaymentsThisMonth = metrics.payments_this_month ?? currentMonthItems.length;
-
-      const totalRevenue = metrics.total_revenue ?? items.filter(p => p.status === 'paid' || p.status === 'canceled').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
-      const revenueThisMonth = metrics.revenue_this_month ?? currentMonthItems.filter(p => p.status === 'paid' || p.status === 'canceled').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
-
-      const setElText = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val;
-      };
-
-      setElText('payStatTotal', finalTotalPayments);
-      setElText('payStatActive', finalPaidPayments);
-      setElText('payStatCanceled', finalCanceledPayments);
-      setElText('payStatRejected', finalRejectedPayments);
-      setElText('payStatThisMonth', finalPaymentsThisMonth);
-      setElText('payStatMonthlyCycle', finalMonthlyCycle);
-      setElText('payStatYearlyCycle', finalYearlyCycle);
-      
-      // Main Dashboard Total Revenue
-      const mainRevEl = document.getElementById('statRevenueVal');
-      if (mainRevEl) {
-        mainRevEl.innerHTML = `${Number(totalRevenue).toFixed(3)} <span style="font-size:13px;font-weight:400">KWD</span>`;
-      }
-      
-      // Payments Page Revenue This Month
-      const revMonthEl = document.getElementById('payStatRevenueThisMonth');
-      if (revMonthEl) {
-        revMonthEl.innerHTML = `${Number(revenueThisMonth).toFixed(3)} <span style="font-size:13px;font-weight:400">KWD</span>`;
-      }
-      
-      const activeEl = document.getElementById('statActive');
-      if (activeEl) {
-        activeEl.textContent = finalPaidPayments;
-      }
-      
-      renderPaymentsTable(items);
+      updatePaymentsUI(data);
     });
   } catch(e) {
     const totalEl = document.getElementById('payStatTotal');
