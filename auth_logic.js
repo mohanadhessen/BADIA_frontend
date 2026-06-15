@@ -235,12 +235,15 @@ function handleSuccessfulAuth(role) {
                         const data = await res.json();
                         const role = data.user_info?.role;
                         if (role) localStorage.setItem('user_role', role);
-                        setTimeout(() => window.location.href = role === 'admin' ? 'admin.html' : 'account.html', 1000);
+                        document.documentElement.style.display = '';
+                        window.location.replace(role === 'admin' ? 'admin.html' : 'account.html');
                     } else {
-                        setTimeout(() => window.location.href = 'account.html', 1000);
+                        document.documentElement.style.display = '';
+                        window.location.replace('account.html');
                     }
                 } catch {
-                    setTimeout(() => window.location.href = 'account.html', 1000);
+                    document.documentElement.style.display = '';
+                    window.location.replace('account.html');
                 }
                 return;
             }
@@ -265,15 +268,18 @@ function handleSuccessfulAuth(role) {
                         if (role) localStorage.setItem('user_role', role);
                         showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
                         window.history.replaceState({}, document.title, window.location.pathname);
-                        setTimeout(() => window.location.href = role === 'admin' ? 'admin.html' : 'account.html', 1000);
+                        document.documentElement.style.display = '';
+                        window.location.replace(role === 'admin' ? 'admin.html' : 'account.html');
                     } else {
                         const err = await res.json();
                         showToast(err.detail || (lang === 'ar' ? 'فشل تسجيل الدخول باستخدام Google' : 'Google sign-in failed'), 'error');
                         window.history.replaceState({}, document.title, window.location.pathname);
+                        document.documentElement.style.display = '';
                     }
                 } catch {
                     showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
                     window.history.replaceState({}, document.title, window.location.pathname);
+                    document.documentElement.style.display = '';
                 }
                 return;
             }

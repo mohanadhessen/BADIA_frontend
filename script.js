@@ -298,6 +298,16 @@ function clearUserDataCache() {
     localStorage.removeItem('badia_requests');
     localStorage.removeItem('requests_etag');
     localStorage.removeItem('reviews_etag');
+    
+    // Clear all admin SWR cache keys
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('api_cache_')) {
+            keysToRemove.push(key);
+        }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
 }
 
 function clearCachedUser() {
