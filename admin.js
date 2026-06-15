@@ -107,10 +107,12 @@ async function apiFetch(path, opts = {}) {
   const data = await res.json();
   
   if (isGet) {
+    localStorage.setItem(cacheKeyData, JSON.stringify(data));
     const newEtag = res.headers.get('ETag');
     if (newEtag) {
       localStorage.setItem(cacheKeyEtag, newEtag);
-      localStorage.setItem(cacheKeyData, JSON.stringify(data));
+    } else {
+      localStorage.removeItem(cacheKeyEtag);
     }
   }
   
@@ -135,6 +137,7 @@ async function swrFetch(path, forceRefresh, onData) {
   }
 
   // Defer the network request to ensure the cached UI builds first
+  const delay = didRenderCache ? 100 : 0;
   setTimeout(async () => {
     try {
       const freshData = await apiFetch(path, { forceRefresh });
@@ -145,7 +148,7 @@ async function swrFetch(path, forceRefresh, onData) {
     } catch (e) {
       console.error(`SWR revalidation failed for ${path}:`, e);
     }
-  }, 100);
+  }, delay);
 
   return didRenderCache;
 }
