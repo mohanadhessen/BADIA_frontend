@@ -2083,7 +2083,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
-      closeStatusModal();
       closeCreateConfirm();
     }
     // Ctrl/Cmd + Enter saves plan modal if open

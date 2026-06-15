@@ -10,13 +10,13 @@
             var qs = window.location.search;
             var isOAuthCallback = qs.indexOf('access_token=') !== -1 || qs.indexOf('code=') !== -1;
             
-            if (role === 'admin' && !isOAuthCallback) {
+            if (!token && !isOAuthCallback) {
+                window.location.replace('index.html');
+            } else if (role === 'admin' && !isOAuthCallback) {
                 window.location.replace('admin.html' + window.location.hash);
             } else if (isOAuthCallback) {
                 document.documentElement.style.display = 'none'; // Prevent UI flash during OAuth
                 setTimeout(function() { document.documentElement.style.display = ''; }, 5000); // 5s fallback
-            } else if (!token && !isOAuthCallback) {
-                window.location.replace('index.html');
             }
         })();
     </script>
