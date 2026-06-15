@@ -2400,9 +2400,6 @@ async function submitSubscription() {
     plan_id: parseInt(planId),
     amount: amount,
     billing_cycle: cycle,
-    status: {
-      status: "paid"
-    },
     start_date: start ? new Date(start).toISOString() : new Date().toISOString(),
     end_date: end ? new Date(end).toISOString() : new Date(Date.now() + 30*24*60*60*1000).toISOString()
   };
