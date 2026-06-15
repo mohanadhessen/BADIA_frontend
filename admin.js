@@ -1172,10 +1172,10 @@ function renderPlansAdmin(plans) {
           ? `<span style="color:var(--text-2)">${feature.price} KWD</span><span style="color:var(--border);margin:0 3px">·</span>`
           : '';
         return `<li style="list-style:none;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;align-items:center;gap:6px;font-size:.75rem">
-          <div class="feat-dot ${statusClass}"></div>
-          <span style="font-weight:600;color:var(--text)">${nameEn}</span>
-          <span style="color:var(--border);margin:0 1px">·</span>
-          ${priceSegment}<span style="color:var(--text-3)">${statusText}</span>
+          <div class="feat-dot ${statusClass}" style="flex-shrink:0"></div>
+          <span style="font-weight:600;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nameEn}</span>
+          <span style="color:var(--border);margin:0 1px;flex-shrink:0">·</span>
+          <span style="display:inline-flex;align-items:center;flex-shrink:0">${priceSegment}<span style="color:var(--text-3)">${statusText}</span></span>
         </li>`;
       }).join('');
  
@@ -1190,10 +1190,10 @@ function renderPlansAdmin(plans) {
           const statusClass = f.enabled ? 'feat-on' : 'feat-off';
           const statusText  = f.enabled ? 'Enabled' : 'Disabled';
           return `<li style="list-style:none;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;align-items:center;gap:6px;font-size:.75rem">
-            <div class="feat-dot ${statusClass}"></div>
-            <span style="font-weight:600;color:var(--text);text-transform:capitalize">${nameEn}</span>
-            <span style="color:var(--border);margin:0 1px">·</span>
-            <span style="color:var(--text-3)">${statusText}</span>
+            <div class="feat-dot ${statusClass}" style="flex-shrink:0"></div>
+            <span style="font-weight:600;color:var(--text);text-transform:capitalize;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nameEn}</span>
+            <span style="color:var(--border);margin:0 1px;flex-shrink:0">·</span>
+            <span style="color:var(--text-3);flex-shrink:0">${statusText}</span>
           </li>`;
         }).join('');
       }
@@ -2140,9 +2140,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Modal Backdrop Click Listeners
-  document.getElementById('statusModal')?.addEventListener('click', function(e) {
-    if (e.target === this) closeStatusModal();
-  });
   document.getElementById('createConfirmModal')?.addEventListener('click', function(e) {
     if (e.target === this) closeCreateConfirm();
   });
@@ -2221,7 +2218,6 @@ async function loadPaymentsTelemetry(silent = false, forceRefresh = false) {
 
 let _lookupTimeout = null;
 let _selectedUserId = null;
-let _currentStatusPaymentId = null;
 
 function lookupUserByEmail(email) {
   clearTimeout(_lookupTimeout);
@@ -2322,8 +2318,7 @@ function autoFillPlanAmount() {
   const selectedPrice = cycle === 'yearly' ? yearlyPrice : monthlyPrice;
   
   if (amountInput) {
-    // Only auto-fill if the price is non-zero; leave empty for custom-priced plans
-    amountInput.value = selectedPrice > 0 ? selectedPrice : '';
+    amountInput.value = selectedPrice;
   }
 }
 
@@ -2462,7 +2457,6 @@ function renderPaymentsTable(items) {
   }
   
   grid.innerHTML = items.map(p => {
-    // Fallback lookup: if nested user or plan objects are missing, fetch them from our caches
     let u = p.user;
     if (!u && p.user_id) {
       u = _users.find(usr => usr.id === p.user_id);
@@ -2485,15 +2479,40 @@ function renderPaymentsTable(items) {
     if (status === 'canceled' || status === 'rejected') statusClass = 'rejected';
     
     const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
-    
+
+    // Build inline status action buttons (like the request section)
+    let statusActions = '';
+    if (status !== 'paid') {
+      statusActions += `<button class="act-btn act-btn-approve" onclick="changePaymentStatus(${p.id}, 'paid')">
+        <i class="fas fa-check" style="margin-right:4px;"></i>
+        Mark Paid
+      </button>`;
+    }
+    if (status !== 'rejected') {
+      statusActions += `<button class="act-btn act-btn-reject" onclick="changePaymentStatus(${p.id}, 'rejected')">
+        <i class="fas fa-ban" style="margin-right:4px;"></i>
+        Reject
+      </button>`;
+    }
+    if (status !== 'canceled') {
+      statusActions += `<button class="act-btn act-btn-pending" onclick="changePaymentStatus(${p.id}, 'canceled')">
+        <i class="fas fa-times-circle" style="margin-right:4px;"></i>
+        Cancel
+      </button>`;
+    }
+
     return `<div class="payment-card">
-      <div class="payment-avatar">${initials}</div>
-      <div class="payment-main">
-        <div class="payment-top">
-          <div class="payment-name">${name}</div>
-          <span class="status-badge ${statusClass}"><span class="status-dot"></span>${formattedStatus}</span>
+      <div class="payment-card-header">
+        <div class="payment-avatar">${initials}</div>
+        <div class="payment-main" style="flex:1;min-width:0;">
+          <div class="payment-top">
+            <div class="payment-name">${name}</div>
+            <span class="status-badge ${statusClass}"><span class="status-dot"></span>${formattedStatus}</span>
+          </div>
+          <div class="payment-email">${email}</div>
         </div>
-        <div class="payment-email">${email}</div>
+      </div>
+      <div class="payment-card-body">
         <div class="payment-meta">
           <div class="meta-item"><div class="meta-label">ID</div><div class="meta-value">#${p.id}</div></div>
           <div class="meta-item"><div class="meta-label">Plan</div><div class="meta-value">${plan.name || '—'}</div></div>
@@ -2502,16 +2521,18 @@ function renderPaymentsTable(items) {
           <div class="meta-item"><div class="meta-label">Period</div><div class="meta-value">${fmtDate(p.start_date)} – ${fmtDate(p.end_date)}</div></div>
           <div class="meta-item"><div class="meta-label">Created</div><div class="meta-value">${fmtDate(p.created_at)}</div></div>
         </div>
+        <div class="payment-email-notice">
+          <i class="fas fa-envelope"></i>
+          <p><strong>Status changes send emails.</strong> Changing this payment's status will automatically notify the user via email.</p>
+        </div>
       </div>
-      <div class="payment-actions" style="display:flex; gap:8px;">
-        <button class="btn-update" onclick="openStatusModal(${p.id}, '${status}')" style="flex:1;">
-          <i class="fas fa-sync-alt" style="font-size:12px; margin-right:4px;"></i>
-          Status
-        </button>
-        <button class="btn-update" onclick="openEditPaymentModal(${p.id})" style="flex:1; background:var(--accent-dim); color:var(--accent);">
-          <i class="fas fa-edit" style="font-size:12px; margin-right:4px;"></i>
+      <div class="payment-card-actions">
+        ${statusActions}
+        <button class="act-btn act-btn-view" onclick="openEditPaymentModal(${p.id})">
+          <i class="fas fa-edit" style="margin-right:4px;"></i>
           Edit
         </button>
+        <div class="spacer"></div>
       </div>
     </div>`;
   }).join('');
@@ -2547,79 +2568,50 @@ function filterPayments() {
   renderPaymentsTable(filtered);
 }
 
-function openStatusModal(pid, currentStatus) {
-  _currentStatusPaymentId = pid;
-  document.getElementById('modalSubtitle').textContent = 'Payment ID: #' + pid;
-  const sel = document.getElementById('newStatusSelect');
-  if (sel) {
-    sel.value = currentStatus;
-  }
-  togglePaidNotice();
-  document.getElementById('statusModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeStatusModal() {
-  document.getElementById('statusModal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function togglePaidNotice() {
-  const sel = document.getElementById('newStatusSelect');
-  const notice = document.getElementById('paidEmailNotice');
-  const textEl = document.getElementById('statusNoticeText');
-  if (sel && notice && textEl) {
-    notice.classList.remove('warning', 'danger');
-    if (sel.value === 'paid') {
-      notice.style.display = 'flex';
-      textEl.innerHTML = `Marking as <strong>Paid</strong> will automatically send a payment receipt to the user's email.`;
-    } else if (sel.value === 'rejected') {
-      notice.style.display = 'flex';
-      notice.classList.add('danger');
-      textEl.innerHTML = `Marking as <strong>Rejected</strong> will automatically send a rejection notification to the user's email.`;
-    } else if (sel.value === 'canceled') {
-      notice.style.display = 'flex';
-      notice.classList.add('warning');
-      textEl.innerHTML = `Marking as <strong>Canceled</strong> will automatically send a cancellation notification to the user's email.`;
-    } else {
-      notice.style.display = 'none';
-    }
-  }
-}
-
-async function confirmStatusUpdate() {
-  const pid = _currentStatusPaymentId;
-  const st = document.getElementById('newStatusSelect').value;
-  if (!pid) return toast('Please select a payment ID', 'error');
-
-  if (st === 'paid') {
-    const payment = _payments.find(p => String(p.id) === String(pid));
-    if (payment) {
-      let email = payment.user_email;
-      if (!email && payment.user) email = payment.user.email;
-      if (!email && payment.user_id) {
-        const u = _users.find(usr => String(usr.id) === String(payment.user_id));
-        if (u) email = u.email;
+async function changePaymentStatus(pid, newStatus) {
+  const statusLabels = { paid: 'Paid', rejected: 'Rejected', canceled: 'Canceled' };
+  const emailMessages = {
+    paid: 'A payment receipt email will be sent to the user.',
+    rejected: 'A rejection notification email will be sent to the user.',
+    canceled: 'A cancellation notification email will be sent to the user.'
+  };
+  
+  confirmAction(
+    `Mark as ${statusLabels[newStatus]}?`,
+    `${emailMessages[newStatus]} Are you sure you want to proceed?`,
+    async () => {
+      if (newStatus === 'paid') {
+        const payment = _payments.find(p => String(p.id) === String(pid));
+        if (payment) {
+          let email = payment.user_email;
+          if (!email && payment.user) email = payment.user.email;
+          if (!email && payment.user_id) {
+            const u = _users.find(usr => String(usr.id) === String(payment.user_id));
+            if (u) email = u.email;
+          }
+          if (checkDuplicatePaidPayment(email, pid)) {
+            toast('User already has an active paid payment', 'error');
+            return;
+          }
+        }
       }
-      if (checkDuplicatePaidPayment(email, pid)) {
-        toast('User already has an active paid payment', 'error');
-        return;
+
+      try {
+        await apiFetch(`/api/v1/admin/payments/${pid}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: { status: newStatus } })
+        });
+        // Optimistic update
+        const payment = _payments.find(p => String(p.id) === String(pid));
+        if (payment) payment.status = newStatus;
+        filterPayments();
+        toast(`Payment status updated to ${statusLabels[newStatus]}`, 'success');
+        loadPaymentsTelemetry(true, true);
+      } catch (e) {
+        toast('Failed to update payment status', 'error');
       }
     }
-  }
-
-  closeStatusModal();
-
-  try {
-    await apiFetch(`/api/v1/admin/payments/${pid}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: { status: st } })
-    });
-    toast('Payment status updated successfully', 'success');
-    loadPaymentsTelemetry(true, true);
-  } catch (e) {
-    toast('Failed to update payment status', 'error');
-  }
+  );
 }
 
 function populateEditPaymentPlanDropdown(selectedPlanId) {

@@ -292,6 +292,10 @@
         <span class="section-title">Requests</span>
         <span class="section-count" id="reqCount">—</span>
       </div>
+      <div class="form-notice" style="margin-bottom:16px">
+        <i class="fas fa-envelope"></i>
+        <p><strong>Status changes send emails.</strong> Approving or rejecting a service request will notify the user via email. Verify all details before proceeding.</p>
+      </div>
       <div id="requestsCardsWrap">
         <div class="items-list" id="requestsCardsGrid">
           <div class="item-row"><div class="item-row-body"><div class="empty-state"><div class="empty-state-icon"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--text-3);"></i></div><h3>Loading requests…</h3></div></div></div>
@@ -505,7 +509,7 @@
             <p><strong>A confirmation email will be sent</strong> to the user once you create this subscription. Verify all details before proceeding.</p>
           </div>
 
-          <!-- Row 1: email | plan | amount | cycle | start | end + button -->
+          <!-- Row 1: email | plan | cycle | amount | start | end + button -->
           <div class="form-grid" style="margin-bottom: 24px;">
             <div class="form-col">
               <label class="form-label">User email <span class="req">*</span></label>
@@ -521,15 +525,15 @@
               </select>
             </div>
             <div class="form-col">
-              <label class="form-label">Amount (KWD) <span class="req">*</span></label>
-              <input class="form-input" type="number" id="sub-amount" placeholder="0.000" step="0.001">
-            </div>
-            <div class="form-col">
               <label class="form-label">Billing cycle <span class="req">*</span></label>
               <select class="form-input" id="sub-cycle" onchange="autoFillPlanAmount()">
                 <option value="monthly" selected="">Monthly</option>
                 <option value="yearly">Yearly</option>
               </select>
+            </div>
+            <div class="form-col">
+              <label class="form-label">Amount (KWD) <span class="req">*</span></label>
+              <input class="form-input" type="number" id="sub-amount" placeholder="0.000" step="0.001">
             </div>
             <div class="form-col">
               <label class="form-label">Start date <span class="req">*</span></label>
@@ -655,44 +659,8 @@
   </div>
 </div>
 
-<!-- ── UPDATE STATUS MODAL ─────────────────────── -->
-<div class="modal-overlay" id="statusModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-icon">
-        <i class="fas fa-edit" style="color:var(--gold)"></i>
-      </div>
-      <div>
-        <div class="modal-title">Update payment status</div>
-        <div class="modal-subtitle" id="modalSubtitle">Payment ID: #1</div>
-      </div>
-      <button class="modal-close" onclick="closeStatusModal()" aria-label="Close">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
 
-    <div class="modal-body">
-      <div class="form-col">
-        <label class="form-label">New status</label>
-        <select class="form-input" id="newStatusSelect" onchange="togglePaidNotice()">
-          <option value="paid">Paid</option>
-          <option value="rejected">Rejected</option>
-          <option value="canceled">Canceled</option>
-        </select>
-      </div>
 
-      <div class="paid-notice" id="paidEmailNotice">
-        <i class="fas fa-envelope"></i>
-        <p id="statusNoticeText">Marking as <strong>Paid</strong> will automatically send a payment receipt to the user's email.</p>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeStatusModal()">Cancel</button>
-      <button class="btn-confirm" onclick="confirmStatusUpdate()">Update status</button>
-    </div>
-  </div>
-</div>
 
 <!-- ── EDIT PAYMENT MODAL ────────────────────── -->
 <div class="modal-backdrop" id="editPaymentModal">
