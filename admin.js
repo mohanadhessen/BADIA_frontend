@@ -1,4 +1,4 @@
-// https://badia-backend.onrender.com
+// https://api.badiaprojectmanagement.com
 
 let API = localStorage.getItem('badia_admin_api') || API_BASE;
 const TOKEN = () => localStorage.getItem('access_token') || '';
