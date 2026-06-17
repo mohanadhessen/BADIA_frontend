@@ -143,7 +143,6 @@ document.getElementById('contactForm')?.addEventListener('submit', function (e) 
         name: document.getElementById('contactName').value,
         email: document.getElementById('contactEmail').value,
         phone: document.getElementById('contactPhone').value,
-        service: document.getElementById('contactService').value,
         message: document.getElementById('contactMessage').value
     };
 
@@ -158,20 +157,39 @@ document.getElementById('contactForm')?.addEventListener('submit', function (e) 
     }
 
     const btn = document.getElementById('submitBtn');
-    const origEN = btn.getAttribute('data-en');
-    const origAR = btn.getAttribute('data-ar');
+    const origEN = btn.getAttribute('data-en') || 'Send Message';
+    const origAR = btn.getAttribute('data-ar') || 'أرسل الرسالة';
     btn.textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
     btn.disabled = true;
 
-    setTimeout(() => {
+    fetch(`${API_BASE}/api/v1/contact`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(async (res) => {
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+        }
         showNotification(
             lang === 'ar' ? 'تم إرسال رسالتك بنجاح! سنتواصل معك قريباً' : 'Message sent successfully! We will contact you soon',
             'success'
         );
         this.reset();
+    })
+    .catch((err) => {
+        console.error('Contact submission error:', err);
+        showNotification(
+            lang === 'ar' ? 'فشل إرسال الرسالة. يرجى المحاولة مرة أخرى لاحقاً.' : 'Failed to send message. Please try again later.',
+            'error'
+        );
+    })
+    .finally(() => {
         btn.textContent = lang === 'ar' ? origAR : origEN;
         btn.disabled = false;
-    }, 1500);
+    });
 });
 
 // ===== Notification =====
