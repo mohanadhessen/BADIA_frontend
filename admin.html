@@ -45,6 +45,12 @@
       </span>
       Dashboard
     </div>
+    <div class="nav-item" onclick="showPage('search')" data-page="search">
+      <span class="nav-icon">
+        <i class="fas fa-search" style="font-size: 13.5px;"></i>
+      </span>
+      Search User Data
+    </div>
   </div>
 
   <div class="nav-section">
@@ -235,6 +241,72 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="page" id="page-search">
+      <div class="page-header">
+        <div class="page-header-row">
+          <div>
+            <h1>Search User Data</h1>
+            <p>Search by user email to see their profile, service requests, and reviews, each in its own section.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom: 24px;">
+        <div class="panel-body">
+          <div style="font-size: 13.5px; font-weight: 500; margin-bottom: 8px; color: var(--text-2);">Find requests, reviews, and user details</div>
+          <div class="search-autofill-container" style="position: relative; max-width: 600px; display: flex; gap: 10px; align-items: center;">
+            <div style="position: relative; flex: 1;">
+              <input type="text" class="form-input" id="searchUserEmailInput" placeholder="Type user email (e.g. user@example.com)" oninput="handleSearchAutocomplete(this.value)" autocomplete="off">
+              <div id="searchAutofillDropdown" class="autofill-dropdown" style="display: none;"></div>
+            </div>
+            <button class="btn btn-accent" onclick="performUserSearch()" style="height: 38px;">
+              <i class="fas fa-search" style="margin-right: 4px;"></i> Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search results sections -->
+      <div id="searchResultsArea" style="display: none;">
+        
+        <!-- Section 1: User Profile -->
+        <div class="section-header" style="margin-top: 24px; margin-bottom: 12px;">
+          <span class="section-title">User Profile</span>
+        </div>
+        <div class="panel" style="margin-bottom: 24px;">
+          <div class="panel-body" id="searchResultUserCard">
+            <!-- User details will go here -->
+          </div>
+        </div>
+
+        <!-- Section 2: Service Requests -->
+        <div class="section-header" style="margin-top: 24px; margin-bottom: 12px;">
+          <span class="section-title">Service Requests</span>
+          <span class="section-count" id="searchResultRequestsCount">0 requests</span>
+        </div>
+        <div class="items-list" id="searchResultRequestsList" style="margin-bottom: 24px;">
+          <!-- Requests will go here -->
+        </div>
+
+        <!-- Section 3: Reviews -->
+        <div class="section-header" style="margin-top: 24px; margin-bottom: 12px;">
+          <span class="section-title">User Reviews</span>
+          <span class="section-count" id="searchResultReviewsCount">0 reviews</span>
+        </div>
+        <div class="items-list" id="searchResultReviewsList" style="margin-bottom: 24px;">
+          <!-- Reviews will go here -->
+        </div>
+
+      </div>
+
+      <div id="searchNoResultsArea" style="display: block; text-align: center; padding: 60px 40px; color: var(--text-3); background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius-md);">
+        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 16px; color: var(--text-muted);"></i>
+        <h3 style="margin-bottom: 8px; color: var(--text-primary);">Search for a User</h3>
+        <p style="max-width: 450px; margin: 0 auto;">Enter a user email in the search bar above to view all their account details, service requests, and reviews in one consolidated view.</p>
+      </div>
+
     </div>
 
     <div class="page" id="page-requests">

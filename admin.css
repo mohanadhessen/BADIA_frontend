@@ -749,7 +749,7 @@ tbody tr.expanded-detail td{background:#fffbf0;border-bottom:1.5px solid var(--a
 .empty-state p{font-size:.82rem}
 
 /* ── Toast ───────────────────────────────────────────────────── */
-.toast-stack{position:fixed;bottom:22px;right:22px;z-index:1000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast-stack{position:fixed;bottom:22px;right:22px;z-index:999999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{
   background:var(--text);color:#fff;padding:10px 14px;border-radius:10px;
   font-size:.82rem;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.18);min-width:220px;max-width:340px;
@@ -1508,4 +1508,66 @@ select.form-input {
 .flatpickr-current-month .flatpickr-monthDropdown-months {
   font-weight: 600 !important;
 }
+
+
+/* ── Autofill Dropdown & Search Redesign ─────────────────── */
+.autofill-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.autofill-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+
+.autofill-item:last-child {
+  border-bottom: none;
+}
+
+.autofill-item:hover, .autofill-item.active {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.search-profile-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.search-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.search-profile-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.search-profile-value {
+  font-size: 13.5px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
 

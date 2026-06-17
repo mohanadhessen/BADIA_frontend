@@ -1362,7 +1362,7 @@ body.modal-open{overflow:hidden}
         .notification {
             position: fixed; top: 1.5rem; right: 1.5rem;
             padding: 1rem 1.5rem; border-radius: 8px;
-            font-size: 0.95rem; font-weight: 600; z-index: 9999;
+            font-size: 0.95rem; font-weight: 600; z-index: 999999;
             animation: slideNotif 0.3s ease-out; max-width: 350px;
         }
         @keyframes slideNotif {

@@ -511,28 +511,36 @@ function handleSuccessfulAuth(role) {
             btn.querySelector('span').textContent = lang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
 
             try {
-                await fetch(`${API_BASE}/api/v1/auth/forgot-password`, {
+                const res = await fetch(`${API_BASE}/api/v1/auth/forgot-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
                 });
-                // Always show success (security — don't reveal if email exists)
-                showToast(lang === 'ar' ? 'إذا كان البريد مسجلاً، تم إرسال رابط إعادة التعيين' : 'If the email exists, a reset link has been sent', 'success');
-                
-                // Cooldown logic
-                resetEmailCooldown = 60;
-                const updateBtn = () => {
-                    if (resetEmailCooldown > 0) {
-                        btn.disabled = true;
-                        btn.querySelector('span').textContent = lang === 'ar' ? `إعادة الإرسال بعد ${resetEmailCooldown} ثانية` : `Resend in ${resetEmailCooldown}s`;
-                        resetEmailCooldown--;
-                        setTimeout(updateBtn, 1000);
-                    } else {
-                        btn.disabled = false;
-                        btn.querySelector('span').textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين →' : 'Send Reset Link →';
-                    }
-                };
-                updateBtn();
+
+                if (res.ok) {
+                    showToast(lang === 'ar' ? 'تم إرسال رابط إعادة التعيين! يرجى التحقق من بريدك الوارد ومجلد البريد العشوائي (Spam) أو المهملات.' : 'Reset link sent! Please check your inbox and your spam or delete folder.', 'success');
+                    
+                    // Cooldown logic
+                    resetEmailCooldown = 60;
+                    const updateBtn = () => {
+                        if (resetEmailCooldown > 0) {
+                            btn.disabled = true;
+                            btn.querySelector('span').textContent = lang === 'ar' ? `إعادة الإرسال بعد ${resetEmailCooldown} ثانية` : `Resend in ${resetEmailCooldown}s`;
+                            resetEmailCooldown--;
+                            setTimeout(updateBtn, 1000);
+                        } else {
+                            btn.disabled = false;
+                            btn.querySelector('span').textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين →' : 'Send Reset Link →';
+                        }
+                    };
+                    updateBtn();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    const errMsg = data.detail || (lang === 'ar' ? 'البريد الإلكتروني غير مسجل لدينا' : 'This email is not registered with us');
+                    showToast(errMsg, 'error');
+                    btn.disabled = false;
+                    btn.querySelector('span').textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين →' : 'Send Reset Link →';
+                }
             } catch {
                 showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
                 btn.disabled = false;

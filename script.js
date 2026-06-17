@@ -203,7 +203,7 @@ function showNotification(msg, type = 'success') {
         position: 'fixed', top: '20px',
         [isRTL ? 'left' : 'right']: '20px',
         padding: '1rem 1.5rem',
-        borderRadius: '8px', fontSize: '1rem', fontWeight: '500', zIndex: '10000',
+        borderRadius: '8px', fontSize: '1rem', fontWeight: '500', zIndex: '999999',
         boxShadow: '0 4px 12px rgba(0,0,0,.15)', maxWidth: '400px',
         fontFamily: "'Inter','Tajawal',sans-serif",
         background: type === 'success' ? '#10b981' : '#ef4444', color: 'white',

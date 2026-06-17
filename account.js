@@ -362,7 +362,20 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: currentUser.email })
                 });
-                showNotification(lang === 'ar' ? 'تم إرسال رابط التفعيل إلى بريدك الإلكتروني' : 'Verification link sent to your email', 'success');
+                if (res.ok) {
+                    showNotification(
+                        lang === 'ar' 
+                            ? 'تم إرسال رابط التفعيل! يرجى التحقق من بريدك الإلكتروني ومجلد البريد العشوائي (Spam) أو المهملات.' 
+                            : 'Verification link sent! Please check your email and spam/delete folder.', 
+                        'success'
+                    );
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showNotification(
+                        data.detail || (lang === 'ar' ? 'فشل إرسال رابط التفعيل' : 'Failed to send verification link'),
+                        'error'
+                    );
+                }
             } catch {
                 showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
             }
