@@ -2255,6 +2255,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === this) closeCreateConfirm();
   });
 
+  // Keypress listener for section search inputs
+  ['userSearch', 'reqSearch', 'revSearch'].forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const type = id === 'userSearch' ? 'user' : (id === 'reqSearch' ? 'request' : 'review');
+        executeSectionSearch(input.value.trim(), type);
+      }
+    });
+  });
+
   // Init
   window.addEventListener('load', () => {
     setTimeout(loadAll, 0);
@@ -2830,22 +2842,40 @@ async function savePayment() {
 }
 
 
-// ── Autocomplete and User Search ─────────────────────────────────
-let _searchAutocompleteTimeout = null;
+// ── Autocomplete and Section-Specific User Search ───────────────────
+let _sectionAutocompleteTimeout = null;
 
-async function handleSearchAutocomplete(val) {
-  clearTimeout(_searchAutocompleteTimeout);
-  const dropdown = document.getElementById('searchAutofillDropdown');
+async function handleSectionAutocomplete(val, type) {
+  clearTimeout(_sectionAutocompleteTimeout);
+  
+  const dropdownId = type === 'user' ? 'userSearchDropdown' : (type === 'request' ? 'requestSearchDropdown' : 'reviewSearchDropdown');
+  const dropdown = document.getElementById(dropdownId);
   if (!dropdown) return;
 
   const query = (val || '').trim();
   if (!query) {
     dropdown.innerHTML = '';
     dropdown.style.display = 'none';
+    if (type === 'user') {
+      loadUsers(_userPage, false, false);
+    } else if (type === 'request') {
+      loadRequests(_reqPage, false, false);
+    } else if (type === 'review') {
+      loadReviews(_revPage, false, false);
+    }
     return;
   }
 
-  _searchAutocompleteTimeout = setTimeout(async () => {
+  // Also trigger local filtering / standard filtering instantly as fallback
+  if (type === 'user') {
+    filterUsers(val);
+  } else if (type === 'request') {
+    filterRequests();
+  } else if (type === 'review') {
+    filterReviews();
+  }
+
+  _sectionAutocompleteTimeout = setTimeout(async () => {
     try {
       const response = await apiFetch(`/api/v1/admin/users/search/autocomplete?q=${encodeURIComponent(query)}`);
       const emails = Array.isArray(response) ? response : [];
@@ -2857,7 +2887,7 @@ async function handleSearchAutocomplete(val) {
       }
 
       dropdown.innerHTML = emails.map(email => {
-        return `<div class="autofill-item" onclick="selectAutofillEmail('${email.replace(/'/g, "\\'")}')">${email}</div>`;
+        return `<div class="autofill-item" onclick="selectSectionEmail('${email.replace(/'/g, "\\'")}', '${type}')">${email}</div>`;
       }).join('');
       dropdown.style.display = 'block';
     } catch (e) {
@@ -2867,221 +2897,96 @@ async function handleSearchAutocomplete(val) {
   }, 150);
 }
 
-function selectAutofillEmail(email) {
-  const input = document.getElementById('searchUserEmailInput');
-  const dropdown = document.getElementById('searchAutofillDropdown');
+function selectSectionEmail(email, type) {
+  const inputId = type === 'user' ? 'userSearch' : (type === 'request' ? 'reqSearch' : 'revSearch');
+  const dropdownId = type === 'user' ? 'userSearchDropdown' : (type === 'request' ? 'requestSearchDropdown' : 'reviewSearchDropdown');
+  
+  const input = document.getElementById(inputId);
+  const dropdown = document.getElementById(dropdownId);
+  
   if (input) input.value = email;
   if (dropdown) {
     dropdown.innerHTML = '';
     dropdown.style.display = 'none';
   }
-  performUserSearch();
+  
+  executeSectionSearch(email, type);
 }
 
 document.addEventListener('click', (e) => {
-  const container = document.querySelector('.search-autofill-container');
-  const dropdown = document.getElementById('searchAutofillDropdown');
-  if (dropdown && container && !container.contains(e.target)) {
-    dropdown.style.display = 'none';
-  }
+  ['userSearchDropdown', 'requestSearchDropdown', 'reviewSearchDropdown'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.parentNode.contains(e.target)) {
+      el.style.display = 'none';
+    }
+  });
 });
 
-async function performUserSearch() {
-  const input = document.getElementById('searchUserEmailInput');
-  if (!input) return;
-  
-  const email = input.value.trim();
+async function executeSectionSearch(email, type) {
   if (!email) {
     toast('Please enter a user email to search', 'warning');
     return;
   }
 
-  const dropdown = document.getElementById('searchAutofillDropdown');
-  if (dropdown) dropdown.style.display = 'none';
-
-  const resultsArea = document.getElementById('searchResultsArea');
-  const noResultsArea = document.getElementById('searchNoResultsArea');
-  
   try {
     const data = await apiFetch(`/api/v1/admin/users/search/results?email=${encodeURIComponent(email)}`);
-    if (!data || !data.user) {
-      throw new Error('User not found');
-    }
-
-    const user = data.user;
-    const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || '—';
-    const initials = name !== '—' ? name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (user.email[0]||'?').toUpperCase();
-    const joined = fmtDate(user.created_at);
-    const userPlanObj = _plans.find(p => p.id === user.current_plan_id);
-    const planName = userPlanObj ? userPlanObj.name : 'None';
-    const status = user.is_active ? 'active' : 'inactive';
+    if (!data) throw new Error('No data found');
     
-    document.getElementById('searchResultUserCard').innerHTML = `
-      <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
-        <div class="recent-avatar" style="width: 54px; height: 54px; font-size: 1.1rem; border-radius: 12px;">${initials}</div>
-        <div>
-          <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${name}</h2>
-          <div style="font-size: 0.84rem; color: var(--text-secondary);">${user.email}</div>
-        </div>
-        <div style="margin-left: auto;">
-          ${statusBadge(status)}
-        </div>
-      </div>
-      <div class="search-profile-card">
-        <div class="search-profile-field">
-          <span class="search-profile-label">User ID</span>
-          <span class="search-profile-value td-mono">#${user.id}</span>
-        </div>
-        <div class="search-profile-field">
-          <span class="search-profile-label">Company</span>
-          <span class="search-profile-value">${user.company_name || '—'}</span>
-        </div>
-        <div class="search-profile-field">
-          <span class="search-profile-label">Phone</span>
-          <span class="search-profile-value">${user.phone || '—'}</span>
-        </div>
-        <div class="search-profile-field">
-          <span class="search-profile-label">Current Plan</span>
-          <span class="search-profile-value">${planName}</span>
-        </div>
-        <div class="search-profile-field">
-          <span class="search-profile-label">Joined</span>
-          <span class="search-profile-value">${joined}</span>
-        </div>
-        <div class="search-profile-field">
-          <span class="search-profile-label">Email Verified</span>
-          <span class="search-profile-value">${user.is_email_verified ? 'Yes ✓' : 'No ✗'}</span>
-        </div>
-      </div>
-      <div style="margin-top: 16px; display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 16px;">
-        <button class="act-btn act-btn-edit" onclick="openEditUserById(${user.id})">
-          <i class="fas fa-user-edit" style="margin-right: 4px;"></i> Edit User Details
-        </button>
-      </div>
-    `;
-
-    const requests = data.requests || [];
-    document.getElementById('searchResultRequestsCount').textContent = `${requests.length} request${requests.length !== 1 ? 's' : ''}`;
-    const requestsList = document.getElementById('searchResultRequestsList');
-    if (requests.length === 0) {
-      requestsList.innerHTML = `<div class="item-row"><div class="item-row-body"><div class="empty-state" style="padding: 24px;"><p>No requests found for this user.</p></div></div></div>`;
-    } else {
-      requestsList.innerHTML = requests.map(req => {
-        const type = req.service_type || 'unknown';
-        const files = req.files || [];
-        const fileChips = files.map(f => {
-          const fname = f.filename || 'file.pdf';
-          const sz = fmtSize(f.size || 0);
-          return `<span class="file-chip" onclick="event.stopPropagation();previewFileById(${req.id},'${f.file_id}','${fname}')" title="Preview ${fname}">
-            <i class="fas fa-paperclip" style="margin-right: 4px;"></i>
-            ${fname.length > 20 ? fname.slice(0, 17) + '…' : fname}
-            ${sz ? `<span class="file-size">${sz}</span>` : ''}
-          </span>`;
-        }).join('');
-
-        return `<div class="item-row">
-          <div class="item-row-body">
-            <div class="item-info-header" style="margin-bottom: 12px;">
-              <div class="item-info-title">${type === 'partnership' ? 'Operational Partnership' : 'Feasibility Study'}</div>
-              <div style="margin-left: auto;">${statusBadge(req.status)}</div>
-            </div>
-            <div class="item-info-grid">
-              <div class="item-info-field">
-                <span class="item-info-label">Request ID</span>
-                <span class="item-info-value td-mono">#${req.id}</span>
-              </div>
-              <div class="item-info-field">
-                <span class="item-info-label">Submitted</span>
-                <span class="item-info-value">${fmtDate(req.created_at)}</span>
-              </div>
-              <div class="item-info-field">
-                <span class="item-info-label">Last Updated</span>
-                <span class="item-info-value">${fmtDate(req.updated_at)}</span>
-              </div>
-            </div>
-            ${files.length ? `<div class="item-info-files" style="margin-top: 12px;">
-              <div class="item-info-files-label">Attached Files (${files.length})</div>
-              <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">${fileChips}</div>
-            </div>` : ''}
-          </div>
-          <div class="item-row-actions">
-            <button class="act-btn act-btn-view" onclick="viewRequest(${req.id})">
-              <i class="fas fa-eye" style="margin-right: 4px;"></i> View Details
-            </button>
-            ${req.status !== 'approved' ? `
-            <button class="act-btn act-btn-approve" onclick="approveRequest(${req.id})">
-              <i class="fas fa-check" style="margin-right:4px;"></i> Approve
-            </button>` : ''}
-            ${req.status !== 'rejected' ? `
-            <button class="act-btn act-btn-reject" onclick="openRejectModal(${req.id})">
-              <i class="fas fa-ban" style="margin-right:4px;"></i> Reject
-            </button>` : ''}
-            <div class="spacer"></div>
-            <button class="act-btn act-btn-delete" onclick="confirmDeleteRequest(${req.id})">
-              <i class="fas fa-trash-alt" style="margin-right:4px;"></i> Delete
-            </button>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    const reviews = data.reviews || [];
-    document.getElementById('searchResultReviewsCount').textContent = `${reviews.length} review${reviews.length !== 1 ? 's' : ''}`;
-    const reviewsList = document.getElementById('searchResultReviewsList');
-    if (reviews.length === 0) {
-      reviewsList.innerHTML = `<div class="item-row"><div class="item-row-body"><div class="empty-state" style="padding: 24px;"><p>No reviews found for this user.</p></div></div></div>`;
-    } else {
-      reviewsList.innerHTML = reviews.map(rev => {
-        const rating = rev.stars || 0;
-        const status = rev.is_published ? 'accepted' : 'pending';
-        const badgeHtml  = status === 'accepted'
-          ? '<span class="badge badge-green"><span class="badge-dot"></span>Accepted</span>'
-          : '<span class="badge badge-yellow"><span class="badge-dot"></span>Pending</span>';
+    if (type === 'user') {
+      if (data.user) {
+        _users = [data.user];
+        _totalUsers = 1;
+        _userHasMore = false;
+        renderUsersTable(_users);
         
-        return `<div class="item-row" id="rev-row-${rev.id}">
-          <div class="item-row-body">
-            <div class="item-info-header" style="margin-bottom: 12px;">
-              <div class="review-stars">${starRating(rating)}<span style="margin-left: 5px; font-size: 0.8rem; font-weight: 600; color: var(--text-2);">${rating}/5</span></div>
-              <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-                ${badgeHtml}
-              </div>
-            </div>
-            <div class="item-info-grid" style="margin-bottom: 10px;">
-              <div class="item-info-field">
-                <span class="item-info-label">Review ID</span>
-                <span class="item-info-value td-mono">#${rev.id}</span>
-              </div>
-              <div class="item-info-field">
-                <span class="item-info-label">Submitted</span>
-                <span class="item-info-value">${fmtDate(rev.created_at)}</span>
-              </div>
-            </div>
-            <div class="item-review-text">${rev.review_text}</div>
-          </div>
-          <div class="item-row-actions">
-            ${status !== 'accepted' ? `<button class="act-btn act-btn-accept" onclick="acceptReview(${rev.id})">
-              <i class="fas fa-check" style="margin-right: 4px;"></i> Approve
-            </button>` : `<button class="act-btn" style="color: var(--text-2);" onclick="pendingReview(${rev.id})">
-              <i class="fas fa-clock" style="margin-right: 4px;"></i> Set Pending
-            </button>`}
-            <div class="spacer"></div>
-            <button class="act-btn act-btn-delete" onclick="confirmDeleteReview(${rev.id})">
-              <i class="fas fa-trash-alt" style="margin-right: 4px;"></i> Delete
-            </button>
-          </div>
-        </div>`;
-      }).join('');
+        document.getElementById('userPageNum').textContent = '1';
+        document.getElementById('userPaginationInfo').textContent = `Search results for "${email}"`;
+        document.getElementById('userPrevBtn').disabled = true;
+        document.getElementById('userNextBtn').disabled = true;
+        document.getElementById('userCount').textContent = `1 user`;
+      }
+    } else if (type === 'request') {
+      _requests = data.requests || [];
+      _requests = _requests.map(r => ({ ...r, id: r.request_id || r.id }));
+      _totalRequests = _requests.length;
+      _reqHasMore = false;
+      renderRequests(_requests);
+      
+      const pending  = _requests.filter(r => r.status === 'pending').length;
+      const approved = _requests.filter(r => r.status === 'approved').length;
+      const rejected = _requests.filter(r => r.status === 'rejected').length;
+      document.getElementById('reqStatTotal').textContent    = _totalRequests;
+      document.getElementById('reqStatPending').textContent  = pending;
+      document.getElementById('reqStatApproved').textContent = approved;
+      document.getElementById('reqStatRejected').textContent = rejected;
+      document.getElementById('reqCount').textContent = `${_totalRequests} request${_totalRequests!==1?'s':''}`;
+      
+      document.getElementById('reqPageNum').textContent = '1';
+      document.getElementById('reqPaginationInfo').textContent = `Search results for "${email}"`;
+      document.getElementById('reqPrevBtn').disabled = true;
+      document.getElementById('reqNextBtn').disabled = true;
+    } else if (type === 'review') {
+      _reviews = data.reviews || [];
+      _totalReviews = _reviews.length;
+      _revHasMore = false;
+      renderReviews(_reviews);
+      
+      const pending  = _reviews.filter(r => (r.status || (r.is_published ? 'accepted' : 'pending')) === 'pending').length;
+      const accepted = _reviews.filter(r => (r.status || (r.is_published ? 'accepted' : 'pending')) === 'accepted').length;
+      document.getElementById('revStatTotal').textContent    = _totalReviews;
+      document.getElementById('revStatPending').textContent  = pending;
+      document.getElementById('revStatAccepted').textContent = accepted;
+      document.getElementById('revCount').textContent = `${_totalReviews} review${_totalReviews!==1?'s':''}`;
+      
+      document.getElementById('revPageNum').textContent = '1';
+      document.getElementById('revPaginationInfo').textContent = `Search results for "${email}"`;
+      document.getElementById('revPrevBtn').disabled = true;
+      document.getElementById('revNextBtn').disabled = true;
     }
-
-    resultsArea.style.display = 'block';
-    noResultsArea.style.display = 'none';
     toast('Search completed successfully', 'success');
-
-  } catch (e) {
-    console.error('Search results error:', e);
-    resultsArea.style.display = 'none';
-    noResultsArea.style.display = 'block';
-    toast('No user found matching this email', 'error');
+  } catch(e) {
+    console.error('Section search failed:', e);
+    toast('No user or records found matching this email', 'error');
   }
 }
 
