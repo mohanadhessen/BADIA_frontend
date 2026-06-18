@@ -2128,13 +2128,6 @@ function renderDashboard() {
 
 }
 
-// ── Search global ────────────────────────────────────────────────
-function handleGlobalSearch(q) {
-  const query = (q || '').trim();
-  if (_currentPage === 'users')    { document.getElementById('userSearch').value = query; filterUsers(query); }
-  if (_currentPage === 'requests') { document.getElementById('reqSearch').value  = query; filterRequests(); }
-}
-
 // ── Refresh ──────────────────────────────────────────────────────
 // ── Refresh ──────────────────────────────────────────────────────
 async function refreshAll() {
@@ -2256,13 +2249,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Keypress listener for section search inputs
-  ['userSearch', 'reqSearch', 'revSearch'].forEach(id => {
+  ['userSearch', 'reqSearch', 'revSearch', 'paySearch'].forEach(id => {
     const input = document.getElementById(id);
     if (!input) return;
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
-        const type = id === 'userSearch' ? 'user' : (id === 'reqSearch' ? 'request' : 'review');
-        executeSectionSearch(input.value.trim(), type);
+        const type = id === 'userSearch' ? 'user' : (id === 'reqSearch' ? 'request' : (id === 'revSearch' ? 'review' : 'payment'));
+        if (type === 'payment') {
+          filterPayments();
+        } else {
+          executeSectionSearch(input.value.trim(), type);
+        }
       }
     });
   });
@@ -2848,7 +2845,11 @@ let _sectionAutocompleteTimeout = null;
 async function handleSectionAutocomplete(val, type) {
   clearTimeout(_sectionAutocompleteTimeout);
   
-  const dropdownId = type === 'user' ? 'userSearchDropdown' : (type === 'request' ? 'requestSearchDropdown' : 'reviewSearchDropdown');
+  const dropdownId = type === 'user' ? 'userSearchDropdown' :
+                     type === 'request' ? 'requestSearchDropdown' :
+                     type === 'review' ? 'reviewSearchDropdown' :
+                     type === 'payment' ? 'paymentSearchDropdown' :
+                     'createSubSearchDropdown';
   const dropdown = document.getElementById(dropdownId);
   if (!dropdown) return;
 
@@ -2862,6 +2863,8 @@ async function handleSectionAutocomplete(val, type) {
       loadRequests(_reqPage, false, false);
     } else if (type === 'review') {
       loadReviews(_revPage, false, false);
+    } else if (type === 'payment') {
+      filterPayments();
     }
     return;
   }
@@ -2873,6 +2876,8 @@ async function handleSectionAutocomplete(val, type) {
     filterRequests();
   } else if (type === 'review') {
     filterReviews();
+  } else if (type === 'payment') {
+    filterPayments();
   }
 
   _sectionAutocompleteTimeout = setTimeout(async () => {
@@ -2898,8 +2903,17 @@ async function handleSectionAutocomplete(val, type) {
 }
 
 function selectSectionEmail(email, type) {
-  const inputId = type === 'user' ? 'userSearch' : (type === 'request' ? 'reqSearch' : 'revSearch');
-  const dropdownId = type === 'user' ? 'userSearchDropdown' : (type === 'request' ? 'requestSearchDropdown' : 'reviewSearchDropdown');
+  const inputId = type === 'user' ? 'userSearch' :
+                  type === 'request' ? 'reqSearch' :
+                  type === 'review' ? 'revSearch' :
+                  type === 'payment' ? 'paySearch' :
+                  'sub-email';
+                  
+  const dropdownId = type === 'user' ? 'userSearchDropdown' :
+                     type === 'request' ? 'requestSearchDropdown' :
+                     type === 'review' ? 'reviewSearchDropdown' :
+                     type === 'payment' ? 'paymentSearchDropdown' :
+                     'createSubSearchDropdown';
   
   const input = document.getElementById(inputId);
   const dropdown = document.getElementById(dropdownId);
@@ -2910,11 +2924,17 @@ function selectSectionEmail(email, type) {
     dropdown.style.display = 'none';
   }
   
-  executeSectionSearch(email, type);
+  if (type === 'create-sub') {
+    lookupUserByEmail(email);
+  } else if (type === 'payment') {
+    filterPayments();
+  } else {
+    executeSectionSearch(email, type);
+  }
 }
 
 document.addEventListener('click', (e) => {
-  ['userSearchDropdown', 'requestSearchDropdown', 'reviewSearchDropdown'].forEach(id => {
+  ['userSearchDropdown', 'requestSearchDropdown', 'reviewSearchDropdown', 'paymentSearchDropdown', 'createSubSearchDropdown'].forEach(id => {
     const el = document.getElementById(id);
     if (el && !el.parentNode.contains(e.target)) {
       el.style.display = 'none';

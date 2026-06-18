@@ -115,10 +115,6 @@
     </div>
     <div class="topbar-title" id="topbarTitle">Dashboard</div>
     <div class="topbar-spacer"></div>
-    <div class="topbar-search">
-      <i class="fas fa-search" style="color:#a0a5b1; font-size:12px;"></i>
-      <input type="text" id="globalSearch" placeholder="Search anything…" oninput="handleGlobalSearch(this.value)">
-    </div>
     <div class="topbar-actions">
       <button class="topbar-btn" onclick="refreshAll()">
         <i class="fas fa-sync-alt" style="font-size:11px;"></i>
@@ -517,7 +513,8 @@
             <div class="form-col">
               <label class="form-label">User email <span class="req">*</span></label>
               <div style="position: relative; width: 100%;">
-                <input class="form-input" type="email" id="sub-email" placeholder="info@badiaprojectmanagement.com" oninput="lookupUserByEmail(this.value)">
+                <input class="form-input" type="email" id="sub-email" placeholder="info@badiaprojectmanagement.com" oninput="lookupUserByEmail(this.value); handleSectionAutocomplete(this.value, 'create-sub')" autocomplete="off">
+                <div id="createSubSearchDropdown" class="autofill-dropdown" style="display: none;"></div>
                 <div id="payUserLookupResult" style="position: absolute; top: 100%; left: 0; font-size: 0.74rem; font-weight: 500; margin-top: 2px; white-space: nowrap; z-index: 5;"></div>
               </div>
             </div>
@@ -569,9 +566,10 @@
 
       <!-- RECENT PAYMENTS -->
       <div class="filter-bar">
-        <div class="filter-search">
+        <div class="filter-search" style="position: relative;">
           <i class="fas fa-search"></i>
-          <input type="text" id="paySearch" placeholder="Search payments by user email, plan name, ID…" oninput="filterPayments()">
+          <input type="text" id="paySearch" placeholder="Search payments by user email, plan name, ID…" oninput="handleSectionAutocomplete(this.value, 'payment')" autocomplete="off">
+          <div id="paymentSearchDropdown" class="autofill-dropdown" style="display: none;"></div>
         </div>
         <select class="filter-select" id="payStatusFilter" onchange="filterPayments()">
           <option value="">All statuses</option>
