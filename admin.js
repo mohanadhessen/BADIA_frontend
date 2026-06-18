@@ -1329,12 +1329,12 @@ function renderPlansAdmin(plans) {
         const statusClass = isEnabled ? 'feat-on' : 'feat-off';
         const statusText  = isEnabled ? 'Enabled' : 'Disabled';
         const priceSegment = (feature.price != null && feature.price !== '')
-          ? `<span style="color:var(--text-2)">${feature.price} KWD</span><span style="color:var(--border);margin:0 3px">·</span>`
+          ? `<span style="color:var(--text-2)">${escapeHtml(String(feature.price))} KWD</span><span style="color:var(--border);margin:0 3px">\u00b7</span>`
           : '';
         return `<li style="list-style:none;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;align-items:center;gap:6px;font-size:.75rem">
           <div class="feat-dot ${statusClass}" style="flex-shrink:0"></div>
-          <span style="font-weight:600;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nameEn}</span>
-          <span style="color:var(--border);margin:0 1px;flex-shrink:0">·</span>
+          <span style="font-weight:600;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(nameEn)}</span>
+          <span style="color:var(--border);margin:0 1px;flex-shrink:0">\u00b7</span>
           <span style="display:inline-flex;align-items:center;flex-shrink:0">${priceSegment}<span style="color:var(--text-3)">${statusText}</span></span>
         </li>`;
       }).join('');
@@ -1351,8 +1351,8 @@ function renderPlansAdmin(plans) {
           const statusText  = f.enabled ? 'Enabled' : 'Disabled';
           return `<li style="list-style:none;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;align-items:center;gap:6px;font-size:.75rem">
             <div class="feat-dot ${statusClass}" style="flex-shrink:0"></div>
-            <span style="font-weight:600;color:var(--text);text-transform:capitalize;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nameEn}</span>
-            <span style="color:var(--border);margin:0 1px;flex-shrink:0">·</span>
+            <span style="font-weight:600;color:var(--text);text-transform:capitalize;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(nameEn)}</span>
+            <span style="color:var(--border);margin:0 1px;flex-shrink:0">\u00b7</span>
             <span style="color:var(--text-3);flex-shrink:0">${statusText}</span>
           </li>`;
         }).join('');
@@ -1361,8 +1361,8 @@ function renderPlansAdmin(plans) {
     return `<div class="plan-admin-card${plan.name === 'Pro' ? ' featured' : ''}">
       <div class="plan-card-top">
         <div>
-          <div class="plan-card-name">${plan.name}</div>
-          <div class="plan-card-id">ID: ${plan.id}</div>
+          <div class="plan-card-name">${escapeHtml(plan.name)}</div>
+          <div class="plan-card-id">ID: ${escapeHtml(String(plan.id))}</div>
         </div>
   
       </div>
@@ -1374,17 +1374,24 @@ function renderPlansAdmin(plans) {
         ${detailItems ? `<ul style="list-style:none;padding:0;margin:0">${detailItems}${moreKeys > 0 ? `<li style="font-size:.72rem;color:var(--text-3);padding-top:8px">+ ${moreKeys} more feature${moreKeys !== 1 ? 's' : ''}</li>` : ''}</ul>` : ''}
       </div>
       <div class="plan-card-footer">
-        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openEditPlanById(${plan.id})">
+        <button class="btn btn-ghost btn-sm" style="flex:1" data-action="edit-plan" data-plan-id="${escapeHtml(String(plan.id))}">
           <i class="fas fa-edit" style="margin-right:4px;"></i>
           Edit
         </button>
-        <button class="btn btn-danger btn-sm" onclick="confirmDeletePlan(${plan.id},'${plan.name.replace(/'/g, "\\'")}')">
+        <button class="btn btn-danger btn-sm" data-action="delete-plan" data-plan-id="${escapeHtml(String(plan.id))}" data-plan-name="${escapeHtml(plan.name)}">
           <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
           Delete
         </button>
       </div>
     </div>`;
   }).join('');
+
+  grid.querySelectorAll('[data-action="edit-plan"]').forEach(b => {
+    b.addEventListener('click', () => openEditPlanById(Number(b.dataset.planId)));
+  });
+  grid.querySelectorAll('[data-action="delete-plan"]').forEach(b => {
+    b.addEventListener('click', () => confirmDeletePlan(Number(b.dataset.planId), b.dataset.planName));
+  });
 }
  
 // ── Plan Modal helpers ──────────────────────────────────────────
