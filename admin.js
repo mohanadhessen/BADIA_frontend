@@ -2109,7 +2109,7 @@ function renderDashboard() {
         ? `<circle cx="${CX}" cy="${CY}" r="${R}" fill="${s.color}"/>`
         : `<path d="M${CX},${CY} L${s.x1.toFixed(2)},${s.y1.toFixed(2)} A${R},${R} 0 ${s.large},1 ${s.x2.toFixed(2)},${s.y2.toFixed(2)} Z"
              fill="${s.color}" stroke="var(--white)" stroke-width="2">
-             <title>${s.name}: ${s.count} user${s.count!==1?'s':''} (${s.pct}%)</title>
+             <title>${escapeHtml(s.name)}: ${s.count} user${s.count!==1?'s':''} (${s.pct}%)</title>
            </path>`
     ).join('');
 
