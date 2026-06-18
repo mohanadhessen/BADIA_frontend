@@ -195,6 +195,11 @@ function closeSidebar() {
   document.getElementById('hamburger').classList.remove('open');
 }
 
+// ── XSS Helper ──────────────────────────────────────────────────
+function escapeHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 // ── Toast ───────────────────────────────────────────────────────
 function toast(msg, type = 'info') {
   const stack = document.getElementById('toastStack');
@@ -640,57 +645,64 @@ function renderUsersCards(users) {
     return;
   }
   grid.innerHTML = users.map(u => {
-    const name    = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || '—';
-    const email   = u.email || '—';
-    const phone   = u.phone || u.phone_number || '—';
+    const name    = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || '\u2014';
+    const email   = u.email || '\u2014';
+    const phone   = u.phone || u.phone_number || '\u2014';
     const userPlanObj = _plans.find(p => p.id === (u.current_plan_id || u.plan_id));
     const plan    = userPlanObj ? userPlanObj.name : (u.plan_name || u.plan || 'None');
     const status  = u.is_active === false ? 'inactive' : 'active';
     const joined  = fmtDate(u.date_joined || u.created_at);
-    const uid     = u.id || u.user_id || '—';
-    const initials = name !== '—' ? name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (email[0]||'?').toUpperCase();
+    const uid     = u.id || u.user_id || '';
+    const initials = name !== '\u2014' ? name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (email[0]||'?').toUpperCase();
     return `<div class="item-row">
       <div class="item-row-body">
         <div class="item-info-header">
-          <div class="recent-avatar" style="width:42px;height:42px;font-size:.84rem;border-radius:10px;flex-shrink:0">${initials}</div>
+          <div class="recent-avatar" style="width:42px;height:42px;font-size:.84rem;border-radius:10px;flex-shrink:0">${escapeHtml(initials)}</div>
           <div style="flex:1;min-width:0">
-            <div class="item-info-title">${name}</div>
-            <div class="item-info-sub">${email}</div>
+            <div class="item-info-title">${escapeHtml(name)}</div>
+            <div class="item-info-sub">${escapeHtml(email)}</div>
           </div>
           <div>${statusBadge(status)}</div>
         </div>
         <div class="item-info-grid">
           <div class="item-info-field">
             <span class="item-info-label">User ID</span>
-            <span class="item-info-value td-mono">#${uid}</span>
+            <span class="item-info-value td-mono">#${escapeHtml(uid)}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Phone</span>
-            <span class="item-info-value">${phone}</span>
+            <span class="item-info-value">${escapeHtml(phone)}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Plan</span>
-            <span class="item-info-value">${plan}</span>
+            <span class="item-info-value">${escapeHtml(plan)}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Joined</span>
-            <span class="item-info-value">${joined}</span>
+            <span class="item-info-value">${escapeHtml(joined)}</span>
           </div>
         </div>
       </div>
       <div class="item-row-actions">
-        <button class="act-btn act-btn-edit" onclick="openEditUserById(${uid})">
+        <button class="act-btn act-btn-edit" data-uid="${escapeHtml(String(uid))}" data-action="edit-user">
           <i class="fas fa-user-edit" style="margin-right:4px;"></i>
           Edit User
         </button>
         <div class="spacer"></div>
-        <button class="act-btn act-btn-delete" onclick="confirmDelete(${uid},'${email}')">
+        <button class="act-btn act-btn-delete" data-uid="${escapeHtml(String(uid))}" data-email="${escapeHtml(email)}" data-action="delete-user">
           <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
           Delete User
         </button>
       </div>
     </div>`;
   }).join('');
+  // Attach delegated click handlers (safe — no inline onclick)
+  grid.querySelectorAll('[data-action="edit-user"]').forEach(btn => {
+    btn.addEventListener('click', () => openEditUserById(btn.dataset.uid));
+  });
+  grid.querySelectorAll('[data-action="delete-user"]').forEach(btn => {
+    btn.addEventListener('click', () => confirmDelete(btn.dataset.uid, btn.dataset.email));
+  });
 }
 
 let _userSearchTimer = null;
@@ -944,62 +956,64 @@ function renderRequests(requests) {
     const userPlanObj = _plans.find(p => p.id === (fullUser.current_plan_id || fullUser.plan_id));
     const plan      = userPlanObj ? userPlanObj.name : (user.plan || user.plan_name || 'None');
     const files     = req.files || [];
-    const name      = user.full_name || [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || '—';
-    const firstName = user.first_name || '—';
-    const lastName  = user.last_name  || '—';
-    const phone     = user.phone || user.phone_number || '—';
-    const company   = user.company_name || user.company || req.company_name || '—';
-    const initials  = (name !== '—' ? name : (user.email||'?')).split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+    const name      = user.full_name || [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email || '\u2014';
+    const firstName = user.first_name || '\u2014';
+    const lastName  = user.last_name  || '\u2014';
+    const phone     = user.phone || user.phone_number || '\u2014';
+    const company   = user.company_name || user.company || req.company_name || '\u2014';
+    const initials  = (name !== '\u2014' ? name : (user.email||'?')).split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
 
-    const fileChips = files.map(f => {
+    // File chips: use data-* attributes; onclick added via addEventListener after render
+    const fileChips = files.map((f, fi) => {
       const fname  = f.filename || f.name || 'file.pdf';
       const sz     = fmtSize(f.size || 0);
       const fileId = f.file_id || f.id || '';
-      return `<span class="file-chip" onclick="event.stopPropagation();previewFileById(${req.id},'${fileId}','${fname}')" title="Preview ${fname}">
+      const displayName = fname.length > 18 ? fname.slice(0,15)+'\u2026' : fname;
+      return `<span class="file-chip" data-req-id="${escapeHtml(String(req.id))}" data-file-id="${escapeHtml(String(fileId))}" data-fname="${escapeHtml(fname)}" data-chip-index="${fi}" title="${escapeHtml(fname)}">
         <i class="fas fa-paperclip" style="margin-right:4px;"></i>
-        ${fname.length > 18 ? fname.slice(0,15)+'…' : fname}
-        ${sz ? `<span class="file-size">${sz}</span>` : ''}
+        ${escapeHtml(displayName)}
+        ${sz ? `<span class="file-size">${escapeHtml(sz)}</span>` : ''}
       </span>`;
     }).join('');
 
-    return `<div class="item-row">
+    return `<div class="item-row" data-req-id="${escapeHtml(String(req.id))}">
       <div class="item-row-body">
         <div class="item-info-header">
-          <div class="recent-avatar" style="width:42px;height:42px;font-size:.84rem;border-radius:10px;flex-shrink:0">${initials}</div>
+          <div class="recent-avatar" style="width:42px;height:42px;font-size:.84rem;border-radius:10px;flex-shrink:0">${escapeHtml(initials)}</div>
           <div style="flex:1;min-width:0">
-            <div class="item-info-title">${name}</div>
-            <div class="item-info-sub">${user.email||'—'}</div>
+            <div class="item-info-title">${escapeHtml(name)}</div>
+            <div class="item-info-sub">${escapeHtml(user.email||'\u2014')}</div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">${typeChip(type)}${statusBadge(req.status)}</div>
         </div>
         <div class="item-info-grid">
           <div class="item-info-field">
             <span class="item-info-label">First Name</span>
-            <span class="item-info-value strong">${firstName}</span>
+            <span class="item-info-value strong">${escapeHtml(firstName)}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Last Name</span>
-            <span class="item-info-value strong">${lastName}</span>
+            <span class="item-info-value strong">${escapeHtml(lastName)}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Phone</span>
-            <span class="item-info-value">${phone}</span>
+            <span class="item-info-value">${escapeHtml(phone)}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Company</span>
-            <span class="item-info-value">${company}</span>
+            <span class="item-info-value">${escapeHtml(company)}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Plan</span>
-            <span class="item-info-value">${plan}</span>
+            <span class="item-info-value">${escapeHtml(plan)}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Request ID</span>
-            <span class="item-info-value td-mono">#${req.id}</span>
+            <span class="item-info-value td-mono">#${escapeHtml(String(req.id))}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Submitted</span>
-            <span class="item-info-value">${fmtDate(req.created_at)}</span>
+            <span class="item-info-value">${escapeHtml(fmtDate(req.created_at))}</span>
           </div>
         </div>
         ${files.length ? `<div class="item-info-files">
@@ -1008,37 +1022,50 @@ function renderRequests(requests) {
         </div>` : ''}
       </div>
       <div class="item-row-actions">
-        <button class="act-btn act-btn-view" onclick="viewRequest(${req.id})">
+        <button class="act-btn act-btn-view" data-req-id="${escapeHtml(String(req.id))}" data-action="view-req">
           <i class="fas fa-eye" style="margin-right:4px;"></i>
           View Details
         </button>
         ${req.status !== 'approved' ? `
-        <button class="act-btn act-btn-approve" onclick="approveRequest(${req.id})">
+        <button class="act-btn act-btn-approve" data-req-id="${escapeHtml(String(req.id))}" data-action="approve-req">
           <i class="fas fa-check" style="margin-right:4px;"></i>
           ${req.status === 'rejected' ? 'Re-Approve' : 'Approve'}
         </button>` : ''}
         ${req.status !== 'rejected' ? `
-        <button class="act-btn act-btn-reject" onclick="openRejectModal(${req.id})">
+        <button class="act-btn act-btn-reject" data-req-id="${escapeHtml(String(req.id))}" data-action="reject-req">
           <i class="fas fa-ban" style="margin-right:4px;"></i>
           ${req.status === 'approved' ? 'Re-Reject' : 'Reject'}
         </button>` : ''}
         ${req.status !== 'pending' ? `
-        <button class="act-btn act-btn-pending" onclick="setPendingRequest(${req.id})">
+        <button class="act-btn act-btn-pending" data-req-id="${escapeHtml(String(req.id))}" data-action="pending-req">
           <i class="fas fa-clock" style="margin-right:4px;"></i>
           Set Pending
         </button>` : ''}
-        ${files.length ? `<button class="act-btn act-btn-download" onclick="downloadAllFiles(${req.id})">
+        ${files.length ? `<button class="act-btn act-btn-download" data-req-id="${escapeHtml(String(req.id))}" data-action="download-all-req">
           <i class="fas fa-download" style="margin-right:4px;"></i>
           Download All (${files.length})
         </button>` : ''}
         <div class="spacer"></div>
-        <button class="act-btn act-btn-delete" onclick="confirmDeleteRequest(${req.id})">
+        <button class="act-btn act-btn-delete" data-req-id="${escapeHtml(String(req.id))}" data-action="delete-req">
           <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
           Delete
         </button>
       </div>
     </div>`;
   }).join('');
+  // Bind request card events safely via addEventListener
+  grid.querySelectorAll('[data-action="view-req"]').forEach(b => b.addEventListener('click', () => viewRequest(Number(b.dataset.reqId))));
+  grid.querySelectorAll('[data-action="approve-req"]').forEach(b => b.addEventListener('click', () => approveRequest(Number(b.dataset.reqId))));
+  grid.querySelectorAll('[data-action="reject-req"]').forEach(b => b.addEventListener('click', () => openRejectModal(Number(b.dataset.reqId))));
+  grid.querySelectorAll('[data-action="pending-req"]').forEach(b => b.addEventListener('click', () => setPendingRequest(Number(b.dataset.reqId))));
+  grid.querySelectorAll('[data-action="download-all-req"]').forEach(b => b.addEventListener('click', () => downloadAllFiles(Number(b.dataset.reqId))));
+  grid.querySelectorAll('[data-action="delete-req"]').forEach(b => b.addEventListener('click', () => confirmDeleteRequest(Number(b.dataset.reqId))));
+  grid.querySelectorAll('.file-chip[data-chip-index]').forEach(chip => {
+    chip.addEventListener('click', e => {
+      e.stopPropagation();
+      previewFileById(Number(chip.dataset.reqId), chip.dataset.fileId, chip.dataset.fname);
+    });
+  });
 }
 
 async function approveRequest(reqId) {
@@ -1133,67 +1160,83 @@ function viewRequest(reqId) {
   document.getElementById('viewReqTitle').textContent = `Request #${req.id}`;
   document.getElementById('viewReqSubtitle').textContent = `${type === 'partnership' ? 'Operational Partnership' : 'Feasibility Study'} — ${fmtDate(req.created_at)}`;
 
-  const fileCards = files.length
-    ? `<div style="display:flex;flex-wrap:wrap;gap:6px">${files.map(f => {
-        const fname  = f.filename || f.name || 'file.pdf';
-        const fsize  = fmtSize(f.size||0);
-        const fdate  = fmtDate(f.uploaded_at||f.upload_date);
-        const fileId = f.file_id || f.id || '';
-        return `<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:9px;min-width:200px;flex:1">
-          <div style="width:34px;height:34px;border-radius:8px;background:var(--red-dim);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" onclick="previewFileById(${req.id},'${fileId}','${fname}')" title="Preview ${fname}">
+  // Build file cards using data-* so fname never touches an onclick string
+  const fileCardElements = files.map((f, fi) => {
+    const fname  = f.filename || f.name || 'file.pdf';
+    const fsize  = fmtSize(f.size||0);
+    const fdate  = fmtDate(f.uploaded_at||f.upload_date);
+    const fileId = f.file_id || f.id || '';
+    return `<div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:9px;min-width:200px;flex:1">
+          <div style="width:34px;height:34px;border-radius:8px;background:var(--red-dim);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer" data-action="preview-file" data-req-id="${escapeHtml(String(req.id))}" data-file-id="${escapeHtml(String(fileId))}" data-fname="${escapeHtml(fname)}" title="${escapeHtml(fname)}">
             <i class="fas fa-file-pdf"></i>
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:.81rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${fname}</div>
-            <div style="font-size:.72rem;color:var(--text-3)">${[fsize,fdate].filter(Boolean).join(' · ')}</div>
+            <div style="font-size:.81rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(fname)}</div>
+            <div style="font-size:.72rem;color:var(--text-3)">${escapeHtml([fsize,fdate].filter(Boolean).join(' \u00b7 '))}</div>
           </div>
-          <button class="btn-icon download btn-xs" onclick="downloadFileById(${req.id},'${fileId}','${fname}')" title="Download ${fname}">
+          <button class="btn-icon download btn-xs" data-action="download-file" data-req-id="${escapeHtml(String(req.id))}" data-file-id="${escapeHtml(String(fileId))}" data-fname="${escapeHtml(fname)}" title="${escapeHtml(fname)}">
             <i class="fas fa-download"></i>
           </button>
         </div>`;
-      }).join('')}</div>`
+  });
+  const fileCards = files.length
+    ? `<div style="display:flex;flex-wrap:wrap;gap:6px">${fileCardElements.join('')}</div>`
     : '<p style="font-size:.83rem;color:var(--text-3)">No files attached to this request.</p>';
 
   const notesSection = req.admin_notes
-    ? `<div style="margin-top:14px"><div class="detail-label" style="margin-bottom:5px">Admin Notes</div><div class="notes-box">${req.admin_notes}</div></div>` : '';
+    ? `<div style="margin-top:14px"><div class="detail-label" style="margin-bottom:5px">Admin Notes</div><div class="notes-box">${escapeHtml(req.admin_notes)}</div></div>` : '';
   const rejSection = req.rejection_reason
-    ? `<div style="margin-top:10px"><div class="detail-label" style="margin-bottom:5px">Rejection Reason</div><div class="notes-box rejection-note">${req.rejection_reason}</div></div>` : '';
+    ? `<div style="margin-top:10px"><div class="detail-label" style="margin-bottom:5px">Rejection Reason</div><div class="notes-box rejection-note">${escapeHtml(req.rejection_reason)}</div></div>` : '';
 
   document.getElementById('viewReqBody').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-bottom:18px">
-      <div><div class="detail-label">User</div><div class="detail-value">${name}</div></div>
-      <div><div class="detail-label">Email</div><div class="detail-value">${user.email||'—'}</div></div>
+      <div><div class="detail-label">User</div><div class="detail-value">${escapeHtml(name)}</div></div>
+      <div><div class="detail-label">Email</div><div class="detail-value">${escapeHtml(user.email||'\u2014')}</div></div>
   
       <div><div class="detail-label">Status</div><div>${statusBadge(req.status)}</div></div>
       <div><div class="detail-label">Type</div><div>${typeChip(type)}</div></div>
-      <div><div class="detail-label">Submitted</div><div class="detail-value">${fmtDate(req.created_at)}</div></div>
+      <div><div class="detail-label">Submitted</div><div class="detail-value">${escapeHtml(fmtDate(req.created_at))}</div></div>
     </div>
     <div class="detail-label" style="margin-bottom:8px">Uploaded Files (${files.length})</div>
     ${fileCards}
     ${notesSection}${rejSection}`;
 
+  // Bind file card events safely after innerHTML is set
+  document.querySelectorAll('#viewReqBody [data-action="preview-file"]').forEach(el => {
+    el.addEventListener('click', () => previewFileById(Number(el.dataset.reqId), el.dataset.fileId, el.dataset.fname));
+  });
+  document.querySelectorAll('#viewReqBody [data-action="download-file"]').forEach(el => {
+    el.addEventListener('click', () => downloadFileById(Number(el.dataset.reqId), el.dataset.fileId, el.dataset.fname));
+  });
+
   const footer = document.getElementById('viewReqFooter');
-  footer.innerHTML = `<button class="btn btn-ghost" onclick="closeModal('viewReqModal')">Close</button>`;
+  footer.innerHTML = '';
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'btn btn-ghost';
+  closeBtn.textContent = 'Close';
+  closeBtn.addEventListener('click', () => closeModal('viewReqModal'));
+  footer.appendChild(closeBtn);
 
   if (req.status !== 'approved') {
-    footer.innerHTML += `
-      <button class="btn btn-green" onclick="closeModal('viewReqModal');approveRequest(${req.id})">
-        <i class="fas fa-check" style="margin-right:4px;"></i>
-        ${req.status === 'rejected' ? 'Re-Approve' : 'Approve'}
-      </button>`;
+    const approveBtn = document.createElement('button');
+    approveBtn.className = 'btn btn-green';
+    approveBtn.innerHTML = '<i class="fas fa-check" style="margin-right:4px;"></i>' + (req.status === 'rejected' ? 'Re-Approve' : 'Approve');
+    approveBtn.addEventListener('click', () => { closeModal('viewReqModal'); approveRequest(req.id); });
+    footer.appendChild(approveBtn);
   }
   if (req.status !== 'rejected') {
-    footer.innerHTML += `
-      <button class="btn btn-danger" onclick="closeModal('viewReqModal');openRejectModal(${req.id})">
-        ${req.status === 'approved' ? 'Re-Reject' : 'Reject'}
-      </button>`;
+    const rejectBtn = document.createElement('button');
+    rejectBtn.className = 'btn btn-danger';
+    rejectBtn.textContent = req.status === 'approved' ? 'Re-Reject' : 'Reject';
+    rejectBtn.addEventListener('click', () => { closeModal('viewReqModal'); openRejectModal(req.id); });
+    footer.appendChild(rejectBtn);
   }
   if (req.status !== 'pending') {
-    footer.innerHTML += `
-      <button class="btn btn-ghost" onclick="closeModal('viewReqModal');setPendingRequest(${req.id})">
-        <i class="fas fa-clock" style="margin-right:4px;"></i>
-        Set Pending
-      </button>`;
+    const pendingBtn = document.createElement('button');
+    pendingBtn.className = 'btn btn-ghost';
+    pendingBtn.innerHTML = '<i class="fas fa-clock" style="margin-right:4px;"></i>Set Pending';
+    pendingBtn.addEventListener('click', () => { closeModal('viewReqModal'); setPendingRequest(req.id); });
+    footer.appendChild(pendingBtn);
   }
   openModal('viewReqModal');
 }
@@ -1860,56 +1903,59 @@ function renderReviews(reviews) {
   }
   grid.innerHTML = reviews.map(rev => {
     const user       = rev.user || {};
-    const name       = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '—';
-    const email      = user.email || '—';
+    const name       = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '\u2014';
+    const email      = user.email || '\u2014';
     const status     = rev.status || (rev.is_published ? 'accepted' : 'pending');
     const rating     = rev.stars || rev.rating || 0;
-    const reviewText = rev.review_text || rev.text || rev.comment || rev.body || '—';
-    const initials   = name !== '—' ? name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (email[0]||'?').toUpperCase();
+    const reviewText = rev.review_text || rev.text || rev.comment || rev.body || '\u2014';
+    const initials   = name !== '\u2014' ? name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (email[0]||'?').toUpperCase();
     const badgeHtml  = status === 'accepted'
       ? '<span class="badge badge-green"><span class="badge-dot"></span>Accepted</span>'
       : '<span class="badge badge-yellow"><span class="badge-dot"></span>Pending</span>';
-    return `<div class="item-row" id="rev-row-${rev.id}">
+    return `<div class="item-row" id="rev-row-${escapeHtml(String(rev.id))}">
       <div class="item-row-body">
         <div class="item-info-header">
-          <div class="recent-avatar" style="width:42px;height:42px;font-size:.84rem;border-radius:10px;flex-shrink:0">${initials}</div>
+          <div class="recent-avatar" style="width:42px;height:42px;font-size:.84rem;border-radius:10px;flex-shrink:0">${escapeHtml(initials)}</div>
           <div style="flex:1;min-width:0">
-            <div class="item-info-title">${name}</div>
-            <div class="item-info-sub">${email}</div>
+            <div class="item-info-title">${escapeHtml(name)}</div>
+            <div class="item-info-sub">${escapeHtml(email)}</div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            <div class="review-stars">${starRating(rating)}<span style="margin-left:5px;font-size:.8rem;font-weight:600;color:var(--text-2)">${rating}/5</span></div>
+            <div class="review-stars">${starRating(rating)}<span style="margin-left:5px;font-size:.8rem;font-weight:600;color:var(--text-2)">${escapeHtml(String(rating))}/5</span></div>
             ${badgeHtml}
           </div>
         </div>
         <div class="item-info-grid" style="margin-bottom:10px">
           <div class="item-info-field">
             <span class="item-info-label">Review ID</span>
-            <span class="item-info-value td-mono">#${rev.id}</span>
+            <span class="item-info-value td-mono">#${escapeHtml(String(rev.id))}</span>
           </div>
           <div class="item-info-field">
             <span class="item-info-label">Submitted</span>
-            <span class="item-info-value">${fmtDate(rev.created_at)}</span>
+            <span class="item-info-value">${escapeHtml(fmtDate(rev.created_at))}</span>
           </div>
         </div>
-        <div class="item-review-text">${reviewText}</div>
+        <div class="item-review-text">${escapeHtml(reviewText)}</div>
       </div>
       <div class="item-row-actions">
-        ${status !== 'accepted' ? `<button class="act-btn act-btn-accept" onclick="acceptReview(${rev.id})">
+        ${status !== 'accepted' ? `<button class="act-btn act-btn-accept" data-rev-id="${escapeHtml(String(rev.id))}" data-action="accept-rev">
           <i class="fas fa-check" style="margin-right:4px;"></i>
           Approve
-        </button>` : `<button class="act-btn" style="color:var(--text-2);" onclick="pendingReview(${rev.id})">
+        </button>` : `<button class="act-btn" style="color:var(--text-2);" data-rev-id="${escapeHtml(String(rev.id))}" data-action="pending-rev">
           <i class="fas fa-clock" style="margin-right:4px;"></i>
           Set Pending
         </button>`}
         <div class="spacer"></div>
-        <button class="act-btn act-btn-delete" onclick="confirmDeleteReview(${rev.id})">
+        <button class="act-btn act-btn-delete" data-rev-id="${escapeHtml(String(rev.id))}" data-action="delete-rev">
           <i class="fas fa-trash-alt" style="margin-right:4px;"></i>
           Delete
         </button>
       </div>
     </div>`;
   }).join('');
+  grid.querySelectorAll('[data-action="accept-rev"]').forEach(b => b.addEventListener('click', () => acceptReview(Number(b.dataset.revId))));
+  grid.querySelectorAll('[data-action="pending-rev"]').forEach(b => b.addEventListener('click', () => pendingReview(Number(b.dataset.revId))));
+  grid.querySelectorAll('[data-action="delete-rev"]').forEach(b => b.addEventListener('click', () => confirmDeleteReview(Number(b.dataset.revId))));
 }
 
 let _revSearchTimer = null;
@@ -2069,9 +2115,9 @@ function renderDashboard() {
 
     const legend = slices.map(s =>
       `<div class="pie-legend-item">
-        <span class="pie-legend-dot" style="background:${s.color}"></span>
-        <span class="pie-legend-name">${s.name}</span>
-        <span class="pie-legend-value">${s.count}</span>
+        <span class="pie-legend-dot" style="background:${escapeHtml(s.color)}"></span>
+        <span class="pie-legend-name">${escapeHtml(s.name)}</span>
+        <span class="pie-legend-value">${escapeHtml(String(s.count))}</span>
       </div>`
     ).join('');
 
@@ -2092,10 +2138,9 @@ function renderDashboard() {
     ? sorted.map(u => {
         const n = [u.first_name,u.last_name].filter(Boolean).join(' ') || (u.email||'?');
         const initials = n.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
-        const plan = u.plan_name||u.plan||'None';
         return `<div class="recent-row">
-          <div class="recent-avatar">${initials}</div>
-          <div class="recent-info"><div class="recent-name">${u.email||n}</div><div class="recent-time">${fmtDate(u.date_joined||u.created_at)}</div></div>
+          <div class="recent-avatar">${escapeHtml(initials)}</div>
+          <div class="recent-info"><div class="recent-name">${escapeHtml(u.email||n)}</div><div class="recent-time">${escapeHtml(fmtDate(u.date_joined||u.created_at))}</div></div>
         </div>`;
       }).join('')
     : '<p style="color:var(--text-3);font-size:.82rem">No users yet</p>';
@@ -2107,14 +2152,15 @@ function renderDashboard() {
     ? pending.map(req => {
         const user = req.user || {};
         const type = req.request_type || req.type || 'unknown';
-        const name = user.email || user.full_name || `User #${user.id}`;
+        const name = user.email || user.full_name || `User #${escapeHtml(String(user.id))}`;
+        const typeLabel = type==='partnership'?'Operational Partnership':'Feasibility Study';
         return `<div class="pending-req-row">
           <div class="pending-req-type">
-            <div class="pending-req-email">${name}</div>
-            <div class="pending-req-meta">${type==='partnership'?'Operational Partnership':'Feasibility Study'} · ${fmtDate(req.created_at)}</div>
+            <div class="pending-req-email">${escapeHtml(name)}</div>
+            <div class="pending-req-meta">${escapeHtml(typeLabel)} \u00b7 ${escapeHtml(fmtDate(req.created_at))}</div>
           </div>
           <div class="pending-req-actions">
-            <button class="btn-icon btn-xs" onclick="showPage('requests');setTimeout(()=>viewRequest(${req.id}),150)" title="View request details">
+            <button class="btn-icon btn-xs" data-req-id="${escapeHtml(String(req.id))}" data-action="dash-view-req" title="View request details">
               <i class="fas fa-eye" style="margin-right:4px;"></i>
               View
             </button>
@@ -2125,6 +2171,10 @@ function renderDashboard() {
         <i class="fas fa-check" style="font-size:1.5rem;color:var(--green);margin-bottom:8px;display:block"></i>
         <p style="font-size:.82rem">All caught up — no pending requests</p>
       </div>`;
+  // Bind dashboard pending-list view buttons
+  pendEl.querySelectorAll('[data-action="dash-view-req"]').forEach(b => {
+    b.addEventListener('click', () => { showPage('requests'); setTimeout(() => viewRequest(Number(b.dataset.reqId)), 150); });
+  });
 
 }
 
@@ -2313,7 +2363,8 @@ function lookupUserByEmail(email) {
         _selectedUserId = user.id;
         const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.company_name || 'No Name';
         if (resultEl) {
-          resultEl.innerHTML = `<span style="color:var(--green)">✓ User found: ${name} (ID: ${user.id})</span>`;
+          resultEl.textContent = `\u2713 User found: ${name} (ID: ${user.id})`;
+          resultEl.style.color = 'var(--green)';
         }
         if (createBtn) createBtn.disabled = false;
         
@@ -2321,14 +2372,16 @@ function lookupUserByEmail(email) {
       } else {
         _selectedUserId = null;
         if (resultEl) {
-          resultEl.innerHTML = '<span style="color:var(--red)">✗ User not found</span>';
+          resultEl.textContent = '\u2717 User not found';
+          resultEl.style.color = 'var(--red)';
         }
         if (createBtn) createBtn.disabled = true;
       }
     } catch(e) {
       _selectedUserId = null;
       if (resultEl) {
-        resultEl.innerHTML = '<span style="color:var(--red)">✗ User not found</span>';
+        resultEl.textContent = '\u2717 User not found';
+        resultEl.style.color = 'var(--red)';
       }
       if (createBtn) createBtn.disabled = true;
     }
@@ -2548,22 +2601,22 @@ function renderPaymentsTable(items) {
     
     const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
 
-    // Build inline status action buttons (like the request section)
+    // Build inline status action buttons using data-* (no onclick interpolation)
     let statusActions = '';
     if (status !== 'paid') {
-      statusActions += `<button class="act-btn act-btn-approve" onclick="changePaymentStatus(${p.id}, 'paid')">
+      statusActions += `<button class="act-btn act-btn-approve" data-pay-id="${escapeHtml(String(p.id))}" data-new-status="paid" data-action="change-pay-status">
         <i class="fas fa-check" style="margin-right:4px;"></i>
         Mark Paid
       </button>`;
     }
     if (status !== 'rejected') {
-      statusActions += `<button class="act-btn act-btn-reject" onclick="changePaymentStatus(${p.id}, 'rejected')">
+      statusActions += `<button class="act-btn act-btn-reject" data-pay-id="${escapeHtml(String(p.id))}" data-new-status="rejected" data-action="change-pay-status">
         <i class="fas fa-ban" style="margin-right:4px;"></i>
         Reject
       </button>`;
     }
     if (status !== 'canceled') {
-      statusActions += `<button class="act-btn act-btn-pending" onclick="changePaymentStatus(${p.id}, 'canceled')">
+      statusActions += `<button class="act-btn act-btn-pending" data-pay-id="${escapeHtml(String(p.id))}" data-new-status="canceled" data-action="change-pay-status">
         <i class="fas fa-times-circle" style="margin-right:4px;"></i>
         Cancel
       </button>`;
@@ -2571,23 +2624,23 @@ function renderPaymentsTable(items) {
 
     return `<div class="payment-card">
       <div class="payment-card-header">
-        <div class="payment-avatar">${initials}</div>
+        <div class="payment-avatar">${escapeHtml(initials)}</div>
         <div class="payment-main" style="flex:1;min-width:0;">
           <div class="payment-top">
-            <div class="payment-name">${name}</div>
-            <span class="status-badge ${statusClass}"><span class="status-dot"></span>${formattedStatus}</span>
+            <div class="payment-name">${escapeHtml(name)}</div>
+            <span class="status-badge ${escapeHtml(statusClass)}"><span class="status-dot"></span>${escapeHtml(formattedStatus)}</span>
           </div>
-          <div class="payment-email">${email}</div>
+          <div class="payment-email">${escapeHtml(email)}</div>
         </div>
       </div>
       <div class="payment-card-body">
         <div class="payment-meta">
-          <div class="meta-item"><div class="meta-label">ID</div><div class="meta-value">#${p.id}</div></div>
-          <div class="meta-item"><div class="meta-label">Plan</div><div class="meta-value">${planName}</div></div>
-          <div class="meta-item"><div class="meta-label">Amount</div><div class="meta-value amount">${p.amount} KWD</div></div>
-          <div class="meta-item"><div class="meta-label">Cycle</div><div class="meta-value">${p.billing_cycle || '—'}</div></div>
-          <div class="meta-item"><div class="meta-label">Period</div><div class="meta-value">${fmtDate(p.start_date)} – ${fmtDate(p.end_date)}</div></div>
-          <div class="meta-item"><div class="meta-label">Created</div><div class="meta-value">${fmtDate(p.created_at)}</div></div>
+          <div class="meta-item"><div class="meta-label">ID</div><div class="meta-value">#${escapeHtml(String(p.id))}</div></div>
+          <div class="meta-item"><div class="meta-label">Plan</div><div class="meta-value">${escapeHtml(planName)}</div></div>
+          <div class="meta-item"><div class="meta-label">Amount</div><div class="meta-value amount">${escapeHtml(String(p.amount))} KWD</div></div>
+          <div class="meta-item"><div class="meta-label">Cycle</div><div class="meta-value">${escapeHtml(p.billing_cycle || '\u2014')}</div></div>
+          <div class="meta-item"><div class="meta-label">Period</div><div class="meta-value">${escapeHtml(fmtDate(p.start_date))} \u2013 ${escapeHtml(fmtDate(p.end_date))}</div></div>
+          <div class="meta-item"><div class="meta-label">Created</div><div class="meta-value">${escapeHtml(fmtDate(p.created_at))}</div></div>
         </div>
         <div class="payment-email-notice">
           <i class="fas fa-envelope"></i>
@@ -2596,7 +2649,7 @@ function renderPaymentsTable(items) {
       </div>
       <div class="payment-card-actions">
         ${statusActions}
-        <button class="act-btn act-btn-view" onclick="openEditPaymentModal(${p.id})">
+        <button class="act-btn act-btn-view" data-pay-id="${escapeHtml(String(p.id))}" data-action="edit-payment">
           <i class="fas fa-edit" style="margin-right:4px;"></i>
           Edit
         </button>
@@ -2604,6 +2657,9 @@ function renderPaymentsTable(items) {
       </div>
     </div>`;
   }).join('');
+  // Bind payment card events
+  grid.querySelectorAll('[data-action="edit-payment"]').forEach(b => b.addEventListener('click', () => openEditPaymentModal(Number(b.dataset.payId))));
+  grid.querySelectorAll('[data-action="change-pay-status"]').forEach(b => b.addEventListener('click', () => changePaymentStatus(Number(b.dataset.payId), b.dataset.newStatus)));
 }
 
 function filterPayments() {
@@ -2892,8 +2948,12 @@ async function handleSectionAutocomplete(val, type) {
       }
 
       dropdown.innerHTML = emails.map(email => {
-        return `<div class="autofill-item" onclick="selectSectionEmail('${email.replace(/'/g, "\\'")}', '${type}')">${email}</div>`;
+        return `<div class="autofill-item" data-email="${escapeHtml(email)}" data-type="${escapeHtml(type)}">${escapeHtml(email)}</div>`;
       }).join('');
+      // Bind click via addEventListener — never put email into onclick string
+      dropdown.querySelectorAll('.autofill-item').forEach(item => {
+        item.addEventListener('click', () => selectSectionEmail(item.dataset.email, item.dataset.type));
+      });
       dropdown.style.display = 'block';
     } catch (e) {
       console.error('Autocomplete error:', e);
