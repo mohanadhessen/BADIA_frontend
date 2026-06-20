@@ -1,7 +1,6 @@
 // https://api.badiaprojectmanagement.com
 
 let API = localStorage.getItem('badia_admin_api') || API_BASE;
-const TOKEN = () => localStorage.getItem('access_token') || '';
 
 // ── State ───────────────────────────────────────────────────────
 let _users    = [];
@@ -13,11 +12,13 @@ let _currentPage = 'dashboard';
 let _totalUsers = 0;
 let _totalRequests = 0;
 let _totalReviews = 0;
+let _totalPayments = 0;
 
 // ── Pagination State (persists across tab switches) ─────────────
 let _userPage = 1, _userHasMore = false, _userLoading = false;
 let _reqPage  = 1, _reqHasMore  = false, _reqLoading  = false;
 let _revPage  = 1, _revHasMore  = false, _revLoading  = false;
+let _payPage  = 1, _payHasMore  = false, _payLoading  = false;
 const PAGE_LIMIT = 25;
 
 // ── API Helper (with auto token refresh) ───────────────────────
@@ -25,97 +26,96 @@ let _refreshing = false;
 let _refreshQueue = [];
 
 async function doRefreshToken() {
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (!refreshToken) throw new Error('No refresh token');
   const res = await fetch(`${API}/api/v1/refresh`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: refreshToken }),
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...csrfHeaders(),
+    },
   });
   if (!res.ok) throw new Error('Refresh failed');
-  const data = await res.json();
-  if (data.access_token) localStorage.setItem('access_token', data.access_token);
-  if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-  return data.access_token;
+  return true;
 }
 
 async function apiFetch(path, opts = {}) {
   const method = (opts.method || 'GET').toUpperCase();
   const isGet = method === 'GET';
-  
+
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
-  if (TOKEN()) headers['Authorization'] = `Bearer ${TOKEN()}`;
-  
+
+  // CSRF for mutations
+  if (!isGet) Object.assign(headers, csrfHeaders());
+
   const cacheKeyData = `api_cache_data_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
   const cacheKeyEtag = `api_cache_etag_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
-  
+
   if (isGet && !opts.forceRefresh) {
     const cachedEtag = localStorage.getItem(cacheKeyEtag);
-    if (cachedEtag) {
-      headers['If-None-Match'] = cachedEtag;
-    }
+    if (cachedEtag) headers['If-None-Match'] = cachedEtag;
   }
 
-  let res = await fetch(`${API}${path}`, { ...opts, headers });
+  let res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers,
+    credentials: 'include',   // ← key change
+  });
 
   if (res.status === 401) {
-    // Try refreshing once
     if (!_refreshing) {
       _refreshing = true;
       try {
-        const newToken = await doRefreshToken();
+        await doRefreshToken();
         _refreshing = false;
-        // Drain queued resolvers
-        _refreshQueue.forEach(r => r(newToken));
+        _refreshQueue.forEach(r => r(true));
         _refreshQueue = [];
-        // Retry original request
-        headers['Authorization'] = `Bearer ${newToken}`;
-        res = await fetch(`${API}${path}`, { ...opts, headers });
+        // Retry — cookies updated by refresh endpoint
+        const retryHeaders = { ...headers };
+        if (!isGet) Object.assign(retryHeaders, csrfHeaders());
+        res = await fetch(`${API}${path}`, {
+          ...opts,
+          headers: retryHeaders,
+          credentials: 'include',
+        });
       } catch (e) {
         _refreshing = false;
-        _refreshQueue.forEach(r => r(null));
+        _refreshQueue.forEach(r => r(false));
         _refreshQueue = [];
-        // Refresh token expired — redirect to sign in
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
         toast('Session expired. Redirecting to sign in…', 'error');
         setTimeout(() => { window.location.href = 'index.html?open_signin=true'; }, 1500);
         throw new Error('Session expired');
       }
     } else {
-      // Another request is already refreshing — queue this one
-      const newToken = await new Promise(resolve => _refreshQueue.push(resolve));
-      if (!newToken) throw new Error('Session expired');
-      headers['Authorization'] = `Bearer ${newToken}`;
-      res = await fetch(`${API}${path}`, { ...opts, headers });
+      const ok = await new Promise(resolve => _refreshQueue.push(resolve));
+      if (!ok) throw new Error('Session expired');
+      const retryHeaders = { ...headers };
+      if (!isGet) Object.assign(retryHeaders, csrfHeaders());
+      res = await fetch(`${API}${path}`, {
+        ...opts,
+        headers: retryHeaders,
+        credentials: 'include',
+      });
     }
   }
 
   if (isGet && res.status === 304) {
     const cachedData = localStorage.getItem(cacheKeyData);
     if (cachedData) {
-      try {
-        return JSON.parse(cachedData);
-      } catch (_) {
-        // Fallback to reload if JSON parse error
-      }
+      try { return JSON.parse(cachedData); } catch (_) {}
     }
   }
 
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  
+
   const data = await res.json();
-  
+
   if (isGet) {
     localStorage.setItem(cacheKeyData, JSON.stringify(data));
     const newEtag = res.headers.get('ETag');
-    if (newEtag) {
-      localStorage.setItem(cacheKeyEtag, newEtag);
-    } else {
-      localStorage.removeItem(cacheKeyEtag);
-    }
+    if (newEtag) localStorage.setItem(cacheKeyEtag, newEtag);
+    else localStorage.removeItem(cacheKeyEtag);
   }
-  
+
   return data;
 }
 
@@ -154,7 +154,7 @@ async function swrFetch(path, forceRefresh, onData) {
 }
 
 // ── Page Navigation (with hash persistence) ────────────────────
-function showPage(id) {
+function showPage(id, skipLoad = false) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
   document.getElementById(`page-${id}`)?.classList.add('active');
@@ -167,18 +167,36 @@ function showPage(id) {
   closeSidebar();
 
   // Call the specific endpoints when clicking on sections
-  if (id === 'users') {
-    loadUsers(_userPage, false, false);
-  } else if (id === 'requests') {
-    loadRequests(_reqPage, false, false);
-  } else if (id === 'plans') {
-    loadPlans(false);
-  } else if (id === 'reviews') {
-    loadReviews(_revPage, false, false);
-  } else if (id === 'payments') {
-    loadPaymentsTelemetry(false, false);
-  } else if (id === 'dashboard') {
-    loadDashboardConsolidated(false);
+  if (!skipLoad) {
+    if (id === 'users') {
+      const searchInput = document.getElementById('userSearch');
+      if (searchInput && searchInput.value) {
+        searchInput.value = '';
+      }
+      loadUsers(_userPage, false, false);
+    } else if (id === 'requests') {
+      const searchInput = document.getElementById('reqSearch');
+      if (searchInput && searchInput.value) {
+        searchInput.value = '';
+      }
+      loadRequests(_reqPage, false, false);
+    } else if (id === 'plans') {
+      loadPlans(false);
+    } else if (id === 'reviews') {
+      const searchInput = document.getElementById('revSearch');
+      if (searchInput && searchInput.value) {
+        searchInput.value = '';
+      }
+      loadReviews(_revPage, false, false);
+    } else if (id === 'payments') {
+      const searchInput = document.getElementById('paySearch');
+      if (searchInput && searchInput.value) {
+        searchInput.value = '';
+      }
+      loadPaymentsTelemetry(false, false);
+    } else if (id === 'dashboard') {
+      loadDashboardConsolidated(false);
+    }
   }
 }
 
@@ -476,22 +494,23 @@ async function loadDashboardConsolidated(forceRefresh = false) {
     await swrFetch(path, forceRefresh, (data) => {
       // 1. Populate all states
       if (data.users) {
-        _users = data.users && Array.isArray(data.users.items) ? data.users.items : [];
+        _users = data.users.items || (Array.isArray(data.users) ? data.users : []);
         _totalUsers = data.users.metrics?.total_users ?? _users.length;
       }
       if (data.plans) {
         _plans = Array.isArray(data.plans) ? data.plans : [];
       }
       if (data.requests) {
-        _requests = Array.isArray(data.requests) ? data.requests.map(r => ({ ...r, id: r.request_id || r.id })) : [];
-        _totalRequests = _requests.length;
+        const reqItems = data.requests.items || (Array.isArray(data.requests) ? data.requests : []);
+        _requests = reqItems.map(r => ({ ...r, id: r.request_id || r.id }));
+        _totalRequests = data.requests.metrics?.total_requests ?? _requests.length;
       }
       if (data.reviews) {
-        _reviews = data.reviews && Array.isArray(data.reviews.items) ? data.reviews.items : [];
+        _reviews = data.reviews.items || (Array.isArray(data.reviews) ? data.reviews : []);
         _totalReviews = data.reviews.metrics?.total_reviews ?? _reviews.length;
       }
       if (data.payments) {
-        _payments = data.payments && Array.isArray(data.payments.items) ? data.payments.items : [];
+        _payments = data.payments.items || (Array.isArray(data.payments) ? data.payments : []);
         updatePaymentsUI(data.payments);
       }
       if (data.plans_distribution) {
@@ -511,6 +530,9 @@ async function loadDashboardConsolidated(forceRefresh = false) {
       updateReviewStats();
       populatePlanFilter();
       populatePlanDropdown();
+
+      // Render details metrics directly from consolidated response metrics
+      renderDashboardMetrics(data);
       
       // If we are currently on a page other than dashboard, make sure to render its table as well
       if (_currentPage === 'users') renderUsersTable(_users);
@@ -521,6 +543,85 @@ async function loadDashboardConsolidated(forceRefresh = false) {
     });
   } catch (e) {
     console.error('Failed to load consolidated dashboard data:', e);
+  }
+}
+
+function renderDashboardMetrics(data) {
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  // 1. Users Metrics
+  if (data.users && data.users.metrics) {
+    const m = data.users.metrics;
+    setVal('statUsers', m.total_users ?? '—');
+    setVal('sidebarUserCount', m.total_users ?? '—');
+    setVal('statUsersActive', m.active_users ?? '—');
+    setVal('statUsersInactive', m.inactive_users ?? '—');
+    setVal('statUsersVerified', m.verified_users ?? '—');
+    setVal('statUsersUnverified', m.unverified_users ?? '—');
+
+    const usersSubEl = document.getElementById('statUsersSub');
+    if (usersSubEl) {
+      usersSubEl.innerHTML = `${m.active_users ?? 0} active &middot; ${m.verified_users ?? 0} verified`;
+    }
+    const usersBar = document.getElementById('statUsersBar');
+    if (usersBar) {
+      const activeUsersPct = m.total_users ? Math.min(((m.active_users || 0) / m.total_users) * 100, 100) : 0;
+      usersBar.style.width = `${activeUsersPct}%`;
+    }
+  }
+
+  // 2. Payments / Plans Metrics
+  if (data.payments && data.payments.metrics) {
+    const m = data.payments.metrics;
+    setVal('statActive', m.paid_payments ?? '—');
+    setVal('statPlansMonthly', m.monthly_payments ?? '—');
+    setVal('statPlansYearly', m.yearly_payments ?? '—');
+    setVal('statPlansTotalPayments', m.total_payments ?? '—');
+    setVal('statPlansRejected', m.rejected_payments ?? '—');
+    
+    // Revenue Card Sub-details
+    if (m.revenue_this_month !== undefined) {
+      setVal('statRevMonth', typeof m.revenue_this_month === 'number' ? m.revenue_this_month.toFixed(3) : m.revenue_this_month);
+    }
+    setVal('statPayThisMonth', m.payments_this_month ?? '—');
+
+    const plansSubEl = document.getElementById('statPlansSub');
+    if (plansSubEl) {
+      plansSubEl.innerHTML = `${m.monthly_payments ?? 0} monthly &middot; ${m.yearly_payments ?? 0} yearly`;
+    }
+    const plansBar = document.getElementById('statActiveBar');
+    if (plansBar) {
+      const paidPlansPct = m.total_payments ? Math.min(((m.paid_payments || 0) / m.total_payments) * 100, 100) : 0;
+      plansBar.style.width = `${paidPlansPct}%`;
+    }
+  }
+
+  // 3. Requests Metrics
+  if (data.requests && data.requests.metrics) {
+    const m = data.requests.metrics;
+    setVal('statRequests', m.total_requests ?? '—');
+    setVal('statPending', m.pending_requests ?? '—');
+    setVal('statApproved', m.approved_requests ?? '—');
+    setVal('statReqApprovedSub', m.approved_requests ?? '—');
+    setVal('statReqPendingSub', m.pending_requests ?? '—');
+    setVal('statReqRejectedSub', m.rejected_requests ?? '—');
+
+    // Sync sidebar badge
+    setVal('sidebarPendingCount', m.pending_requests || '—');
+  }
+
+  // 4. Reviews Metrics
+  if (data.reviews && data.reviews.metrics) {
+    const m = data.reviews.metrics;
+    setVal('statReviewsVal', m.total_reviews ?? '—');
+    setVal('statReviewsPublished', m.published_reviews ?? '—');
+    setVal('statReviewsPending', m.pending_reviews ?? '—');
+
+    // Sync sidebar badge
+    setVal('sidebarReviewsCount', m.pending_reviews || '—');
   }
 }
 
@@ -568,7 +669,20 @@ async function loadUsers(page, silent = false, forceRefresh = false) {
   if (_userLoading) return;
   _userLoading = true;
   _userPage = page || 1;
-  const path = `/api/v1/admin/users?page=${_userPage}`;
+  
+  const planEl = document.getElementById('planFilter');
+  const statusEl = document.getElementById('statusFilter');
+  const planVal = planEl ? planEl.value : '';
+  const statusVal = statusEl ? statusEl.value : '';
+  
+  let path = `/api/v1/admin/users?page=${_userPage}`;
+  if (planVal) {
+    path += `&plan=${encodeURIComponent(planVal)}`;
+  }
+  if (statusVal) {
+    path += `&status=${encodeURIComponent(statusVal)}`;
+  }
+
   if (!silent) setUserPaginationLoading(true);
   try {
     const didRenderCache = await swrFetch(path, forceRefresh, (data) => {
@@ -627,7 +741,9 @@ function populatePlanFilter() {
     const sel = document.getElementById(selId);
     if (!sel) return;
     const existing = new Set([...sel.options].map(o => o.value));
-    const names = [...new Set(_users.map(u => u.plan_name || u.plan || '').filter(Boolean))];
+    const namesFromUsers = _users.map(u => u.plan_name || u.plan || '').filter(Boolean);
+    const namesFromPlans = _plans.map(p => p.name).filter(Boolean);
+    const names = [...new Set([...namesFromUsers, ...namesFromPlans])];
     names.forEach(p => {
       if (!existing.has(p)) {
         const o = document.createElement('option');
@@ -1150,7 +1266,7 @@ async function confirmRejectRequest() {
 }
 
 function viewRequest(reqId) {
-  const req = _requests.find(r => r.id === reqId);
+  const req = _requests.find(r => String(r.id) === String(reqId));
   if (!req) return;
   const user  = req.user || {};
   const type  = req.request_type || req.type || 'unknown';
@@ -1842,10 +1958,11 @@ async function loadReviews(page, silent = false, forceRefresh = false) {
   if (!silent) setRevPaginationLoading(true);
   try {
     const didRenderCache = await swrFetch(path, forceRefresh, (data) => {
-      _reviews = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.reviews || []));
-      _revHasMore = data && data.has_next !== undefined ? !!data.has_next : (_reviews.length === PAGE_LIMIT);
-      _totalReviews = data && data.total !== undefined ? data.total : _reviews.length;
-      renderReviews(_reviews);
+      const rawReviews = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.reviews || []));
+      _reviews = rawReviews;
+      _revHasMore = data && data.has_next !== undefined ? !!data.has_next : (rawReviews.length === PAGE_LIMIT);
+      _totalReviews = data && data.metrics && data.metrics.total_reviews !== undefined ? data.metrics.total_reviews : (data && data.total !== undefined ? data.total : _reviews.length);
+      _filterReviewsNow();
       updateReviewStats();
       updateRevPagination();
     });
@@ -2076,112 +2193,165 @@ function renderDashboard() {
   if (!entries.length || total === 0) {
     distEl.innerHTML = '<p style="color:var(--text-3);font-size:.82rem;padding:20px 0;text-align:center">No user data yet</p>';
   } else {
-    const DASHBOARD_COLORS = ['#8b5cf6', '#3b82f6', '#d4af37', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9', '#ec4899', '#14b8a6', '#6366f1'];
+    const DASHBOARD_COLORS = ['#A9802F', '#3F7A5C', '#7A6BAE', '#D8D2C4', '#b8862e', '#a8503f'];
     function getColor(name) {
-      if (name.toLowerCase() === 'none' || name.toLowerCase() === 'no plan') return '#C0C0C0';
+      if (name.toLowerCase() === 'none' || name.toLowerCase() === 'no plan') return '#D8D2C4';
       let hash = 0;
       for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
       return DASHBOARD_COLORS[Math.abs(hash) % DASHBOARD_COLORS.length];
     }
 
-    // Build SVG pie chart
-    const R = 90, CX = 110, CY = 100;
-    let startAngle = -Math.PI / 2;
+    const C = 2 * Math.PI * 46; // Circumference of radius 46 ~ 289.0265
+    let accumulated = 0;
+    
     const slices = entries.map(([name, count]) => {
-      const angle = (count / total) * 2 * Math.PI;
-      const x1 = CX + R * Math.cos(startAngle);
-      const y1 = CY + R * Math.sin(startAngle);
-      startAngle += angle;
-      const x2 = CX + R * Math.cos(startAngle);
-      const y2 = CY + R * Math.sin(startAngle);
-      const large = angle > Math.PI ? 1 : 0;
-      const color = getColor(name);
       const pct = Math.round(count / total * 100);
-      const midA = startAngle - angle / 2;
-      return { name, count, pct, x1, y1, x2, y2, large, color, midA, angle };
+      const len = (count / total) * C;
+      const offset = -accumulated;
+      accumulated += len;
+      const color = getColor(name);
+      return { name, count, pct, len, offset, color };
     });
 
-    const labelSlices = slices.filter(s => s.pct >= 4);
-    const svgLabels = labelSlices.map(s => {
-      const alpha = s.angle / 2;
-      const d = alpha === 0 ? 0 : (2 / 3) * R * Math.sin(alpha) / alpha;
-      const lx = CX + d * Math.cos(s.midA);
-      const ly = CY + d * Math.sin(s.midA);
-      return `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="middle"
-        fill="#fff" font-size="11" font-weight="700" font-family="'Geist', sans-serif" style="pointer-events:none">${s.pct}%</text>`;
+    const circlesHtml = slices.map(s => {
+      return `<circle cx="60" cy="60" r="46" fill="none" stroke="${s.color}" stroke-width="16"
+                stroke-dasharray="${s.len.toFixed(1)} ${(C - s.len).toFixed(1)}"
+                stroke-dashoffset="${s.offset.toFixed(1)}"
+                transform="rotate(-90 60 60)" style="transition: stroke-dashoffset 0.3s ease;">
+                <title>${escapeHtml(s.name)}: ${s.count} user${s.count!==1?'s':''} (${s.pct}%)</title>
+              </circle>`;
     }).join('');
 
-    const svgPaths = slices.map(s =>
-      entries.length === 1
-        ? `<circle cx="${CX}" cy="${CY}" r="${R}" fill="${s.color}"/>`
-        : `<path d="M${CX},${CY} L${s.x1.toFixed(2)},${s.y1.toFixed(2)} A${R},${R} 0 ${s.large},1 ${s.x2.toFixed(2)},${s.y2.toFixed(2)} Z"
-             fill="${s.color}" stroke="var(--white)" stroke-width="2">
-             <title>${escapeHtml(s.name)}: ${s.count} user${s.count!==1?'s':''} (${s.pct}%)</title>
-           </path>`
-    ).join('');
-
     const legend = slices.map(s =>
-      `<div class="pie-legend-item">
-        <span class="pie-legend-dot" style="background:${escapeHtml(s.color)}"></span>
-        <span class="pie-legend-name">${escapeHtml(s.name)}</span>
-        <span class="pie-legend-value">${escapeHtml(String(s.count))}</span>
+      `<div class="legend-item">
+        <span class="sw" style="background:${escapeHtml(s.color)}"></span>
+        <span class="name">${escapeHtml(s.name)}</span>
+        <span class="pct">${s.pct}%</span>
       </div>`
     ).join('');
 
     distEl.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;width:100%">
-        <svg width="100%" height="200" viewBox="0 0 220 200" style="flex-shrink:0;overflow:visible;display:block">
-          ${svgPaths}
-          ${svgLabels}
+      <div class="donut-wrap">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#EFEAE0" stroke-width="16"/>
+          ${circlesHtml}
+          <text x="60" y="64" text-anchor="middle" font-family="Cormorant Garamond" font-weight="600" font-size="20" fill="var(--text)">${total}</text>
         </svg>
-        <div class="pie-legend-container">${legend}</div>
+        <div class="legend">
+          ${legend}
+        </div>
       </div>`;
   }
 
   // Recent signups
   const sorted = [..._users].sort((a,b) => new Date(b.date_joined||b.created_at||0)-new Date(a.date_joined||a.created_at||0)).slice(0,5);
   const recentEl = document.getElementById('recentSignups');
-  recentEl.innerHTML = sorted.length
-    ? sorted.map(u => {
-        const n = [u.first_name,u.last_name].filter(Boolean).join(' ') || (u.email||'?');
-        const initials = n.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
-        return `<div class="recent-row">
-          <div class="recent-avatar">${escapeHtml(initials)}</div>
-          <div class="recent-info"><div class="recent-name">${escapeHtml(u.email||n)}</div><div class="recent-time">${escapeHtml(fmtDate(u.date_joined||u.created_at))}</div></div>
-        </div>`;
-      }).join('')
-    : '<p style="color:var(--text-3);font-size:.82rem">No users yet</p>';
+  if (recentEl) {
+    recentEl.innerHTML = sorted.length
+      ? sorted.map(u => {
+          const n = [u.first_name,u.last_name].filter(Boolean).join(' ') || (u.email||'?');
+          const initials = n !== '?' ? n.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (u.email ? u.email[0].toUpperCase() : '?');
+          return `<div class="row-item">
+            <div class="sq-avatar" style="background:#1C1A17">${escapeHtml(initials)}</div>
+            <div class="row-meta">
+              <div class="row-name">${escapeHtml(u.email || n)}</div>
+              <div class="row-sub">Joined ${escapeHtml(fmtDate(u.date_joined||u.created_at))}</div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<p style="color:var(--text-3);font-size:.82rem;padding:16px 0;text-align:center">No users yet</p>';
+  }
 
   // Pending requests widget
   const pending = _requests.filter(r => r.status === 'pending').slice(0, 5);
   const pendEl = document.getElementById('dashPendingList');
-  pendEl.innerHTML = pending.length
-    ? pending.map(req => {
-        const user = req.user || {};
-        const type = req.request_type || req.type || 'unknown';
-        const name = user.email || user.full_name || `User #${escapeHtml(String(user.id))}`;
-        const typeLabel = type==='partnership'?'Operational Partnership':'Feasibility Study';
-        return `<div class="pending-req-row">
-          <div class="pending-req-type">
-            <div class="pending-req-email">${escapeHtml(name)}</div>
-            <div class="pending-req-meta">${escapeHtml(typeLabel)} \u00b7 ${escapeHtml(fmtDate(req.created_at))}</div>
-          </div>
-          <div class="pending-req-actions">
-            <button class="btn-icon btn-xs" data-req-id="${escapeHtml(String(req.id))}" data-action="dash-view-req" title="View request details">
-              <i class="fas fa-eye" style="margin-right:4px;"></i>
-              View
-            </button>
-          </div>
+  if (pendEl) {
+    function getRequestColor(type) {
+      if (type === 'partnership') return '#3F7A5C';
+      return '#A9802F';
+    }
+    pendEl.innerHTML = pending.length
+      ? pending.map(req => {
+          const user = req.user || {};
+          const type = req.request_type || req.type || 'unknown';
+          const name = user.email || user.full_name || `User #${escapeHtml(String(user.id))}`;
+          const initials = (name[0] || '?').toUpperCase() + (name[1] || '').toUpperCase();
+          const typeLabel = type==='partnership'?'Operational Partnership':'Feasibility Study';
+          const color = getRequestColor(type);
+          return `<div class="row-item">
+            <div class="sq-avatar" style="background:${color}">${escapeHtml(initials)}</div>
+            <div class="row-meta">
+              <div class="row-name">${escapeHtml(name)}</div>
+              <div class="row-sub">${escapeHtml(typeLabel)} &middot; ${escapeHtml(fmtDate(req.created_at))}</div>
+            </div>
+            <div class="badge view" data-req-id="${escapeHtml(String(req.id))}" data-action="dash-view-req">View</div>
+          </div>`;
+        }).join('')
+      : `<div style="text-align:center;padding:24px 0;color:var(--text-3)">
+          <i class="fas fa-check" style="font-size:1.5rem;color:var(--green);margin-bottom:8px;display:block"></i>
+          <p style="font-size:.82rem">All caught up — no pending requests</p>
         </div>`;
-      }).join('')
-    : `<div style="text-align:center;padding:24px 0;color:var(--text-3)">
-        <i class="fas fa-check" style="font-size:1.5rem;color:var(--green);margin-bottom:8px;display:block"></i>
-        <p style="font-size:.82rem">All caught up — no pending requests</p>
-      </div>`;
-  // Bind dashboard pending-list view buttons
-  pendEl.querySelectorAll('[data-action="dash-view-req"]').forEach(b => {
-    b.addEventListener('click', () => { showPage('requests'); setTimeout(() => viewRequest(Number(b.dataset.reqId)), 150); });
-  });
+    // Bind dashboard pending-list view buttons
+    pendEl.querySelectorAll('[data-action="dash-view-req"]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const reqId = isNaN(b.dataset.reqId) ? b.dataset.reqId : Number(b.dataset.reqId);
+        const reqObj = pending.find(r => String(r.id) === String(reqId));
+        const email = reqObj && reqObj.user ? reqObj.user.email : '';
+        if (email) {
+          showPage('requests', true);
+          const searchInput = document.getElementById('reqSearch');
+          if (searchInput) searchInput.value = email;
+          await executeSectionSearch(email, 'request');
+          viewRequest(reqId);
+        } else {
+          showPage('requests');
+          setTimeout(() => viewRequest(reqId), 150);
+        }
+      });
+    });
+  }
+
+  // Pending reviews widget
+  const pendingReviews = _reviews.filter(r => r.status === 'pending' || !r.is_published).slice(0, 5);
+  const pendRevEl = document.getElementById('dashPendingReviewsList');
+  if (pendRevEl) {
+    pendRevEl.innerHTML = pendingReviews.length
+      ? pendingReviews.map(rev => {
+          const user = rev.user || {};
+          const name = user.email || `User #${escapeHtml(String(rev.user_id))}`;
+          const text = rev.review_text || '';
+          const initials = (name[0] || '?').toUpperCase();
+          const starsHtml = starRating(rev.stars);
+          return `<div class="row-item">
+            <div class="sq-avatar" style="background:#A8503F">${escapeHtml(initials)}</div>
+            <div class="row-meta">
+              <div class="row-name">${escapeHtml(name)}</div>
+              <div class="row-sub">${starsHtml} "${escapeHtml(text.slice(0, 36))}${text.length > 36 ? '...' : ''}"</div>
+            </div>
+            <div class="badge view" data-rev-id="${escapeHtml(String(rev.id))}" data-action="dash-view-rev">View</div>
+          </div>`;
+        }).join('')
+      : `<div style="text-align:center;padding:24px 0;color:var(--text-3)">
+          <i class="fas fa-check" style="font-size:1.5rem;color:var(--green);margin-bottom:8px;display:block"></i>
+          <p style="font-size:.82rem">All caught up — no pending reviews</p>
+        </div>`;
+    // Bind dashboard pending-reviews-list view buttons
+    pendRevEl.querySelectorAll('[data-action="dash-view-rev"]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const revId = isNaN(b.dataset.revId) ? b.dataset.revId : Number(b.dataset.revId);
+        const revObj = pendingReviews.find(r => String(r.id) === String(revId));
+        const email = revObj && revObj.user ? revObj.user.email : '';
+        if (email) {
+          showPage('reviews', true);
+          const searchInput = document.getElementById('revSearch');
+          if (searchInput) searchInput.value = email;
+          await executeSectionSearch(email, 'review');
+        } else {
+          showPage('reviews');
+        }
+      });
+    });
+  }
 
 }
 
@@ -2189,20 +2359,26 @@ function renderDashboard() {
 // ── Refresh ──────────────────────────────────────────────────────
 async function refreshAll() {
   toast('Refreshing data…', 'info');
-  if (_currentPage === 'dashboard') {
-    await loadDashboardConsolidated(true);
-  } else if (_currentPage === 'users') {
-    await loadUsers(_userPage, false, true);
-  } else if (_currentPage === 'requests') {
-    await loadRequests(_reqPage, false, true);
-  } else if (_currentPage === 'plans') {
-    await loadPlans(true);
-  } else if (_currentPage === 'reviews') {
-    await loadReviews(_revPage, false, true);
-  } else if (_currentPage === 'payments') {
-    await loadPaymentsTelemetry(false, true);
-  } else {
-    await loadAll();
+  try {
+    if (_currentPage === 'dashboard') {
+      await loadDashboardConsolidated(true);
+    } else if (_currentPage === 'users') {
+      await loadUsers(_userPage, false, true);
+    } else if (_currentPage === 'requests') {
+      await loadRequests(_reqPage, false, true);
+    } else if (_currentPage === 'plans') {
+      await loadPlans(true);
+    } else if (_currentPage === 'reviews') {
+      await loadReviews(_revPage, false, true);
+    } else if (_currentPage === 'payments') {
+      await loadPaymentsTelemetry(false, true);
+    } else {
+      await loadAll();
+    }
+    toast('Data refreshed successfully', 'success');
+  } catch (err) {
+    console.error('Refresh error:', err);
+    toast('Failed to refresh data', 'error');
   }
 }
 
@@ -2215,19 +2391,16 @@ function saveSettings() {
 
 // ── Logout ───────────────────────────────────────────────────────
 async function handleLogout() {
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (refreshToken) {
-    try {
-      await apiFetch('/api/v1/auth/revoke', {
-        method: 'POST',
-        body: JSON.stringify({ refresh_token: refreshToken })
-      });
-    } catch (e) {
-      console.error('Failed to revoke token:', e);
-    }
+  try {
+    await fetch(`${API}/api/v1/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
+    });
+  } catch (e) {
+    // Even if the request fails, still redirect
   }
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('refresh_token');
+  clearUserDataCache();
   window.location.href = 'index.html';
 }
 
@@ -2312,11 +2485,7 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         const type = id === 'userSearch' ? 'user' : (id === 'reqSearch' ? 'request' : (id === 'revSearch' ? 'review' : 'payment'));
-        if (type === 'payment') {
-          filterPayments();
-        } else {
-          executeSectionSearch(input.value.trim(), type);
-        }
+        executeSectionSearch(input.value.trim(), type);
       }
     });
   });
@@ -2328,16 +2497,62 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadPaymentsTelemetry(silent = false, forceRefresh = false) {
-  const path = '/api/v1/admin/payments';
+  if (_payLoading) return;
+  _payLoading = true;
+  const path = `/api/v1/admin/payments?page=${_payPage}`;
+  if (!silent) setPayPaginationLoading(true);
   try {
-    await swrFetch(path, forceRefresh, (data) => {
+    const didRenderCache = await swrFetch(path, forceRefresh, (data) => {
+      const items = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.payments || []));
+      _payments = items;
+      _payHasMore = data && data.has_next !== undefined ? !!data.has_next : (_payments.length === PAGE_LIMIT);
+      
+      const metrics = data.metrics || {};
+      _totalPayments = metrics.total_payments ?? (data.total ?? _payments.length);
+
       updatePaymentsUI(data);
+      updatePayPagination();
     });
+    if (didRenderCache) silent = true;
   } catch(e) {
     const totalEl = document.getElementById('payStatTotal');
     if (totalEl) totalEl.textContent = '—';
     console.error('Failed to load payments telemetry:', e);
+  } finally {
+    _payLoading = false;
+    if (!silent) setPayPaginationLoading(false);
+    updatePayPagination();
   }
+}
+
+function updatePayPagination() {
+  const pageNumEl = document.getElementById('payPageNum');
+  const infoEl = document.getElementById('payPaginationInfo');
+  const prevBtn = document.getElementById('payPrevBtn');
+  const nextBtn = document.getElementById('payNextBtn');
+
+  if (pageNumEl) pageNumEl.textContent = _payPage;
+  if (infoEl) {
+    const total = _totalPayments !== undefined ? _totalPayments : _payments.length;
+    infoEl.textContent = `Page ${_payPage} · ${_payments.length} of ${total} shown`;
+  }
+  if (prevBtn) prevBtn.disabled = _payPage <= 1;
+  if (nextBtn) nextBtn.disabled = !_payHasMore;
+}
+
+function setPayPaginationLoading(on) {
+  const info = document.getElementById('payPaginationInfo');
+  if (on && info) {
+    info.innerHTML = '<span class="pagination-loading"><span class="pagination-spinner"></span>Loading…</span>';
+  }
+}
+
+async function changePayPage(page) {
+  if (page < 1 || _payLoading) return;
+  if (page > _payPage && !_payHasMore) return;
+  _payPage = page;
+  await loadPaymentsTelemetry(false, false);
+  document.getElementById('page-payments').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 let _lookupTimeout = null;
@@ -2669,7 +2884,13 @@ function renderPaymentsTable(items) {
   grid.querySelectorAll('[data-action="change-pay-status"]').forEach(b => b.addEventListener('click', () => changePaymentStatus(Number(b.dataset.payId), b.dataset.newStatus)));
 }
 
+let _paySearchTimer = null;
 function filterPayments() {
+  clearTimeout(_paySearchTimer);
+  _paySearchTimer = setTimeout(_filterPaymentsNow, 250);
+}
+
+function _filterPaymentsNow() {
   const q = (document.getElementById('paySearch').value || '').toLowerCase().trim();
   const status = document.getElementById('payStatusFilter').value;
   const sort = document.getElementById('paySortFilter').value;
@@ -2993,8 +3214,6 @@ function selectSectionEmail(email, type) {
   
   if (type === 'create-sub') {
     lookupUserByEmail(email);
-  } else if (type === 'payment') {
-    filterPayments();
   } else {
     executeSectionSearch(email, type);
   }
@@ -3016,24 +3235,32 @@ async function executeSectionSearch(email, type) {
   }
 
   try {
-    const data = await apiFetch(`/api/v1/admin/users/search/results?email=${encodeURIComponent(email)}`);
+    let data;
+    if (type === 'user') {
+      data = await apiFetch(`/api/v1/admin/users/by-email?email=${encodeURIComponent(email)}`);
+    } else if (type === 'request') {
+      data = await apiFetch(`/api/v1/admin/requests/by-email?email=${encodeURIComponent(email)}`);
+    } else if (type === 'review') {
+      data = await apiFetch(`/api/v1/admin/reviews/by-email?email=${encodeURIComponent(email)}`);
+    } else if (type === 'payment') {
+      data = await apiFetch(`/api/v1/admin/payments/by-email?email=${encodeURIComponent(email)}`);
+    }
+
     if (!data) throw new Error('No data found');
     
     if (type === 'user') {
-      if (data.user) {
-        _users = [data.user];
-        _totalUsers = 1;
-        _userHasMore = false;
-        renderUsersTable(_users);
-        
-        document.getElementById('userPageNum').textContent = '1';
-        document.getElementById('userPaginationInfo').textContent = `Search results for "${email}"`;
-        document.getElementById('userPrevBtn').disabled = true;
-        document.getElementById('userNextBtn').disabled = true;
-        document.getElementById('userCount').textContent = `1 user`;
-      }
+      _users = [data];
+      _totalUsers = 1;
+      _userHasMore = false;
+      renderUsersTable(_users);
+      
+      document.getElementById('userPageNum').textContent = '1';
+      document.getElementById('userPaginationInfo').textContent = `Search results for "${email}"`;
+      document.getElementById('userPrevBtn').disabled = true;
+      document.getElementById('userNextBtn').disabled = true;
+      document.getElementById('userCount').textContent = `1 user`;
     } else if (type === 'request') {
-      _requests = data.requests || [];
+      _requests = data || [];
       _requests = _requests.map(r => ({ ...r, id: r.request_id || r.id }));
       _totalRequests = _requests.length;
       _reqHasMore = false;
@@ -3053,7 +3280,7 @@ async function executeSectionSearch(email, type) {
       document.getElementById('reqPrevBtn').disabled = true;
       document.getElementById('reqNextBtn').disabled = true;
     } else if (type === 'review') {
-      _reviews = data.reviews || [];
+      _reviews = data || [];
       _totalReviews = _reviews.length;
       _revHasMore = false;
       renderReviews(_reviews);
@@ -3069,11 +3296,25 @@ async function executeSectionSearch(email, type) {
       document.getElementById('revPaginationInfo').textContent = `Search results for "${email}"`;
       document.getElementById('revPrevBtn').disabled = true;
       document.getElementById('revNextBtn').disabled = true;
+    } else if (type === 'payment') {
+      _payments = data || [];
+      updatePaymentsUI({ items: _payments, metrics: {} });
+      
+      document.getElementById('payPageNum').textContent = '1';
+      document.getElementById('payPaginationInfo').textContent = `Search results for "${email}"`;
+      document.getElementById('payPrevBtn').disabled = true;
+      document.getElementById('payNextBtn').disabled = true;
     }
     toast('Search completed successfully', 'success');
   } catch(e) {
     console.error('Section search failed:', e);
     toast('No user or records found matching this email', 'error');
   }
+}
+
+function triggerMobileSearch(inputId, type) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  executeSectionSearch(input.value.trim(), type);
 }
 

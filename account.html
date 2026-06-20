@@ -3,20 +3,26 @@
 
 <head>
     <script>
-        // UX pre-render routing (Note: Server-side API validation is still required for true security)
-        (function() {
-            var role = localStorage.getItem('user_role');
-            var token = localStorage.getItem('access_token');
+        // UX pre-render routing (server-side API validation still enforces real security)
+        (function () {
+            function getCookieInline(name) {
+                var match = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
+                return match ? decodeURIComponent(match[1]) : '';
+            }
+
+            var role = getCookieInline('badia_role');
             var qs = window.location.search;
-            var isOAuthCallback = qs.indexOf('access_token=') !== -1 || qs.indexOf('code=') !== -1;
-            
-            if (!token && !isOAuthCallback) {
+
+            // Detect Google OAuth callback: backend now uses ?logged_in=1
+            var isOAuthCallback = qs.indexOf('logged_in=1') !== -1;
+
+            if (!role && !isOAuthCallback) {
                 window.location.replace('index.html');
             } else if (role === 'admin' && !isOAuthCallback) {
                 window.location.replace('admin.html' + window.location.hash);
             } else if (isOAuthCallback) {
-                document.documentElement.style.display = 'none'; // Prevent UI flash during OAuth
-                setTimeout(function() { document.documentElement.style.display = ''; }, 5000); // 5s fallback
+                document.documentElement.style.display = 'none';
+                setTimeout(function () { document.documentElement.style.display = ''; }, 5000);
             }
         })();
     </script>
@@ -532,7 +538,8 @@
                                 data-placeholder-en="Type your email to confirm"
                                 data-placeholder-ar="اكتب بريدك الإلكتروني للتأكيد"
                                 placeholder="Type your email to confirm" oninput="checkDeleteConfirmation()"
-                                class="danger-input">
+                                class="danger-input"
+                                data-bwignore="true">
                         </div>
                     </div>
                     <div class="edit-modal-footer" style="margin-top: 1.5rem; display: flex; gap: 10px; justify-content: flex-end;">

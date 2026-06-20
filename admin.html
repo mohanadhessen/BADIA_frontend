@@ -1,10 +1,13 @@
 <!DOCTYPE html><html lang="en"><head>
 <script>
-  // UX pre-render routing
+  // UX pre-render routing (server-side API validation still enforces real security)
   (function() {
-      var role = localStorage.getItem('user_role');
-      var token = localStorage.getItem('access_token');
-      if (!token || role !== 'admin') {
+      function getCookieInline(name) {
+          var match = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
+          return match ? decodeURIComponent(match[1]) : '';
+      }
+      var role = getCookieInline('badia_role');
+      if (role !== 'admin') {
           window.location.replace('account.html' + window.location.hash);
       }
   })();
@@ -16,13 +19,96 @@
 <link rel="apple-touch-icon" href="assets/badia-logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <link rel="stylesheet" href="admin.css?v=1.0.0">
 <script src="config.js?v=1.0.0" defer></script>
 <script src="admin.js?v=1.0.0" defer></script>
+<style>
+  .stat-card-details {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-3);
+    font-weight: 500;
+  }
+  .stat-detail-row strong {
+    color: var(--text-2);
+  }
+  .dash-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .pie-layout-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 4px 0;
+  }
+  .pie-chart-container {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .pie-legend-container-new {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 130px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .pie-legend-container-new::-webkit-scrollbar {
+    width: 4px;
+  }
+  .pie-legend-container-new::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .pie-legend-container-new::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .pie-legend-item-new {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-2);
+  }
+  .pie-legend-dot-new {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .pie-legend-name-new {
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pie-legend-value-new {
+    font-family: 'Geist Mono', monospace;
+    font-weight: 600;
+    color: var(--text-3);
+    font-size: 0.74rem;
+  }
+</style>
 </head>
 <body>
 <div class="admin-wrap">
@@ -125,108 +211,121 @@
 
   <div class="content">
 
-    <div class="page active" id="page-dashboard">
-      <div class="page-header">
-        <div class="page-header-row">
-          <div>
-            <h1>Dashboard</h1>
-            <p>Welcome back, Administrator. Here's what's happening today.</p>
-          </div>
+    <div class="page active" id="page-dashboard" style="padding:4px 12px 36px;max-width:1200px;margin:0 auto;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:26px;">
+        <div>
+          <h1 style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:32px;margin:0 0 4px;letter-spacing:.01em;color:var(--text-primary);">Good evening, Administrator</h1>
+          <div style="color:var(--text-secondary);font-size:13.5px;">Saturday, 20 June — here's where things stand</div>
         </div>
+
       </div>
 
-      <div class="dash-overview">
-        <div class="dash-overview-left">
-          <!-- Numeric Cards Grid: 3 columns -->
-          <div class="stats-grid-3col">
-            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total Users</div><div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
-                  <i class="fas fa-users"></i>
-                </div></div><div class="stat-card-body"><div class="stat-value" id="statUsers">—</div></div></div>
-            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Active Plans</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-                  <i class="fas fa-check-circle"></i>
-                </div></div><div class="stat-card-body"><div class="stat-value" id="statActive">—</div></div></div>
-            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total Revenue</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-                  <i class="fas fa-dollar-sign"></i>
-                </div></div><div class="stat-card-body"><div class="stat-value green" id="statRevenueVal" style="color:var(--green)">—</div></div></div>
-            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Total Requests</div><div class="stat-icon-box" style="background:var(--accent-dim);color:#9a7920">
-                  <i class="fas fa-clipboard-list"></i>
-                </div></div><div class="stat-card-body"><div class="stat-value" id="statRequests">—</div></div></div>
-            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Pending Review</div><div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
-                  <i class="fas fa-clock"></i>
-                </div></div><div class="stat-card-body"><div class="stat-value" id="statPending">—</div></div></div>
-            <div class="stat-card"><div class="stat-card-header"><div class="stat-label">Approved</div><div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
-                  <i class="fas fa-thumbs-up"></i>
-                </div></div><div class="stat-card-body"><div class="stat-value" id="statApproved">—</div></div></div>
-          </div>
-
-          <!-- Telemetry Cards Grid: 2 columns -->
-          <div class="stats-grid-2col" style="margin-top: 16px;">
-            <div class="stat-card stat-card-storage"><div class="stat-card-header"><div class="stat-label">Storage Used</div><div class="stat-icon-box" style="background:rgba(16,185,129,.08);color:var(--green)">
-                  <i class="fas fa-database"></i>
-                </div></div><div class="stat-card-body"><div class="stat-value" id="statStorageVal">—</div><div class="storage-bar-wrap">
-                    <div class="storage-bar"><div class="storage-bar-fill" id="statStorageBar" style="width:0%"></div></div>
-                    <div class="storage-details">
-                      <span id="statStorageSub">Loading…</span>
-                      <span id="statStoragePct"></span>
-                    </div>
-                  </div></div></div>
-            
-            <div class="stat-card stat-card-emails"><div class="stat-card-header"><div class="stat-label">Total Emails sent</div><div class="stat-icon-box" style="background:rgba(59,130,246,.08);color:#3b82f6">
-                  <i class="fas fa-envelope"></i>
-                </div></div><div class="stat-card-body"><div class="stat-value" id="statEmailsVal">—</div>
-                  <div class="email-limits-wrap">
-                    <div class="email-limit-row">
-                      <div class="limit-labels">
-                        <span class="limit-name">Monthly Limit</span>
-                        <span id="statEmailMonthPct" class="limit-pct">— / —</span>
-                      </div>
-                      <div class="storage-bar">
-                        <div class="storage-bar-fill" id="statEmailMonthBar" style="width:0%"></div>
-                      </div>
-                    </div>
-                    <div class="email-limit-row">
-                      <div class="limit-labels">
-                        <span class="limit-name">Daily Limit</span>
-                        <span id="statEmailDayPct" class="limit-pct">— / —</span>
-                      </div>
-                      <div class="storage-bar">
-                        <div class="storage-bar-fill" id="statEmailDayBar" style="width:0%"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div></div>
-          </div>
-        </div>
-
-        <div class="dash-pie-card">
-          <div class="stat-card-header">
-            <div class="stat-label">Plan Distribution</div>
-            <div class="stat-icon-box" style="background:rgba(192,192,192,0.15);color:#C0C0C0">
-              <i class="fas fa-chart-pie"></i>
+      <!-- HERO ROW -->
+      <div class="hero-row">
+        <div class="card hero-card">
+          <div class="hero-top">
+            <div>
+              <div class="hero-label">Total revenue · this month</div>
+              <div class="hero-number" id="statRevenueVal">— <span class="unit">KWD</span></div>
             </div>
           </div>
-          <div class="stat-card-body" id="planDistribution">
+          <div class="hero-foot">
+            <div class="stat">Payments this month <b class="num" id="statPayThisMonth">—</b></div>
+            <div class="stat">This month rev: <b class="num" id="statRevMonth">—</b> KWD</div>
+          </div>
+        </div>
+
+        <div class="side-stack">
+          <div class="card mini-card">
+            <div class="mini-top">
+              <div class="mini-label">Active plans</div>
+              <div class="mini-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.2-5.4 3.2 1.3-6L3.3 9.2l6.1-.6z"/></svg></div>
+            </div>
+            <div class="mini-value num" id="statActive">—</div>
+
+            <div class="mini-foot" id="statPlansSub">Loading plans…</div>
+          </div>
+          <div class="card mini-card">
+            <div class="mini-top">
+              <div class="mini-label">Total users</div>
+              <div class="mini-icon good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
+            </div>
+            <div class="mini-value num" id="statUsers">—</div>
+
+            <div class="mini-foot" id="statUsersSub">Loading users…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAT STRIP -->
+      <div class="stat-strip">
+        <div class="stat-chip">
+          <div class="chip-top"><span class="chip-label">Total requests</span><span class="chip-dot" style="background:#A9802F"></span></div>
+          <div class="chip-value num" id="statRequests">—</div>
+          <div class="chip-sub"><span id="statReqApprovedSub">—</span> approved &middot; <span id="statReqRejectedSub">—</span> rejected</div>
+        </div>
+        <div class="stat-chip">
+          <div class="chip-top"><span class="chip-label">Pending requests</span><span class="chip-dot" style="background:#B8862E"></span></div>
+          <div class="chip-value num" id="statPending">—</div>
+          <div class="chip-sub">awaiting review</div>
+        </div>
+        <div class="stat-chip">
+          <div class="chip-top"><span class="chip-label">Approved requests</span><span class="chip-dot" style="background:#3F7A5C"></span></div>
+          <div class="chip-value num" id="statApproved">—</div>
+          <div class="chip-sub">approved requests</div>
+        </div>
+        <div class="stat-chip">
+          <div class="chip-top"><span class="chip-label">User reviews</span><span class="chip-dot" style="background:#7A6BAE"></span></div>
+          <div class="chip-value num" id="statReviewsVal">—</div>
+          <div class="chip-sub"><span id="statReviewsPublished">—</span> published &middot; <span id="statReviewsPending">—</span> pending</div>
+        </div>
+      </div>
+
+      <!-- TWO COL -->
+      <div class="two-col">
+        <div class="card">
+          <h3>System usage</h3>
+          <div class="combo-row">
+            <div class="combo-block">
+              <div class="combo-head"><span>Storage used</span><b id="statStoragePct">—</b></div>
+              <div class="mini-bar" style="height:7px"><span id="statStorageBar" style="width:0%"></span></div>
+              <div class="mini-foot" id="statStorageSub" style="margin-top:8px">Loading files...</div>
+            </div>
+            <div class="combo-block">
+              <div class="combo-head"><span>Emails — daily limit</span><b id="statEmailDayPct">—</b></div>
+              <div class="mini-bar" style="height:7px"><span id="statEmailDayBar" style="width:0%;background:#B8862E"></span></div>
+              <div class="mini-foot" id="statEmailMonthPct" style="margin-top:8px">Monthly: — sent</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Plan distribution</h3>
+          <div class="donut-wrap" id="planDistribution">
             <div style="color:var(--text-3);font-size:.82rem">Loading…</div>
           </div>
         </div>
       </div>
 
-      <div class="dash-grid">
-        <div class="dash-card">
-          <div class="dash-card-header">
-            <span class="dash-card-title">Pending Requests</span>
-            <span class="dash-card-link" onclick="showPage('requests')">View all →</span>
-          </div>
-          <div class="dash-card-body" id="dashPendingList">
+      <!-- LISTS -->
+      <div class="lists">
+        <div class="card">
+          <div class="list-head"><h3>Pending requests</h3><span style="font-size:12px;color:var(--gold);font-weight:600;cursor:pointer" onclick="showPage('requests')">View all →</span></div>
+          <div class="dash-card-body" id="dashPendingList" style="padding:0">
             <div style="color:var(--text-3);font-size:.82rem">Loading…</div>
           </div>
         </div>
-        <div class="dash-card">
-          <div class="dash-card-header">
-            <span class="dash-card-title">Recent Sign-ups</span>
-            <span class="dash-card-link" onclick="showPage('users')">View all →</span>
+
+        <div class="card">
+          <div class="list-head"><h3>Recent sign-ups</h3><span style="font-size:12px;color:var(--gold);font-weight:600;cursor:pointer" onclick="showPage('users')">View all →</span></div>
+          <div class="dash-card-body" id="recentSignups" style="padding:0">
+            <div style="color:var(--text-3);font-size:.82rem">Loading…</div>
           </div>
-          <div class="dash-card-body" id="recentSignups">
+        </div>
+
+        <div class="card">
+          <div class="list-head"><h3>Pending reviews</h3><span style="font-size:12px;color:var(--gold);font-weight:600;cursor:pointer" onclick="showPage('reviews')">View all →</span></div>
+          <div class="dash-card-body" id="dashPendingReviewsList" style="padding:0">
             <div style="color:var(--text-3);font-size:.82rem">Loading…</div>
           </div>
         </div>
@@ -261,7 +360,10 @@
       <div class="filter-bar">
         <div class="search-box" style="flex:1;min-width:180px;position:relative;">
           <i class="fas fa-search" style="color:#a0a5b1; font-size:12px; margin-right:4px;"></i>
-          <input type="text" id="reqSearch" placeholder="Search by user, email, type…" oninput="handleSectionAutocomplete(this.value, 'request')" autocomplete="off">
+          <input type="text" id="reqSearch" placeholder="Search by user, email, type…" oninput="handleSectionAutocomplete(this.value, 'request')" autocomplete="off" data-bwignore="true" style="flex:1;">
+          <button class="search-go-btn" onclick="triggerMobileSearch('reqSearch', 'request')" title="Search">
+            Search
+          </button>
           <div id="requestSearchDropdown" class="autofill-dropdown" style="display: none;"></div>
         </div>
         <div class="filter-divider"></div>
@@ -324,14 +426,17 @@
       <div class="filter-bar">
         <div class="search-box" style="flex:1;min-width:180px;position:relative;">
           <i class="fas fa-search" style="color:#a0a5b1; font-size:12px; margin-right:4px;"></i>
-          <input type="text" id="userSearch" placeholder="Search by name, email, ID…" oninput="handleSectionAutocomplete(this.value, 'user')" autocomplete="off">
+          <input type="text" id="userSearch" placeholder="Search by name, email, ID…" oninput="handleSectionAutocomplete(this.value, 'user')" autocomplete="off" data-bwignore="true" style="flex:1;">
+          <button class="search-go-btn" onclick="triggerMobileSearch('userSearch', 'user')" title="Search">
+            Search
+          </button>
           <div id="userSearchDropdown" class="autofill-dropdown" style="display: none;"></div>
         </div>
         <div class="filter-divider"></div>
-        <select class="filter-select" id="planFilter" onchange="filterUsers(document.getElementById('userSearch').value)">
+        <select class="filter-select" id="planFilter" onchange="loadUsers(1, false, true)">
           <option value="">All Plans</option>
         </select>
-        <select class="filter-select" id="statusFilter" onchange="filterUsers(document.getElementById('userSearch').value)">
+        <select class="filter-select" id="statusFilter" onchange="loadUsers(1, false, true)">
           <option value="">All Statuses</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
@@ -386,13 +491,16 @@
       <div class="filter-bar">
         <div class="search-box" style="flex:1;min-width:180px;position:relative;">
           <i class="fas fa-search" style="color:#a0a5b1; font-size:12px; margin-right:4px;"></i>
-          <input type="text" id="revSearch" placeholder="Search by user, email, review text…" oninput="handleSectionAutocomplete(this.value, 'review')" autocomplete="off">
+          <input type="text" id="revSearch" placeholder="Search by user, email, review text…" oninput="handleSectionAutocomplete(this.value, 'review')" autocomplete="off" data-bwignore="true" style="flex:1;">
+          <button class="search-go-btn" onclick="triggerMobileSearch('revSearch', 'review')" title="Search">
+            Search
+          </button>
           <div id="reviewSearchDropdown" class="autofill-dropdown" style="display: none;"></div>
         </div>
         <div class="filter-divider"></div>
         <select class="filter-select" id="revStatusFilter" onchange="filterReviews()">
           <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
+          <option value="pending" selected>Pending</option>
           <option value="accepted">Accepted</option>
         </select>
         <select class="filter-select" id="revRatingFilter" onchange="filterReviews()">
@@ -513,7 +621,7 @@
             <div class="form-col">
               <label class="form-label">User email <span class="req">*</span></label>
               <div style="position: relative; width: 100%;">
-                <input class="form-input" type="email" id="sub-email" placeholder="info@badiaprojectmanagement.com" oninput="lookupUserByEmail(this.value); handleSectionAutocomplete(this.value, 'create-sub')" autocomplete="off">
+                <input class="form-input" type="email" id="sub-email" placeholder="info@badiaprojectmanagement.com" oninput="lookupUserByEmail(this.value); handleSectionAutocomplete(this.value, 'create-sub')" autocomplete="off" data-bwignore="true">
                 <div id="createSubSearchDropdown" class="autofill-dropdown" style="display: none;"></div>
                 <div id="payUserLookupResult" style="position: absolute; top: 100%; left: 0; font-size: 0.74rem; font-weight: 500; margin-top: 2px; white-space: nowrap; z-index: 5;"></div>
               </div>
@@ -533,12 +641,12 @@
             </div>
             <div class="form-col">
               <label class="form-label">Amount (KWD) <span class="req">*</span></label>
-              <input class="form-input" type="number" id="sub-amount" placeholder="0.000" step="0.001">
+              <input class="form-input" type="number" id="sub-amount" placeholder="0.000" step="0.001" data-bwignore="true">
             </div>
             <div class="form-col">
               <label class="form-label">Start date <span class="req">*</span></label>
               <div class="input-with-icon flatpickr" id="start-date-container" style="position: relative; display: flex; align-items: center; width: 100%;">
-                <input class="form-input" type="text" id="sub-start" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="" onchange="autoFillPlanAmount()">
+                <input class="form-input" type="text" id="sub-start" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="" onchange="autoFillPlanAmount()" data-bwignore="true">
                 <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle="">
                   <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
                 </a>
@@ -547,7 +655,7 @@
             <div class="form-col">
               <label class="form-label">End date <span class="req">*</span></label>
               <div class="input-with-icon flatpickr" id="end-date-container" style="position: relative; display: flex; align-items: center; width: 100%;">
-                <input class="form-input" type="text" id="sub-end" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="">
+                <input class="form-input" type="text" id="sub-end" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="" data-bwignore="true">
                 <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle="">
                   <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
                 </a>
@@ -566,11 +674,15 @@
 
       <!-- RECENT PAYMENTS -->
       <div class="filter-bar">
-        <div class="filter-search" style="position: relative;">
-          <i class="fas fa-search"></i>
-          <input type="text" id="paySearch" placeholder="Search payments by user email, plan name, ID…" oninput="handleSectionAutocomplete(this.value, 'payment')" autocomplete="off">
+        <div class="search-box" style="flex:1;min-width:180px;position:relative;">
+          <i class="fas fa-search" style="color:#a0a5b1; font-size:12px; margin-right:4px;"></i>
+          <input type="text" id="paySearch" placeholder="Search payments by user email, plan name, ID…" oninput="handleSectionAutocomplete(this.value, 'payment')" autocomplete="off" data-bwignore="true" style="flex:1;">
+          <button class="search-go-btn" onclick="triggerMobileSearch('paySearch', 'payment')" title="Search">
+            Search
+          </button>
           <div id="paymentSearchDropdown" class="autofill-dropdown" style="display: none;"></div>
         </div>
+        <div class="filter-divider"></div>
         <select class="filter-select" id="payStatusFilter" onchange="filterPayments()">
           <option value="">All statuses</option>
           <option value="paid">Paid</option>
@@ -591,6 +703,18 @@
       <div class="payments-list" id="paymentsListGrid">
         <div style="text-align:center;color:var(--text-muted);padding:20px 0;">Loading recent payments…</div>
       </div>
+      <div class="pagination-bar" id="payPaginationBar">
+        <span class="pagination-info" id="payPaginationInfo">Page 1</span>
+        <div class="pagination-controls">
+          <button class="pagination-page" id="payPrevBtn" onclick="changePayPage(_payPage - 1)" disabled="">
+            <i class="fas fa-chevron-left" style="font-size:11px;"></i>
+          </button>
+          <span class="pagination-page current" id="payPageNum">1</span>
+          <button class="pagination-page" id="payNextBtn" onclick="changePayPage(_payPage + 1)">
+            <i class="fas fa-chevron-right" style="font-size:11px;"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="page" id="page-settings">
@@ -600,7 +724,7 @@
           <div class="form-section-title">API Configuration</div>
           <div class="form-group">
             <label class="form-label">API Base URL</label>
-            <input class="form-input" id="settingsApiBase" type="text" value="http://127.0.0.1:8000">
+            <input class="form-input" id="settingsApiBase" type="text" value="http://127.0.0.1:8000" data-bwignore="true">
           </div>
         </div>
         <div class="form-section">
@@ -608,11 +732,11 @@
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Admin Email</label>
-              <input class="form-input" type="email" placeholder="admin@badiaprojectmanagement.com">
+              <input class="form-input" type="email" placeholder="admin@badiaprojectmanagement.com" data-bwignore="true">
             </div>
             <div class="form-group">
               <label class="form-label">New Password</label>
-              <input class="form-input" type="password" placeholder="Leave blank to keep current">
+              <input class="form-input" type="password" placeholder="Leave blank to keep current" data-bwignore="true">
             </div>
           </div>
         </div>
@@ -689,7 +813,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Amount (KWD) <span class="req">*</span></label>
-          <input class="form-input" id="editPaymentAmount" type="number" step="0.001" placeholder="0.000">
+          <input class="form-input" id="editPaymentAmount" type="number" step="0.001" placeholder="0.000" data-bwignore="true">
         </div>
         <div class="form-group">
           <label class="form-label">Status <span class="req">*</span></label>
@@ -704,7 +828,7 @@
         <div class="form-group">
           <label class="form-label">Start Date <span class="req">*</span></label>
           <div class="input-with-icon flatpickr" id="edit-payment-start-container" style="position: relative; display: flex; align-items: center; width: 100%;">
-            <input class="form-input" type="text" id="editPaymentStart" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="">
+            <input class="form-input" type="text" id="editPaymentStart" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="" data-bwignore="true">
             <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle="">
               <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
             </a>
@@ -713,7 +837,7 @@
         <div class="form-group">
           <label class="form-label">End Date <span class="req">*</span></label>
           <div class="input-with-icon flatpickr" id="edit-payment-end-container" style="position: relative; display: flex; align-items: center; width: 100%;">
-            <input class="form-input" type="text" id="editPaymentEnd" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="">
+            <input class="form-input" type="text" id="editPaymentEnd" placeholder="YYYY-MM-DD" style="padding-left: 11px; padding-right: 33px;" data-input="" data-bwignore="true">
             <a style="position: absolute; right: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center;" data-toggle="">
               <i class="fa-regular fa-calendar" style="font-size: 14px;"></i>
             </a>
@@ -784,31 +908,31 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">First Name</label>
-          <input class="form-input" id="editFirstName" type="text" placeholder="First name">
+          <input class="form-input" id="editFirstName" type="text" placeholder="First name" data-bwignore="true">
         </div>
         <div class="form-group">
           <label class="form-label">Last Name</label>
-          <input class="form-input" id="editLastName" type="text" placeholder="Last name">
+          <input class="form-input" id="editLastName" type="text" placeholder="Last name" data-bwignore="true">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Company Name</label>
-          <input class="form-input" id="editCompanyName" type="text" placeholder="Company Name">
+          <input class="form-input" id="editCompanyName" type="text" placeholder="Company Name" data-bwignore="true">
         </div>
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input class="form-input" id="editEmail" type="email" placeholder="info@badiaprojectmanagement.com">
+          <input class="form-input" id="editEmail" type="email" placeholder="info@badiaprojectmanagement.com" data-bwignore="true">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Phone</label>
-          <input class="form-input" id="editPhone" type="tel" placeholder="+965 XXXX XXXX">
+          <input class="form-input" id="editPhone" type="tel" placeholder="+965 XXXX XXXX" data-bwignore="true">
         </div>
         <div class="form-group">
           <label class="form-label">New Password</label>
-          <input class="form-input" id="editPassword" type="text" placeholder="Leave blank to keep current">
+          <input class="form-input" id="editPassword" type="text" placeholder="Leave blank to keep current" data-bwignore="true">
         </div>
       </div>
       <div class="form-row">
@@ -865,7 +989,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">Plan Name *</label>
-          <input class="form-input" id="editPlanName" type="text" placeholder="e.g. Professional">
+          <input class="form-input" id="editPlanName" type="text" placeholder="e.g. Professional" data-bwignore="true">
           <div id="errPlanName" style="font-size:.75rem;color:var(--red);margin-top:3px"></div>
         </div>
       </div>
@@ -875,12 +999,12 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Monthly Price *</label>
-            <input class="form-input" id="editPlanMonthly" type="number" step="0.001" min="0" placeholder="49.900">
+            <input class="form-input" id="editPlanMonthly" type="number" step="0.001" min="0" placeholder="49.900" data-bwignore="true">
             <div id="errPlanMonthly" style="font-size:.75rem;color:var(--red);margin-top:3px"></div>
           </div>
           <div class="form-group">
             <label class="form-label">Yearly Price *</label>
-            <input class="form-input" id="editPlanYearly" type="number" step="0.001" min="0" placeholder="509.000">
+            <input class="form-input" id="editPlanYearly" type="number" step="0.001" min="0" placeholder="509.000" data-bwignore="true">
           </div>
         </div>
       </div>
@@ -895,11 +1019,11 @@
           <div class="fb-inputs-row">
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label" style="font-size:.72rem">English Name *</label>
-              <input type="text" class="form-input" id="fbInputEn" placeholder="e.g. 10 Users" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}">
+              <input type="text" class="form-input" id="fbInputEn" placeholder="e.g. 10 Users" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}" data-bwignore="true">
             </div>
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label" style="font-size:.72rem">Arabic Name *</label>
-              <input type="text" class="form-input" id="fbInputAr" placeholder="مثال: ١٠ مستخدمين" style="direction:rtl" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}">
+              <input type="text" class="form-input" id="fbInputAr" placeholder="مثال: ١٠ مستخدمين" style="direction:rtl" onkeydown="if(event.key==='Enter'){event.preventDefault();addFeatureFromBuilder()}" data-bwignore="true">
             </div>
             <div class="form-group" style="margin-bottom:0; display:flex; flex-direction:column; align-items:center">
               <label class="form-label" style="font-size:.72rem">Enabled</label>

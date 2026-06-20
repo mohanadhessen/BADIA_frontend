@@ -40,43 +40,6 @@ function handleSuccessfulAuth(role) {
 
         // API_BASE is declared in script.js — do not redeclare here
 
-        // ===== Language for auth page =====
-        function initAuthLang() {
-            const saved = localStorage.getItem('badia_lang') || 'en';
-            setAuthLang(saved, false);
-        }
-
-        
-
-        function setAuthLang(lang, save = true) {
-            document.documentElement.setAttribute('lang', lang);
-            document.documentElement.setAttribute('dir', 'ltr');
-
-            document.querySelectorAll('[data-en][data-ar]').forEach(el => {
-                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
-                const val = el.getAttribute(`data-${lang}`);
-                if (el.children.length > 0 && val.includes('<')) {
-                    el.innerHTML = val;
-                } else {
-                    el.textContent = val;
-                }
-            });
-
-            document.querySelectorAll('[data-placeholder-en][data-placeholder-ar]').forEach(el => {
-                el.placeholder = el.getAttribute(`data-placeholder-${lang}`);
-            });
-
-            const toggleBtn = document.getElementById('authLangToggle');
-            if (toggleBtn) toggleBtn.textContent = lang === 'en' ? 'عربي' : 'English';
-
-            if (save) localStorage.setItem('badia_lang', lang);
-        }
-
-        function toggleAuthLang() {
-            const current = document.documentElement.getAttribute('lang') || 'en';
-            setAuthLang(current === 'en' ? 'ar' : 'en');
-        }
-
         /* Tab switch */
         function switchTab(tab, event) {
             if (event && typeof event.preventDefault === 'function') {
@@ -193,10 +156,7 @@ function handleSuccessfulAuth(role) {
         function handleGoogleAuth() {
             window.location.href = `${API_BASE}/api/v1/auth/google`;
         }
-        const googleLoginBtn = document.getElementById('googleLoginBtn');
-        if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleAuth);
-        const googleRegBtn = document.getElementById('googleRegBtn');
-        if (googleRegBtn) googleRegBtn.addEventListener('click', handleGoogleAuth);
+        // Google button listeners will be attached in initAuthForm()
 
         /* Handle URL params (OAuth, Verification, Password Reset) on page load */
         async function handleURLParams() {
@@ -215,27 +175,19 @@ function handleSuccessfulAuth(role) {
                 window.history.replaceState({}, document.title, newUrl);
             }
             
-            // 1. Google OAuth Callback (Tokens in URL)
-            const accessToken = params.get('access_token');
-            const refreshToken = params.get('refresh_token');
-            if (accessToken) {
-                if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                localStorage.setItem('access_token', accessToken);
-                if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
-                const lang = document.documentElement.getAttribute('lang') || 'en';
-                showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
-                // Clean URL query parameters
-                window.history.replaceState({}, document.title, window.location.pathname);
-                // Fetch user profile to determine role for redirect
+            // 1. Google OAuth Callback (logged_in=1 in URL)
+            const loggedIn = params.get('logged_in');
+            if (loggedIn === '1') {
                 try {
                     const res = await fetch(`${API_BASE}/api/v1/users/me`, {
-                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                        credentials: 'include',
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        const role = data.user_info?.role;
-                        if (role) localStorage.setItem('user_role', role);
+                        const role = data.user_info?.role || 'user';
+                        document.cookie = `badia_role=${role}; path=/; max-age=2592000; samesite=lax`;
                         document.documentElement.style.display = '';
+                        window.history.replaceState({}, document.title, window.location.pathname);
                         window.location.replace(role === 'admin' ? 'admin.html' : 'account.html');
                     } else {
                         document.documentElement.style.display = '';
@@ -244,42 +196,6 @@ function handleSuccessfulAuth(role) {
                 } catch {
                     document.documentElement.style.display = '';
                     window.location.replace('account.html');
-                }
-                return;
-            }
-
-            // 1b. Google OAuth Callback (Code in URL)
-            const code = params.get('code');
-            if (code) {
-                const lang = document.documentElement.getAttribute('lang') || 'en';
-                showToast(lang === 'ar' ? 'جاري التحقق من حساب Google...' : 'Authenticating with Google...', 'success');
-                try {
-                    const res = await fetch(`${API_BASE}/api/v1/auth/google/callback?code=${code}`, {
-                        method: 'GET'
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        const authHeader = res.headers.get('Authorization') || res.headers.get('authorization');
-                        const token = authHeader ? authHeader.replace('Bearer ', '') : data.access_token;
-                        if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                        if (token) localStorage.setItem('access_token', token);
-                        if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-                        const role = data.user_info?.role;
-                        if (role) localStorage.setItem('user_role', role);
-                        showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!', 'success');
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        document.documentElement.style.display = '';
-                        window.location.replace(role === 'admin' ? 'admin.html' : 'account.html');
-                    } else {
-                        const err = await res.json();
-                        showToast(err.detail || (lang === 'ar' ? 'فشل تسجيل الدخول باستخدام Google' : 'Google sign-in failed'), 'error');
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        document.documentElement.style.display = '';
-                    }
-                } catch {
-                    showToast(lang === 'ar' ? 'حدث خطأ في الاتصال بالخادم' : 'Connection error', 'error');
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    document.documentElement.style.display = '';
                 }
                 return;
             }
@@ -293,7 +209,8 @@ function handleSuccessfulAuth(role) {
                 try {
                     const res = await fetch(`${API_BASE}/api/v1/auth/verify-email`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
                         body: JSON.stringify({ token: verifyToken })
                     });
                     if (res.ok) {
@@ -337,7 +254,7 @@ function handleSuccessfulAuth(role) {
         }
 
         /* Login form — hits the backend */
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        async function onLoginFormSubmit(e) {
             e.preventDefault();
             let valid = true;
             const lang = document.documentElement.getAttribute('lang') || 'en';
@@ -364,35 +281,24 @@ function handleSuccessfulAuth(role) {
             try {
                 const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
                     body: JSON.stringify({ email: email.value, password: pass.value })
                 });
 
                 if (res.ok) {
-                    const data = await res.json();
-                    const authHeader = res.headers.get('Authorization') || res.headers.get('authorization');
-                    const token = authHeader ? authHeader.replace('Bearer ', '') : data.access_token;
                     if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                    if (token) localStorage.setItem('access_token', token);
-                    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-
-                    // Try to get role from login response first
-                    let role = data.user_info?.role;
-
-                    // If login response doesn't include role, fetch it from /users/me
-                    if (!role && token) {
-                        try {
-                            const meRes = await fetch(`${API_BASE}/api/v1/users/me`, {
-                                headers: { 'Authorization': `Bearer ${token}` }
-                            });
-                            if (meRes.ok) {
-                                const meData = await meRes.json();
-                                role = meData.user_info?.role;
-                            }
-                        } catch { /* ignore, will default to account.html */ }
+                    
+                    // Fetch user info to get the role since login response doesn't contain it
+                    const userRes = await fetch(`${API_BASE}/api/v1/users/me`, { credentials: 'include' });
+                    let role = 'user';
+                    if (userRes.ok) {
+                        const userData = await userRes.json();
+                        role = userData.user_info?.role || 'user';
+                        document.cookie = `badia_role=${role}; path=/; max-age=2592000; samesite=lax`;
+                        if (typeof setCachedUser === 'function') setCachedUser(userData.user_info);
                     }
 
-                    if (role) localStorage.setItem('user_role', role);
                     showToast(lang === 'ar' ? 'تم تسجيل الدخول بنجاح! جاري التحويل...' : 'Signed in successfully! Redirecting...', 'success');
                     setTimeout(() => handleSuccessfulAuth(role), 1500);
 
@@ -413,10 +319,10 @@ function handleSuccessfulAuth(role) {
                 btn.disabled = false;
                 btn.querySelector('span').textContent = lang === 'ar' ? 'دخول إلى الحساب →' : 'Sign In →';
             }
-        });
+        }
 
         /* Register form — hits POST /api/v1/auth/register_local */
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        async function onRegisterFormSubmit(e) {
             e.preventDefault();
             const lang = document.documentElement.getAttribute('lang') || 'en';
 
@@ -461,7 +367,8 @@ function handleSuccessfulAuth(role) {
             try {
                 const res = await fetch(`${API_BASE}/api/v1/auth/register_local`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
                     body: JSON.stringify({
                         first_name: firstName,
                         last_name: lastName,
@@ -476,10 +383,9 @@ function handleSuccessfulAuth(role) {
 
                 if (res.ok || res.status === 201) {
                     if (typeof clearUserDataCache === 'function') clearUserDataCache();
-                    localStorage.setItem('access_token', data.access_token);
-                    if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
+                    const role = data.role || (data.user_info ? data.user_info.role : 'user');
                     showToast(lang === 'ar' ? 'تم إنشاء الحساب بنجاح! جاري التحويل...' : 'Account created successfully! Redirecting...', 'success');
-                    setTimeout(() => handleSuccessfulAuth('user'), 1500);
+                    setTimeout(() => handleSuccessfulAuth(role), 1500);
                 } else {
                     showToast(data.detail || (lang === 'ar' ? 'حدث خطأ أثناء التسجيل' : 'Registration error'), 'error');
                     btn.disabled = false;
@@ -490,11 +396,11 @@ function handleSuccessfulAuth(role) {
                 btn.disabled = false;
                 btn.querySelector('span').textContent = lang === 'ar' ? 'إنشاء الحساب →' : 'Create Account →';
             }
-        });
+        }
 
         /* Forgot password form */
         let resetEmailCooldown = 0;
-        document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+        async function onForgotFormSubmit(e) {
             e.preventDefault();
             if (resetEmailCooldown > 0) return;
 
@@ -513,7 +419,8 @@ function handleSuccessfulAuth(role) {
             try {
                 const res = await fetch(`${API_BASE}/api/v1/auth/forgot-password`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
                     body: JSON.stringify({ email })
                 });
 
@@ -546,13 +453,12 @@ function handleSuccessfulAuth(role) {
                 btn.disabled = false;
                 btn.querySelector('span').textContent = lang === 'ar' ? 'إرسال رابط إعادة التعيين →' : 'Send Reset Link →';
             }
-        });
+        }
 
         /* Reset Password with Token form */
         const resetTokenForm = document.getElementById('resetTokenForm');
-        if (resetTokenForm) {
-            resetTokenForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
+        async function onResetTokenFormSubmit(e) {
+            e.preventDefault();
                 const lang = document.documentElement.getAttribute('lang') || 'en';
                 const token = document.getElementById('resetToken').value.trim();
                 const newPassword = document.getElementById('resetNewPass').value;
@@ -573,7 +479,8 @@ function handleSuccessfulAuth(role) {
                 try {
                     const res = await fetch(`${API_BASE}/api/v1/auth/reset-password`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
                         body: JSON.stringify({ token, new_password: newPassword })
                     });
 
@@ -595,18 +502,40 @@ function handleSuccessfulAuth(role) {
                 }
                 btn.disabled = false;
                 btn.querySelector('span').textContent = lang === 'ar' ? 'إعادة تعيين كلمة المرور →' : 'Reset Password →';
-            });
+            }
+
+        let authFormInitialized = false;
+        function initAuthForm() {
+            if (authFormInitialized) return;
+            const loginForm = document.getElementById('loginForm');
+            if (!loginForm) return;
+            authFormInitialized = true;
+
+            const googleLoginBtn = document.getElementById('googleLoginBtn');
+            if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleAuth);
+            const googleRegBtn = document.getElementById('googleRegBtn');
+            if (googleRegBtn) googleRegBtn.addEventListener('click', handleGoogleAuth);
+
+            loginForm.addEventListener('submit', onLoginFormSubmit);
+            
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) registerForm.addEventListener('submit', onRegisterFormSubmit);
+
+            const forgotForm = document.getElementById('forgotForm');
+            if (forgotForm) forgotForm.addEventListener('submit', onForgotFormSubmit);
+
+            const resetTokenForm = document.getElementById('resetTokenForm');
+            if (resetTokenForm) resetTokenForm.addEventListener('submit', onResetTokenFormSubmit);
         }
 
         handleURLParams();
         // Init
-        initAuthLang();
+        initAuthForm();
         // ===== Nav Auth & Service Gates (Moved from script.js) =====
-        window.handlePaymentClick = function(url) { if (localStorage.getItem('access_token')) { window.open(url, '_blank'); } else { if(typeof openAuthModal === 'function') { openAuthModal('login', 'payment'); } } };
+        window.handlePaymentClick = function(url) { if (isLoggedIn()) { window.open(url, '_blank'); } else { if(typeof openAuthModal === 'function') { openAuthModal('login', 'payment'); } } };
 
         window.handleServiceRequest = function(serviceType) {
-            var isLoggedIn = !!localStorage.getItem('access_token');
-            if (isLoggedIn) {
+            if (isLoggedIn()) {
                 var destinations = {
                     partnership: 'account.html#partnership',
                     feasibility: 'account.html#feasibility'
@@ -622,11 +551,11 @@ function handleSuccessfulAuth(role) {
         window.updateNavAuthLink = function() {
             const desktopAuth = document.getElementById('navAuthDesktop');
             const mobileAuth = document.getElementById('navMobileAuth');
-            const token = localStorage.getItem('access_token');
+            const userLoggedIn = isLoggedIn();
             const lang = document.documentElement.getAttribute('lang') || 'en';
 
-            if (token) {
-                const role = localStorage.getItem('user_role');
+            if (userLoggedIn) {
+                const role = getUserRole();
                 const targetUrl = role === 'admin' ? 'admin.html' : 'account.html';
 
                 // Logged in → replace both auth zones with a single link
@@ -663,8 +592,7 @@ function handleSuccessfulAuth(role) {
         };
 
         window.updateServiceGates = function() {
-            const token = localStorage.getItem('access_token');
-            const isLoggedIn = !!token;
+            const userLoggedIn = isLoggedIn();
             const lang = document.documentElement.getAttribute('lang') || 'en';
 
             document.querySelectorAll('.service-gate').forEach(gate => {
@@ -673,7 +601,7 @@ function handleSuccessfulAuth(role) {
                 const cta = gate.querySelector('.service-gate-cta');
                 if (!cta) return;
 
-                if (isLoggedIn) {
+                if (userLoggedIn) {
                     gate.classList.add('gate-open');
                     gate.classList.remove('gate-locked');
 
@@ -728,3 +656,49 @@ function handleSuccessfulAuth(role) {
                 }
             });
         };
+        // Initialize UI state on script load
+        if (typeof window.updateNavAuthLink === 'function') {
+            window.updateNavAuthLink();
+        }
+
+        // Verify session validity with backend on index page load using the minimal endpoint
+        const isLandingPage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '' || window.location.pathname.endsWith('/');
+        if (isLandingPage) {
+            async function checkSession() {
+                try {
+                    let res = await fetch(`${API_BASE}/api/v1/users/me?minimal=true`, { credentials: 'include' });
+                    if (res.status === 401 && typeof tryRefreshToken === 'function') {
+                        const refreshed = await tryRefreshToken();
+                        if (refreshed) {
+                            res = await fetch(`${API_BASE}/api/v1/users/me?minimal=true`, { credentials: 'include' });
+                        }
+                    }
+                    if (res.ok) {
+                        // User is actually logged in according to source of truth
+                        if (!isLoggedIn()) {
+                            // Missing role cookie, get full profile to set it and update UI
+                            const fullRes = await fetch(`${API_BASE}/api/v1/users/me`, { credentials: 'include' });
+                            if (fullRes.ok) {
+                                const data = await fullRes.json();
+                                const role = data.user_info?.role || 'user';
+                                document.cookie = `badia_role=${role}; path=/; max-age=2592000; samesite=lax`;
+                            }
+                        }
+                        if (typeof window.updateNavAuthLink === 'function') {
+                            window.updateNavAuthLink();
+                        }
+                    } else {
+                        // Not authenticated according to backend
+                        if (isLoggedIn()) {
+                            clearCachedUser();
+                            if (typeof window.updateNavAuthLink === 'function') {
+                                window.updateNavAuthLink();
+                            }
+                        }
+                    }
+                } catch (err) {
+                    // Ignore connection errors
+                }
+            }
+            checkSession();
+        }

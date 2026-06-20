@@ -6,10 +6,13 @@
         let editingReviewId = null;
         let modalSelectedRating = 0;
         let editingRequestId = null;
+        let accountFormsInitialized = false;
 
         // ===== Auth Guard =====
         (function () {
-            if (!localStorage.getItem('access_token')) {
+            // isLoggedIn() checks the non-httpOnly badia_role cookie (UX check only)
+            // The real auth check happens when fetchUserProfile() calls GET /users/me
+            if (!isLoggedIn()) {
                 window.location.href = 'index.html?open_signin=true';
                 return;
             }
@@ -167,9 +170,31 @@
             }
         }
 
+        function initAccountForms() {
+            if (accountFormsInitialized) return;
+            const editProfileForm = document.getElementById('editProfileForm');
+            if (!editProfileForm) return;
+            accountFormsInitialized = true;
+
+            editProfileForm.addEventListener('submit', onEditProfileSubmit);
+
+            const changePasswordForm = document.getElementById('changePasswordForm');
+            if (changePasswordForm) changePasswordForm.addEventListener('submit', onChangePasswordSubmit);
+
+            const partnershipForm = document.getElementById('partnershipForm');
+            if (partnershipForm) partnershipForm.addEventListener('submit', onPartnershipSubmit);
+
+            const feasibilityForm = document.getElementById('feasibilityForm');
+            if (feasibilityForm) feasibilityForm.addEventListener('submit', onFeasibilitySubmit);
+
+            const reviewForm = document.getElementById('reviewForm');
+            if (reviewForm) reviewForm.addEventListener('submit', onReviewSubmit);
+        }
+
         // ===== Initialize Account Page =====
         async function initAccountPage() {
             initAccountLang();
+            initAccountForms();
 
             // Try cached user first
             const cached = getCachedUser();
@@ -224,7 +249,8 @@
                 try {
                     const res = await fetch(`${API_BASE}/api/v1/auth/verify-email`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
                         body: JSON.stringify({ token: verifyToken })
                     });
                     if (res.ok) {
@@ -270,58 +296,93 @@
         function renderProfile(user) {
             const lang = getLang();
 
+            // Helper to set textContent if different
+            const setTxt = (id, val) => {
+                const el = document.getElementById(id);
+                if (el && el.textContent !== val) {
+                    el.textContent = val;
+                }
+            };
+
             // Sidebar — overwrite text and clear stale data-* values so setAccountLang doesn't clobber it
             const sidebarNameEl = document.getElementById('sidebarName');
             if (sidebarNameEl) {
-                sidebarNameEl.textContent = `${user.first_name} ${user.last_name}`;
+                const fullName = `${user.first_name} ${user.last_name}`;
+                if (sidebarNameEl.textContent !== fullName) {
+                    sidebarNameEl.textContent = fullName;
+                }
                 sidebarNameEl.removeAttribute('data-en');
                 sidebarNameEl.removeAttribute('data-ar');
             }
             const sidebarEmailEl = document.getElementById('sidebarEmail');
-            if (sidebarEmailEl) {
+            if (sidebarEmailEl && sidebarEmailEl.textContent !== user.email) {
                 sidebarEmailEl.textContent = user.email;
             }
 
             const sidebarAvatarEl = document.getElementById('sidebarAvatar');
             if (user.avatar_url) {
                 if (sidebarAvatarEl) {
-                    sidebarAvatarEl.innerHTML = `<img src="${user.avatar_url}" class="sidebar-avatar" alt="avatar">`;
-                    sidebarAvatarEl.className = '';
+                    const avatarHTML = `<img src="${user.avatar_url}" class="sidebar-avatar" alt="avatar">`;
+                    if (sidebarAvatarEl.innerHTML !== avatarHTML) {
+                        sidebarAvatarEl.innerHTML = avatarHTML;
+                    }
+                    if (sidebarAvatarEl.className !== '') {
+                        sidebarAvatarEl.className = '';
+                    }
                 }
-                document.getElementById('profileAvatarLg').innerHTML = `<img src="${user.avatar_url}" class="profile-avatar-lg" alt="avatar">`;
-                document.getElementById('profileAvatarLg').className = '';
+                const profileAvatarLg = document.getElementById('profileAvatarLg');
+                if (profileAvatarLg) {
+                    const avatarHTML = `<img src="${user.avatar_url}" class="profile-avatar-lg" alt="avatar">`;
+                    if (profileAvatarLg.innerHTML !== avatarHTML) {
+                        profileAvatarLg.innerHTML = avatarHTML;
+                    }
+                    if (profileAvatarLg.className !== '') {
+                        profileAvatarLg.className = '';
+                    }
+                }
             }
 
             // Profile section
-            document.getElementById('profileFullName').textContent = `${user.first_name} ${user.last_name}`;
-            document.getElementById('profileRole').textContent = user.role || 'user';
-            document.getElementById('profileFirstName').textContent = user.first_name || '—';
-            document.getElementById('profileLastName').textContent = user.last_name || '—';
-            document.getElementById('profileCompany').textContent = user.company_name || '—';
-            document.getElementById('profileEmail').textContent = user.email || '—';
-            document.getElementById('profilePhone').textContent = user.phone || '—';
-            document.getElementById('profileProvider').textContent = user.auth_provider || 'local';
-            document.getElementById('profileCreatedAt').textContent = user.created_at ? new Date(user.created_at).toLocaleDateString(lang === 'ar' ? 'ar-KW' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+            setTxt('profileFullName', `${user.first_name} ${user.last_name}`);
+            setTxt('profileRole', user.role || 'user');
+            setTxt('profileFirstName', user.first_name || '—');
+            setTxt('profileLastName', user.last_name || '—');
+            setTxt('profileCompany', user.company_name || '—');
+            setTxt('profileEmail', user.email || '—');
+            setTxt('profilePhone', user.phone || '—');
+            setTxt('profileProvider', user.auth_provider || 'local');
+            
+            const formattedDate = user.created_at ? new Date(user.created_at).toLocaleDateString(lang === 'ar' ? 'ar-KW' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+            setTxt('profileCreatedAt', formattedDate);
 
             // Verification status
             const verifiedEl = document.getElementById('profileVerified');
-            if (user.is_email_verified) {
-                verifiedEl.innerHTML = `<span class="verified-badge">✓ ${lang === 'ar' ? 'مفعّل' : 'Verified'}</span>`;
-            } else {
-                verifiedEl.innerHTML = `<span style="color:#dc2626;font-weight:600;">✕ ${lang === 'ar' ? 'غير مفعّل' : 'Not Verified'}</span>`;
+            if (verifiedEl) {
+                const verifiedHTML = user.is_email_verified
+                    ? `<span class="verified-badge">✓ ${lang === 'ar' ? 'مفعّل' : 'Verified'}</span>`
+                    : `<span style="color:#dc2626;font-weight:600;">✕ ${lang === 'ar' ? 'غير مفعّل' : 'Not Verified'}</span>`;
+                if (verifiedEl.innerHTML !== verifiedHTML) {
+                    verifiedEl.innerHTML = verifiedHTML;
+                }
             }
 
             // Delete section
-            document.getElementById('deleteEmailDisplay').textContent = user.email;
+            setTxt('deleteEmailDisplay', user.email);
         }
 
         // ===== Populate Edit Form =====
         function populateEditForm(user) {
-            document.getElementById('editFirstName').value = user.first_name || '';
-            document.getElementById('editLastName').value = user.last_name || '';
-            document.getElementById('editCompany').value = user.company_name || '';
-            document.getElementById('editPhone').value = user.phone || '';
-            document.getElementById('editAvatar').value = user.avatar_url || '';
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el && el.value !== val) {
+                    el.value = val;
+                }
+            };
+            setVal('editFirstName', user.first_name || '');
+            setVal('editLastName', user.last_name || '');
+            setVal('editCompany', user.company_name || '');
+            setVal('editPhone', user.phone || '');
+            setVal('editAvatar', user.avatar_url || '');
         }
 
         // ===== Verification Gate =====
@@ -359,7 +420,8 @@
             try {
                 const res = await fetch(`${API_BASE}/api/v1/auth/request-verification`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
                     body: JSON.stringify({ email: currentUser.email })
                 });
                 if (res.ok) {
@@ -382,7 +444,7 @@
         }
 
         // ===== Edit Profile Submit =====
-        document.getElementById('editProfileForm').addEventListener('submit', async function (e) {
+        async function onEditProfileSubmit(e) {
             e.preventDefault();
             const lang = getLang();
 
@@ -431,10 +493,10 @@
             }
             btn.disabled = false;
             btn.textContent = lang === 'ar' ? 'حفظ التعديلات' : 'Save Changes';
-        });
+        }
 
         // ===== Change Password Submit =====
-        document.getElementById('changePasswordForm').addEventListener('submit', async function (e) {
+        async function onChangePasswordSubmit(e) {
             e.preventDefault();
             const lang = getLang();
             const currentPassword = document.getElementById('currentPassword').value;
@@ -451,7 +513,7 @@
 
             try {
                 const res = await apiFetch('/api/v1/users/me/password', {
-                    method: 'PATCH',
+                    method: 'POST',
                     body: JSON.stringify({
                         current_password: currentPassword,
                         new_password: newPassword
@@ -471,7 +533,7 @@
             }
             btn.disabled = false;
             btn.textContent = lang === 'ar' ? 'تحديث كلمة المرور' : 'Update Password';
-        });
+        }
 
 
 
@@ -541,7 +603,7 @@
         }
 
         // ===== Partnership Form Submit =====
-        document.getElementById('partnershipForm').addEventListener('submit', async function (e) {
+        async function onPartnershipSubmit(e) {
             e.preventDefault();
             const lang = getLang();
 
@@ -591,12 +653,10 @@
                     }
                 });
 
-                const token = localStorage.getItem('access_token');
                 const res = await fetch(`${API_BASE}/api/v1/files/operational_partnership/submit`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
+                    credentials: 'include',
+                    headers: { ...csrfHeaders() },
                     body: formData
                 });
 
@@ -627,10 +687,10 @@
 
             btn.disabled = false;
             btn.textContent = lang === 'ar' ? 'إرسال الطلب' : 'Submit Application';
-        });
+        }
 
         // ===== Feasibility Form Submit =====
-        document.getElementById('feasibilityForm').addEventListener('submit', async function (e) {
+        async function onFeasibilitySubmit(e) {
             e.preventDefault();
             const lang = getLang();
 
@@ -689,7 +749,7 @@
 
             btn.disabled = false;
             btn.textContent = lang === 'ar' ? 'إرسال طلب الدراسة' : 'Submit Study Request';
-        });
+        }
 
         // ===== Requests =====
         async function fetchRequests(forceRefresh = false) {
@@ -1019,10 +1079,10 @@
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const token = localStorage.getItem('access_token');
                 const res = await fetch(`${API_BASE}/api/v1/files/operational_partnership/files/${fileId}`, {
                     method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` },
+                    credentials: 'include',
+                    headers: { ...csrfHeaders() },
                     body: formData
                 });
 
@@ -1205,7 +1265,7 @@
         }
 
         // Submit review
-        document.getElementById('reviewForm').addEventListener('submit', async function (e) {
+        async function onReviewSubmit(e) {
             e.preventDefault();
             const lang = getLang();
             const text = document.getElementById('reviewText').value.trim();
@@ -1250,7 +1310,7 @@
                 showNotification(lang === 'ar' ? 'خطأ في الاتصال' : 'Connection error', 'error');
             }
             btn.disabled = false;
-        });
+        }
 
         function startEditReview(id) {
             const review = currentReviews.find(r => r.id === id);
@@ -1354,17 +1414,13 @@
 
         // ===== Logout =====
         async function handleLogout() {
-            const refreshToken = localStorage.getItem('refresh_token');
-            if (refreshToken) {
-                try {
-                    await apiFetch('/api/v1/auth/revoke', {
-                        method: 'POST',
-                        body: JSON.stringify({ refresh_token: refreshToken })
-                    });
-                } catch (e) {
-                    console.error('Failed to revoke token:', e);
-                }
-            }
+            try {
+                await fetch(`${API_BASE}/api/v1/auth/logout`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
+                });
+            } catch (e) {}
             clearCachedUser();
             window.location.href = 'index.html';
         }

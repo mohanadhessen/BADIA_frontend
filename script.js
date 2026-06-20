@@ -53,7 +53,9 @@ function setLanguage(lang, save = true) {
     }
 
     // Update nav auth link
-    updateNavAuthLink();
+    if (typeof window.updateNavAuthLink === 'function') {
+        window.updateNavAuthLink();
+    }
 
     // Re-render plans in new language if already loaded
     if (_cachedPlans) renderPlans(_cachedPlans, _currentBilling);
@@ -92,8 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(card);
     });
 
-    // Update nav auth link on load
-    updateNavAuthLink();
 });
 
 // ===== Nav Auth & Service Gates moved to auth_logic.js =====
@@ -254,8 +254,10 @@ if (statsBar) {
                 document.querySelectorAll('.stat-item h3').forEach(el => {
                     const target = parseInt(el.dataset.target);
                     const suffix = el.dataset.suffix || '+';
+                    const duration = parseInt(el.dataset.duration) || 2000;
+                    const steps = duration / 16;
+                    const inc = target / steps;
                     let current = 0;
-                    const inc = target / 125;
                     const timer = setInterval(() => {
                         current += inc;
                         if (current >= target) { el.textContent = target + suffix; clearInterval(timer); }
@@ -330,9 +332,11 @@ function clearUserDataCache() {
 
 function clearCachedUser() {
     clearUserDataCache();
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_role');
+    // Clear cookies for auth state check
+    document.cookie = "badia_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+    document.cookie = "csrf_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+    document.cookie = "badia_role=; path=/; domain=.badiaprojectmanagement.com; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
+    document.cookie = "csrf_token=; path=/; domain=.badiaprojectmanagement.com; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
 }
 
 function getCachedReviews() {
@@ -355,26 +359,39 @@ function setCachedRequests(requests) {
 
 // ===== API Helper =====
 async function apiFetch(path, options = {}) {
-    const token = localStorage.getItem('access_token');
+    const isGet = !options.method || options.method.toUpperCase() === 'GET';
     const headers = { ...(options.headers || {}) };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     if (!(options.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
     }
 
-    const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    // Add CSRF token for state-changing requests
+    if (!isGet) {
+        Object.assign(headers, csrfHeaders());
+    }
 
-    // If 401, try refreshing the token
+    const res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+        credentials: 'include',   // ← sends httpOnly cookies automatically
+    });
+
+    // If 401, attempt a silent token refresh then retry once
     if (res.status === 401) {
         const refreshed = await tryRefreshToken();
         if (refreshed) {
-            headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
-            return fetch(`${API_BASE}${path}`, { ...options, headers });
+            // Retry — cookies are already updated by the refresh endpoint
+            const retryHeaders = { ...headers };
+            if (!isGet) Object.assign(retryHeaders, csrfHeaders());
+            return fetch(`${API_BASE}${path}`, {
+                ...options,
+                headers: retryHeaders,
+                credentials: 'include',
+            });
         } else {
             clearCachedUser();
-            if (typeof openAuthModal === 'function') {
-                openAuthModal('login');
-            }
+            if (typeof openAuthModal === 'function') openAuthModal('login');
             return res;
         }
     }
@@ -382,22 +399,19 @@ async function apiFetch(path, options = {}) {
 }
 
 async function tryRefreshToken() {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return false;
     try {
         const res = await fetch(`${API_BASE}/api/v1/refresh`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refresh_token: refreshToken })
+            credentials: 'include',         // sends refresh_token cookie
+            headers: {
+                'Content-Type': 'application/json',
+                ...csrfHeaders(),
+            },
         });
-        if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('access_token', data.access_token);
-            if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-            return true;
-        }
-    } catch (e) { /* ignore */ }
-    return false;
+        return res.ok;
+    } catch {
+        return false;
+    }
 }
 
 // ===== Testimonial Carousel =====
