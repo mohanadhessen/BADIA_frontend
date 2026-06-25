@@ -716,7 +716,7 @@ function renderPlans(plans, billing) {
             <ul class="plan-features">${featureHTML}</ul>
             <div class="plan-card-actions">
                 <button class="btn btn-ghost-small" onclick="openPlanModal(${idx})">${detailsText}</button>
-                <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="handlePaymentClick('https://upayto.me/badia')">${subscribeText}</button>
+                <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="handlePaymentClick('')">${subscribeText}</button>
             </div>
         </div>`;
     }).join('');
