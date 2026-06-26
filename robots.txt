@@ -8,20 +8,34 @@ Disallow:
 User-agent: Slurp
 Disallow:
 
-# 2. BLOCK AI data scrapers from training on your data
+# 2. ALLOW AI chatbot user-initiated fetches and search indexing
+# (these run when a real user asks the assistant to look up your page)
+User-agent: Claude-User
+Disallow:
+
+User-agent: Claude-SearchBot
+Disallow:
+
+User-agent: ChatGPT-User
+Disallow:
+
+User-agent: OAI-SearchBot
+Disallow:
+
+User-agent: Perplexity-User
+Disallow:
+
+# 3. BLOCK AI training-data crawlers
 User-agent: Google-Extended
 Disallow: /
 
 User-agent: GPTBot
 Disallow: /
 
-User-agent: ChatGPT-User
+User-agent: ClaudeBot
 Disallow: /
 
 User-agent: PerplexityBot
-Disallow: /
-
-User-agent: ClaudeBot
 Disallow: /
 
 User-agent: Applebot-Extended
@@ -30,6 +44,9 @@ Disallow: /
 User-agent: CCBot
 Disallow: /
 
-# 3. Catch-all for any other bots not mentioned above
+User-agent: Bytespider
+Disallow: /
+
+# 4. Catch-all for everything else
 User-agent: *
 Disallow:
