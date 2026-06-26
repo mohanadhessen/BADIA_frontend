@@ -1,5 +1,3 @@
-// https://api.badiaprojectmanagement.com
-
 let API = localStorage.getItem('badia_admin_api') || API_BASE;
 
 // ── State ───────────────────────────────────────────────────────
@@ -13,6 +11,9 @@ let _totalUsers = 0;
 let _totalRequests = 0;
 let _totalReviews = 0;
 let _totalPayments = 0;
+let _userMetrics = {};
+let _reqMetrics = {};
+let _revMetrics = {};
 
 // ── Pagination State (persists across tab switches) ─────────────
 let _userPage = 1, _userHasMore = false, _userLoading = false;
@@ -20,6 +21,32 @@ let _reqPage  = 1, _reqHasMore  = false, _reqLoading  = false;
 let _revPage  = 1, _revHasMore  = false, _revLoading  = false;
 let _payPage  = 1, _payHasMore  = false, _payLoading  = false;
 const PAGE_LIMIT = 25;
+
+// ── Performance: DOM Cache ──────────────────────────────────────
+const _domCache = {};
+function _el(id) {
+  if (!_domCache[id]) _domCache[id] = document.getElementById(id);
+  // Fallback: if element was removed/replaced, re-query
+  if (_domCache[id] && !_domCache[id].isConnected) _domCache[id] = document.getElementById(id);
+  return _domCache[id];
+}
+
+// Cached collections for showPage (populated on DOMContentLoaded)
+let _cachedPages = null;
+let _cachedNavItems = null;
+
+// ── Performance: Batch DOM text updates ─────────────────────────
+function batchSetText(updates) {
+  // updates: { elementId: value, ... }
+  for (const [id, val] of Object.entries(updates)) {
+    const el = _el(id);
+    if (el) el.textContent = val;
+  }
+}
+
+// ── Performance: Render guard for renderDashboard ───────────────
+let _lastDashboardHash = '';
+let _rafPending = false;
 
 // ── API Helper (with auto token refresh) ───────────────────────
 let _refreshing = false;
@@ -50,16 +77,20 @@ async function apiFetch(path, opts = {}) {
   const cacheKeyData = `api_cache_data_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
   const cacheKeyEtag = `api_cache_etag_${path.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
-  if (isGet && !opts.forceRefresh) {
+  if (isGet) {
     const cachedEtag = localStorage.getItem(cacheKeyEtag);
     if (cachedEtag) headers['If-None-Match'] = cachedEtag;
   }
 
-  let res = await fetch(`${API}${path}`, {
+  const fetchOpts = {
     ...opts,
     headers,
-    credentials: 'include',   // ← key change
-  });
+    credentials: 'include',
+  };
+
+  let finalPath = path;
+
+  let res = await fetch(`${API}${finalPath}`, fetchOpts);
 
   if (res.status === 401) {
     if (!_refreshing) {
@@ -132,32 +163,47 @@ async function swrFetch(path, forceRefresh, onData) {
         const parsed = JSON.parse(cachedStr);
         onData(parsed);
         didRenderCache = true;
-      } catch (e) {}
+      } catch (e) {
+        console.warn(`[SWR] Error rendering cached data for ${path}:`, e);
+      }
     }
   }
 
-  // Defer the network request to ensure the cached UI builds first
-  const delay = didRenderCache ? 100 : 0;
-  setTimeout(async () => {
+  if (didRenderCache) {
+    // Cache was rendered — revalidate in background after a short delay
+    setTimeout(async () => {
+      try {
+        const freshData = await apiFetch(path, { forceRefresh });
+        const freshStr = JSON.stringify(freshData);
+        if (freshStr !== cachedStr) {
+          onData(freshData);
+        }
+      } catch (e) {
+        console.error(`SWR revalidation failed for ${path}:`, e);
+      }
+    }, 100);
+  } else {
+    // No cache — fetch immediately and render (awaitable by caller)
     try {
       const freshData = await apiFetch(path, { forceRefresh });
-      const freshStr = JSON.stringify(freshData);
-      if (freshStr !== cachedStr) {
-        onData(freshData);
-      }
+      onData(freshData);
     } catch (e) {
-      console.error(`SWR revalidation failed for ${path}:`, e);
+      console.error(`SWR fetch failed for ${path}:`, e);
+      throw e; // Re-throw so callers can handle it
     }
-  }, delay);
+  }
 
   return didRenderCache;
 }
 
 // ── Page Navigation (with hash persistence) ────────────────────
 function showPage(id, skipLoad = false) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
-  document.getElementById(`page-${id}`)?.classList.add('active');
+  // Use cached collections if available, otherwise query (first call before DOMContentLoaded)
+  const pages = _cachedPages || document.querySelectorAll('.page');
+  const navs = _cachedNavItems || document.querySelectorAll('.nav-item');
+  pages.forEach(p => p.classList.remove('active'));
+  navs.forEach(a => a.classList.remove('active'));
+  _el(`page-${id}`)?.classList.add('active');
   document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
   _currentPage = id;
   const titles = { dashboard:'Dashboard', search:'Search User Data', requests:'Service Requests', users:'Users', plans:'Pricing Plans', reviews:'Reviews', payments:'Payments', settings:'Settings' };
@@ -373,10 +419,10 @@ let _planDistributionData = [];
 
 // ── UI Updaters ──────────────────────────────────────────────────
 function updatePaymentsUI(data) {
-  const items = data && Array.isArray(data.items) ? data.items : [];
+  const items = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : []);
   _payments = items;
 
-  const metrics = data.metrics || {};
+  const metrics = (data && data.metrics) ? data.metrics : {};
   
   const finalTotalPayments = metrics.total_payments ?? items.length;
   const finalPaidPayments = metrics.paid_payments ?? items.filter(p => p.status === 'paid').length;
@@ -396,34 +442,29 @@ function updatePaymentsUI(data) {
   const totalRevenue = metrics.total_revenue ?? items.filter(p => p.status === 'paid' || p.status === 'canceled').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
   const revenueThisMonth = metrics.revenue_this_month ?? currentMonthItems.filter(p => p.status === 'paid' || p.status === 'canceled').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
 
-  const setElText = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  };
-
-  setElText('payStatTotal', finalTotalPayments);
-  setElText('payStatActive', finalPaidPayments);
-  setElText('payStatCanceled', finalCanceledPayments);
-  setElText('payStatRejected', finalRejectedPayments);
-  setElText('payStatThisMonth', finalPaymentsThisMonth);
-  setElText('payStatMonthlyCycle', finalMonthlyCycle);
-  setElText('payStatYearlyCycle', finalYearlyCycle);
+  // Batch all text updates in one pass
+  batchSetText({
+    payStatTotal: finalTotalPayments,
+    payStatActive: finalPaidPayments,
+    payStatCanceled: finalCanceledPayments,
+    payStatRejected: finalRejectedPayments,
+    payStatThisMonth: finalPaymentsThisMonth,
+    payStatMonthlyCycle: finalMonthlyCycle,
+    payStatYearlyCycle: finalYearlyCycle,
+    sidebarPaymentsCount: finalTotalPayments,
+    statActive: finalPaidPayments
+  });
   
-  // Main Dashboard Total Revenue
-  const mainRevEl = document.getElementById('statRevenueVal');
+  // Main Dashboard Total Revenue (innerHTML — can't batch)
+  const mainRevEl = _el('statRevenueVal');
   if (mainRevEl) {
     mainRevEl.innerHTML = `${Number(totalRevenue).toFixed(3)} <span style="font-size:13px;font-weight:400">KWD</span>`;
   }
   
   // Payments Page Revenue This Month
-  const revMonthEl = document.getElementById('payStatRevenueThisMonth');
+  const revMonthEl = _el('payStatRevenueThisMonth');
   if (revMonthEl) {
     revMonthEl.innerHTML = `${Number(revenueThisMonth).toFixed(3)} <span style="font-size:13px;font-weight:400">KWD</span>`;
-  }
-  
-  const activeEl = document.getElementById('statActive');
-  if (activeEl) {
-    activeEl.textContent = finalPaidPayments;
   }
   
   renderPaymentsTable(items);
@@ -437,16 +478,13 @@ function updateStorageUI(data) {
   const files = data.total_files ?? 0;
   const displayVal = gb >= 1 ? `${gb.toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
   
-  const valEl = document.getElementById('statStorageVal');
-  if (valEl) valEl.textContent = displayVal;
+  batchSetText({
+    statStorageVal: displayVal,
+    statStorageSub: `${files} file${files!==1?'s':''} · ${rem.toFixed(2)} GB free`,
+    statStoragePct: `${pct.toFixed(1)}%`
+  });
   
-  const subEl = document.getElementById('statStorageSub');
-  if (subEl) subEl.textContent = `${files} file${files!==1?'s':''} · ${rem.toFixed(2)} GB free`;
-  
-  const pctEl = document.getElementById('statStoragePct');
-  if (pctEl) pctEl.textContent = `${pct.toFixed(1)}%`;
-  
-  const bar = document.getElementById('statStorageBar');
+  const bar = _el('statStorageBar');
   if (bar) {
     bar.style.width = `${Math.min(pct, 100)}%`;
     bar.className = 'storage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '');
@@ -459,16 +497,16 @@ function updateEmailsUI(data) {
   const monthLimit = data.month_limit   ?? null;
   const dayLimit   = data.day_limit     ?? null;
 
-  const valEl = document.getElementById('statEmailsVal');
+  const valEl = _el('statEmailsVal');
   if (valEl) valEl.textContent = thisMonth.toLocaleString();
 
   // Month stats
   const monthPctVal = monthLimit ? Math.min((thisMonth / monthLimit) * 100, 100) : (thisMonth > 0 ? 100 : 0);
   const monthPctText = monthLimit ? `${thisMonth.toLocaleString()} / ${monthLimit.toLocaleString()} (${Math.round(monthPctVal)}%)` : thisMonth.toLocaleString();
-  const elMonthPct = document.getElementById('statEmailMonthPct');
+  const elMonthPct = _el('statEmailMonthPct');
   if (elMonthPct) elMonthPct.textContent = monthPctText;
 
-  const monthBar = document.getElementById('statEmailMonthBar');
+  const monthBar = _el('statEmailMonthBar');
   if (monthBar) {
     monthBar.style.width = `${monthPctVal}%`;
     monthBar.className = 'storage-bar-fill' + (monthLimit && monthPctVal >= 90 ? ' danger' : monthLimit && monthPctVal >= 70 ? ' warn' : '');
@@ -477,10 +515,10 @@ function updateEmailsUI(data) {
   // Daily stats
   const dayPctVal = dayLimit ? Math.min((thisDay / dayLimit) * 100, 100) : (thisDay > 0 ? 100 : 0);
   const dayPctText = dayLimit ? `${thisDay.toLocaleString()} / ${dayLimit.toLocaleString()} (${Math.round(dayPctVal)}%)` : thisDay.toLocaleString();
-  const elDayPct = document.getElementById('statEmailDayPct');
+  const elDayPct = _el('statEmailDayPct');
   if (elDayPct) elDayPct.textContent = dayPctText;
 
-  const dayBar = document.getElementById('statEmailDayBar');
+  const dayBar = _el('statEmailDayBar');
   if (dayBar) {
     dayBar.style.width = `${dayPctVal}%`;
     dayBar.className = 'storage-bar-fill' + (dayLimit && dayPctVal >= 90 ? ' danger' : dayLimit && dayPctVal >= 70 ? ' warn' : '');
@@ -492,54 +530,103 @@ async function loadDashboardConsolidated(forceRefresh = false) {
   const path = '/api/v1/admin/dashboard';
   try {
     await swrFetch(path, forceRefresh, (data) => {
-      // 1. Populate all states
-      if (data.users) {
-        _users = data.users.items || (Array.isArray(data.users) ? data.users : []);
-        _totalUsers = data.users.metrics?.total_users ?? _users.length;
-      }
-      if (data.plans) {
-        _plans = Array.isArray(data.plans) ? data.plans : [];
-      }
-      if (data.requests) {
-        const reqItems = data.requests.items || (Array.isArray(data.requests) ? data.requests : []);
-        _requests = reqItems.map(r => ({ ...r, id: r.request_id || r.id }));
-        _totalRequests = data.requests.metrics?.total_requests ?? _requests.length;
-      }
-      if (data.reviews) {
-        _reviews = data.reviews.items || (Array.isArray(data.reviews) ? data.reviews : []);
-        _totalReviews = data.reviews.metrics?.total_reviews ?? _reviews.length;
-      }
-      if (data.payments) {
-        _payments = data.payments.items || (Array.isArray(data.payments) ? data.payments : []);
-        updatePaymentsUI(data.payments);
-      }
-      if (data.plans_distribution) {
-        _planDistributionData = data.plans_distribution;
-      }
-      if (data.storage) {
-        updateStorageUI(data.storage);
-      }
-      if (data.emails) {
-        updateEmailsUI(data.emails);
-      }
-      
-      // 2. Render and Sync
-      renderDashboard();
-      updateUserCount();
-      updateRequestStats();
-      updateReviewStats();
-      populatePlanFilter();
-      populatePlanDropdown();
+      console.log('[Dashboard] Consolidated data received:', Object.keys(data));
 
-      // Render details metrics directly from consolidated response metrics
-      renderDashboardMetrics(data);
-      
+      // Merge global metrics into nested objects for UI consistency
+      if (data.metrics) {
+        if (data.users && typeof data.users === 'object' && !data.users.metrics) data.users.metrics = data.metrics.users;
+        if (data.requests && typeof data.requests === 'object' && !data.requests.metrics) data.requests.metrics = data.metrics.requests;
+        if (data.reviews && typeof data.reviews === 'object' && !data.reviews.metrics) data.reviews.metrics = data.metrics.reviews;
+        // Payments: always merge both sources so payments_this_month / revenue_this_month are available
+        if (data.payments && typeof data.payments === 'object' && data.metrics.payments) {
+          data.payments.metrics = { ...(data.payments.metrics || {}), ...data.metrics.payments };
+        }
+      }
+
+      // 1. Populate all states — each section wrapped so a failure in one
+      //    doesn't prevent the rest from rendering.
+      try {
+        if (data.users) {
+          _users = data.users.items || (Array.isArray(data.users) ? data.users : []);
+          _userMetrics = data.users.metrics || {};
+          _totalUsers = _userMetrics.total_users ?? _users.length;
+        }
+      } catch (e) { console.error('[Dashboard] Error processing users:', e); }
+
+      try {
+        if (data.plans) {
+          _plans = Array.isArray(data.plans) ? data.plans : [];
+        }
+      } catch (e) { console.error('[Dashboard] Error processing plans:', e); }
+
+      try {
+        if (data.requests) {
+          const reqItems = data.requests.items || (Array.isArray(data.requests) ? data.requests : []);
+          _requests = reqItems.map(r => ({ ...r, id: r.request_id || r.id }));
+          _reqMetrics = data.requests.metrics || {};
+          _totalRequests = _reqMetrics.total_requests ?? _requests.length;
+        }
+      } catch (e) { console.error('[Dashboard] Error processing requests:', e); }
+
+      try {
+        if (data.reviews) {
+          _reviews = data.reviews.items || (Array.isArray(data.reviews) ? data.reviews : []);
+          _revMetrics = data.reviews.metrics || {};
+          _totalReviews = _revMetrics.total_reviews ?? _reviews.length;
+        }
+      } catch (e) { console.error('[Dashboard] Error processing reviews:', e); }
+
+      try {
+        if (data.payments) {
+          _payments = data.payments.items || (Array.isArray(data.payments) ? data.payments : []);
+          const payMetrics = data.payments.metrics || {};
+          _totalPayments = payMetrics.total_payments ?? _payments.length;
+          updatePaymentsUI(data.payments);
+        }
+      } catch (e) { console.error('[Dashboard] Error processing payments:', e); }
+
+      try {
+        if (data.plans_distribution) {
+          if (Array.isArray(data.plans_distribution)) {
+            _planDistributionData = data.plans_distribution;
+          } else if (data.plans_distribution && typeof data.plans_distribution === 'object') {
+            _planDistributionData = Object.entries(data.plans_distribution).map(([name, count]) => ({ name, count }));
+          }
+        }
+      } catch (e) { console.error('[Dashboard] Error processing plans_distribution:', e); }
+
+      try {
+        if (data.storage) updateStorageUI(data.storage);
+      } catch (e) { console.error('[Dashboard] Error processing storage:', e); }
+
+      try {
+        if (data.emails) updateEmailsUI(data.emails);
+      } catch (e) { console.error('[Dashboard] Error processing emails:', e); }
+
+      // 2. Render metrics from the consolidated response FIRST
+      // This sets sidebar badges and all dashboard stat elements from the API metrics
+      try {
+        renderDashboardMetrics(data);
+      } catch (e) { console.error('[Dashboard] Error in renderDashboardMetrics:', e); }
+
+      // 3. Render dashboard widgets (charts, lists) and section helpers
+      try {
+        renderDashboard();
+      } catch (e) { console.error('[Dashboard] Error in renderDashboard:', e); }
+
+      try {
+        populatePlanFilter();
+        populatePlanDropdown();
+      } catch (e) { console.error('[Dashboard] Error populating plan filters:', e); }
+
       // If we are currently on a page other than dashboard, make sure to render its table as well
-      if (_currentPage === 'users') renderUsersTable(_users);
-      else if (_currentPage === 'requests') renderRequests(_requests);
-      else if (_currentPage === 'plans') renderPlansAdmin(_plans);
-      else if (_currentPage === 'reviews') renderReviews(_reviews);
-      else if (_currentPage === 'payments') renderPaymentsTable(_payments);
+      try {
+        if (_currentPage === 'users') renderUsersTable(_users);
+        else if (_currentPage === 'requests') renderRequests(_requests);
+        else if (_currentPage === 'plans') renderPlansAdmin(_plans);
+        else if (_currentPage === 'reviews') renderReviews(_reviews);
+        else if (_currentPage === 'payments') renderPaymentsTable(_payments);
+      } catch (e) { console.error('[Dashboard] Error rendering current page table:', e); }
     });
   } catch (e) {
     console.error('Failed to load consolidated dashboard data:', e);
@@ -547,82 +634,82 @@ async function loadDashboardConsolidated(forceRefresh = false) {
 }
 
 function renderDashboardMetrics(data) {
-  const setVal = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  };
+  // Batched text updates — collect all values first, apply in one pass
+  const updates = {};
 
   // 1. Users Metrics
-  if (data.users && data.users.metrics) {
-    const m = data.users.metrics;
-    setVal('statUsers', m.total_users ?? '—');
-    setVal('sidebarUserCount', m.total_users ?? '—');
-    setVal('statUsersActive', m.active_users ?? '—');
-    setVal('statUsersInactive', m.inactive_users ?? '—');
-    setVal('statUsersVerified', m.verified_users ?? '—');
-    setVal('statUsersUnverified', m.unverified_users ?? '—');
-
-    const usersSubEl = document.getElementById('statUsersSub');
-    if (usersSubEl) {
-      usersSubEl.innerHTML = `${m.active_users ?? 0} active &middot; ${m.verified_users ?? 0} verified`;
-    }
-    const usersBar = document.getElementById('statUsersBar');
-    if (usersBar) {
-      const activeUsersPct = m.total_users ? Math.min(((m.active_users || 0) / m.total_users) * 100, 100) : 0;
-      usersBar.style.width = `${activeUsersPct}%`;
-    }
+  const mUsers = (data.metrics && data.metrics.users) || (data.users && data.users.metrics);
+  if (mUsers) {
+    updates.statUsers = mUsers.total_users ?? '—';
+    updates.sidebarUserCount = mUsers.total_users ?? '—';
   }
 
   // 2. Payments / Plans Metrics
-  if (data.payments && data.payments.metrics) {
-    const m = data.payments.metrics;
-    setVal('statActive', m.paid_payments ?? '—');
-    setVal('statPlansMonthly', m.monthly_payments ?? '—');
-    setVal('statPlansYearly', m.yearly_payments ?? '—');
-    setVal('statPlansTotalPayments', m.total_payments ?? '—');
-    setVal('statPlansRejected', m.rejected_payments ?? '—');
-    
-    // Revenue Card Sub-details
-    if (m.revenue_this_month !== undefined) {
-      setVal('statRevMonth', typeof m.revenue_this_month === 'number' ? m.revenue_this_month.toFixed(3) : m.revenue_this_month);
-    }
-    setVal('statPayThisMonth', m.payments_this_month ?? '—');
+  // Merge both sources: top-level data.metrics.payments AND nested data.payments.metrics
+  // Some fields (payments_this_month, revenue_this_month) may only exist in one source
+  const _topPayMetrics = (data.metrics && data.metrics.payments) || {};
+  const _nestedPayMetrics = (data.payments && data.payments.metrics) || {};
+  const mPayments = { ..._nestedPayMetrics, ..._topPayMetrics };
+  if (Object.keys(mPayments).length) {
+    updates.statActive = mPayments.paid_payments ?? '—';
 
-    const plansSubEl = document.getElementById('statPlansSub');
-    if (plansSubEl) {
-      plansSubEl.innerHTML = `${m.monthly_payments ?? 0} monthly &middot; ${m.yearly_payments ?? 0} yearly`;
+    // Hero revenue card — total_revenue from the dashboard endpoint
+    const totalRevenue = mPayments.total_revenue;
+    if (totalRevenue !== undefined && totalRevenue !== null) {
+      const revenueEl = _el('statRevenueVal');
+      if (revenueEl) {
+        revenueEl.innerHTML = `${typeof totalRevenue === 'number' ? totalRevenue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : totalRevenue} <span class="unit">KWD</span>`;
+      }
     }
-    const plansBar = document.getElementById('statActiveBar');
-    if (plansBar) {
-      const paidPlansPct = m.total_payments ? Math.min(((m.paid_payments || 0) / m.total_payments) * 100, 100) : 0;
-      plansBar.style.width = `${paidPlansPct}%`;
+
+    // Revenue Card Sub-details — payments_this_month & revenue_this_month
+    if (mPayments.revenue_this_month !== undefined) {
+      updates.statRevMonth = typeof mPayments.revenue_this_month === 'number' ? mPayments.revenue_this_month.toFixed(3) : mPayments.revenue_this_month;
     }
+    updates.statPayThisMonth = mPayments.payments_this_month ?? '—';
   }
 
   // 3. Requests Metrics
-  if (data.requests && data.requests.metrics) {
-    const m = data.requests.metrics;
-    setVal('statRequests', m.total_requests ?? '—');
-    setVal('statPending', m.pending_requests ?? '—');
-    setVal('statApproved', m.approved_requests ?? '—');
-    setVal('statReqApprovedSub', m.approved_requests ?? '—');
-    setVal('statReqPendingSub', m.pending_requests ?? '—');
-    setVal('statReqRejectedSub', m.rejected_requests ?? '—');
-
-    // Sync sidebar badge
-    setVal('sidebarPendingCount', m.pending_requests || '—');
+  const mRequests = (data.metrics && data.metrics.requests) || (data.requests && data.requests.metrics);
+  if (mRequests) {
+    updates.statRequests = mRequests.total_requests ?? '—';
+    updates.statPending = mRequests.pending_requests ?? '—';
+    updates.statApproved = mRequests.approved_requests ?? '—';
+    updates.statReqApprovedSub = mRequests.approved_requests ?? '—';
+    updates.statReqPendingSub = mRequests.pending_requests ?? '—';
+    updates.statReqRejectedSub = mRequests.rejected_requests ?? '—';
+    updates.sidebarPendingCount = mRequests.pending_requests || '—';
+    updates.reqStatTotal = mRequests.total_requests ?? '—';
+    updates.reqStatPending = mRequests.pending_requests ?? '—';
+    updates.reqStatApproved = mRequests.approved_requests ?? '—';
+    updates.reqStatRejected = mRequests.rejected_requests ?? '—';
   }
 
   // 4. Reviews Metrics
-  if (data.reviews && data.reviews.metrics) {
-    const m = data.reviews.metrics;
-    setVal('statReviewsVal', m.total_reviews ?? '—');
-    setVal('statReviewsPublished', m.published_reviews ?? '—');
-    setVal('statReviewsPending', m.pending_reviews ?? '—');
-
-    // Sync sidebar badge
-    setVal('sidebarReviewsCount', m.pending_reviews || '—');
+  const mReviews = (data.metrics && data.metrics.reviews) || (data.reviews && data.reviews.metrics);
+  if (mReviews) {
+    updates.statReviewsVal = mReviews.total_reviews ?? '—';
+    updates.statReviewsPublished = mReviews.published_reviews ?? '—';
+    updates.statReviewsPending = mReviews.pending_reviews ?? '—';
+    updates.sidebarReviewsCount = mReviews.pending_reviews || '—';
+    updates.revStatTotal = mReviews.total_reviews ?? '—';
+    updates.revStatPending = mReviews.pending_reviews ?? '—';
+    updates.revStatAccepted = mReviews.published_reviews ?? '—';
   }
+
+  // 5. Update Time
+  const updatedAt = (data.metrics && data.metrics.updated_at) || data.updated_at;
+  if (updatedAt) {
+    const dateObj = new Date(updatedAt);
+    const options = { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    const dateStr = dateObj.toLocaleDateString('en-GB', options);
+    updates.dashboardUpdateDate = `${dateStr} — here's where things stand`;
+  } else {
+    updates.dashboardUpdateDate = `Last updated: just now — here's where things stand`;
+  }
+
+  // Apply all text updates in one batch
+  batchSetText(updates);
 }
 
 // ── Legacy small endpoints fallback logic ──────────────────────
@@ -646,15 +733,6 @@ async function loadEmailsThisMonth() {
   }
 }
 
-async function loadStorageUsage() {
-  try {
-    const data = await apiFetch('/api/v1/admin/storage/usage');
-    updateStorageUI(data);
-  } catch (e) {
-    document.getElementById('statStorageVal').textContent = '—';
-  }
-}
-
 async function loadAll() {
   // On initial load, call the consolidated dashboard endpoint
   // if the dashboard is not already loaded as the initial page.
@@ -675,6 +753,9 @@ async function loadUsers(page, silent = false, forceRefresh = false) {
   const planVal = planEl ? planEl.value : '';
   const statusVal = statusEl ? statusEl.value : '';
   
+  const searchEl = document.getElementById('userSearch');
+  const searchVal = searchEl ? searchEl.value.trim() : '';
+
   let path = `/api/v1/admin/users?page=${_userPage}`;
   if (planVal) {
     path += `&plan=${encodeURIComponent(planVal)}`;
@@ -682,13 +763,24 @@ async function loadUsers(page, silent = false, forceRefresh = false) {
   if (statusVal) {
     path += `&status=${encodeURIComponent(statusVal)}`;
   }
+  if (searchVal) {
+    path += `&q=${encodeURIComponent(searchVal)}`;
+  }
 
   if (!silent) setUserPaginationLoading(true);
   try {
     const didRenderCache = await swrFetch(path, forceRefresh, (data) => {
-      _users = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.users || []));
+      let raw = [];
+      if (data && Array.isArray(data.items)) raw = data.items;
+      else if (Array.isArray(data)) raw = data;
+      else if (data && data.users && Array.isArray(data.users.items)) raw = data.users.items;
+      else if (data && Array.isArray(data.users)) raw = data.users;
+      else if (data && Array.isArray(data.results)) raw = data.results;
+
+      _users = raw;
       _userHasMore = data && data.has_next !== undefined ? !!data.has_next : (_users.length === PAGE_LIMIT);
-      _totalUsers = data?.metrics?.total_users ?? _users.length;
+      _userMetrics = data?.metrics || (data?.users?.metrics) || {};
+      _totalUsers = _userMetrics.total_users ?? _users.length;
       renderUsersTable(_users);
       updateUserCount();
       populatePlanFilter();
@@ -730,10 +822,18 @@ async function changeUserPage(page) {
 function updateUserCount() {
   const displayCount = _users.length;
   const n = _totalUsers !== undefined ? _totalUsers : displayCount;
-  document.getElementById('userCount').textContent = `${n} user${n !== 1 ? 's' : ''}`;
-  document.getElementById('sidebarUserCount').textContent = n;
-  document.getElementById('statUsers').textContent = n;
-  // Active Plans stat is now populated by paid_payments from the payments telemetry
+  const m = _userMetrics || {};
+
+  batchSetText({
+    userCount: `${n} user${n !== 1 ? 's' : ''}`,
+    sidebarUserCount: n,
+    statUsers: n,
+    userStatTotal: m.total_users ?? n,
+    userStatActive: m.active_users ?? '—',
+    userStatInactive: m.inactive_users ?? '—',
+    userStatVerified: m.verified_users ?? '—',
+    userStatUnverified: m.unverified_users ?? '—'
+  });
 }
 
 function populatePlanFilter() {
@@ -828,44 +928,7 @@ function filterUsers(q) {
 }
 
 async function _filterUsersNow(q) {
-  const plan = document.getElementById('planFilter').value.toLowerCase();
-  const st   = document.getElementById('statusFilter')?.value.toLowerCase() || '';
-  const query = (q || '').toLowerCase().trim();
-
-  let pool = _users;
-
-  // Use server search endpoint when query looks like an email or is non-empty
-  if (query && query.includes('@')) {
-    try {
-      const result = await apiFetch(`/api/v1/admin/user?email=${encodeURIComponent(query)}`);
-      pool = result ? [result] : [];
-    } catch (e) {
-      pool = [];
-    }
-  } else if (query && /^\d+$/.test(query)) {
-    try {
-      const result = await apiFetch(`/api/v1/admin/user?user_id=${encodeURIComponent(query)}`);
-      pool = result ? [result] : [];
-    } catch (e) {
-      pool = [];
-    }
-  } else if (query) {
-    pool = _users.filter(u =>
-      (u.email||'').toLowerCase().includes(query) ||
-      (u.first_name||'').toLowerCase().includes(query) ||
-      (u.last_name||'').toLowerCase().includes(query) ||
-      String(u.id||u.user_id||'').includes(query)
-    );
-  }
-
-  const filtered = pool.filter(u => {
-    const matchPlan = !plan || (u.plan_name||u.plan||'').toLowerCase() === plan;
-    const status = u.is_active === false ? 'inactive' : 'active';
-    const matchSt = !st || status === st;
-    return matchPlan && matchSt;
-  });
-  document.getElementById('userCount').textContent = `${filtered.length} user${filtered.length!==1?'s':''}`;
-  renderUsersCards(filtered);
+  await loadUsers(1, false, true);
 }
 
 function openEditUserById(id) {
@@ -922,7 +985,6 @@ async function saveUser() {
         const planObj = _plans.find(p => p.id === payload.current_plan_id);
         if (planObj) _users[idx].plan_name = planObj.name;
       }
-      filterUsers(); // update table based on current filters
     }
     closeModal('editUserModal');
     toast('User updated successfully', 'success');
@@ -930,6 +992,74 @@ async function saveUser() {
     loadUsers(_userPage, true, true);
   } catch (e) {
     toast('Failed to update user', 'error');
+  }
+}
+
+function openCreateUserModal() {
+  document.getElementById('createFirstName').value = '';
+  document.getElementById('createLastName').value = '';
+  document.getElementById('createCompanyName').value = '';
+  document.getElementById('createEmail').value = '';
+  document.getElementById('createPhone').value = '';
+  document.getElementById('createPassword').value = '';
+  openModal('createUserModal');
+}
+
+async function createUser() {
+  const firstName = document.getElementById('createFirstName').value.trim();
+  const lastName = document.getElementById('createLastName').value.trim();
+  const companyName = document.getElementById('createCompanyName').value.trim();
+  const email = document.getElementById('createEmail').value.trim();
+  const phone = document.getElementById('createPhone').value.trim();
+  const password = document.getElementById('createPassword').value;
+
+  if (!firstName || !lastName || !companyName || !email) {
+    toast('Please fill in all required fields.', 'error');
+    return;
+  }
+
+  const payload = {
+    first_name: firstName,
+    last_name: lastName,
+    company_name: companyName,
+    email: email,
+    phone: phone || null,
+  };
+
+  if (password) {
+    payload.password = password;
+  }
+
+  try {
+    const res = await fetch(`${API}/api/v1/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...csrfHeaders()
+      },
+      body: JSON.stringify(payload),
+      credentials: 'include'
+    });
+
+    if (!res.ok) {
+      let errMsg = `Failed to create user: HTTP ${res.status}`;
+      try {
+        const errData = await res.json();
+        if (errData && errData.detail) {
+          errMsg = errData.detail;
+        }
+      } catch (_) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await res.json();
+    closeModal('createUserModal');
+    toast('User created successfully', 'success');
+    
+    loadUsers(_userPage, true, true);
+    loadPlanDistribution();
+  } catch (e) {
+    toast(e.message || 'Failed to create user', 'error');
   }
 }
 
@@ -946,11 +1076,9 @@ async function deleteUser(userId) {
     await apiFetch(`/api/v1/admin/users/${encodeURIComponent(email || userId)}`, { method: 'DELETE' });
     _users = _users.filter(u => String(u.id||u.user_id) !== String(userId));
     _totalUsers = Math.max(0, _totalUsers - 1);
-    filterUsers();
     updateUserCount();
     toast('User deleted', 'info');
     loadPlanDistribution();
-    loadStorageUsage();
     loadUsers(_userPage, true, true);
   } catch (e) {
     toast('Failed to delete user', 'error');
@@ -962,14 +1090,40 @@ async function loadRequests(page, silent = false, forceRefresh = false) {
   if (_reqLoading) return;
   _reqLoading = true;
   _reqPage = page || 1;
-  const path = `/api/v1/admin/requests?page=${_reqPage}`;
+
+  const searchEl = document.getElementById('reqSearch');
+  const typeEl = document.getElementById('reqTypeFilter');
+  const statusEl = document.getElementById('reqStatusFilter');
+  const planEl = document.getElementById('reqPlanFilter');
+  const sortEl = document.getElementById('reqSortFilter');
+
+  const q = searchEl ? searchEl.value.trim() : '';
+  const type = typeEl ? typeEl.value : '';
+  const status = statusEl ? statusEl.value : '';
+  const plan = planEl ? planEl.value : '';
+  const sort = sortEl ? sortEl.value : '';
+
+  let path = `/api/v1/admin/requests?page=${_reqPage}`;
+  if (q) path += `&q=${encodeURIComponent(q)}`;
+  if (type) path += `&type=${encodeURIComponent(type)}`;
+  if (status) path += `&status=${encodeURIComponent(status)}`;
+  if (plan) path += `&plan=${encodeURIComponent(plan)}`;
+  if (sort) path += `&sort=${encodeURIComponent(sort)}`;
+
   if (!silent) setReqPaginationLoading(true);
   try {
     const didRenderCache = await swrFetch(path, forceRefresh, (data) => {
-      _requests = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.requests || []));
-      _requests = _requests.map(r => ({ ...r, id: r.request_id || r.id }));
+      let raw = [];
+      if (data && Array.isArray(data.items)) raw = data.items;
+      else if (Array.isArray(data)) raw = data;
+      else if (data && data.requests && Array.isArray(data.requests.items)) raw = data.requests.items;
+      else if (data && Array.isArray(data.requests)) raw = data.requests;
+      else if (data && Array.isArray(data.results)) raw = data.results;
+
+      _requests = raw.map(r => ({ ...r, id: r.request_id || r.id }));
       _reqHasMore = data && data.has_next !== undefined ? !!data.has_next : (_requests.length === PAGE_LIMIT);
-      _totalRequests = data?.metrics?.total ?? _requests.length;
+      _reqMetrics = data?.metrics || (data?.requests?.metrics) || {};
+      _totalRequests = _reqMetrics.total_requests ?? _requests.length;
       renderRequests(_requests);
       updateRequestStats();
       updateReqPagination();
@@ -1010,53 +1164,33 @@ async function changeReqPage(page) {
 function updateRequestStats() {
   const displayCount = _requests.length;
   const total    = _totalRequests !== undefined ? _totalRequests : displayCount;
-  const pending  = _requests.filter(r => r.status === 'pending').length;
-  const approved = _requests.filter(r => r.status === 'approved').length;
-  const rejected = _requests.filter(r => r.status === 'rejected').length;
-  document.getElementById('reqStatTotal').textContent    = total;
-  document.getElementById('reqStatPending').textContent  = pending;
-  document.getElementById('reqStatApproved').textContent = approved;
-  document.getElementById('reqStatRejected').textContent = rejected;
-  document.getElementById('statRequests').textContent    = total;
-  document.getElementById('statPending').textContent     = pending;
-  document.getElementById('statApproved').textContent    = approved;
-  document.getElementById('sidebarPendingCount').textContent = pending || '—';
-  document.getElementById('reqCount').textContent = `${total} request${total!==1?'s':''}`;
+  
+  const m = _reqMetrics || {};
+  const pending  = m.pending_requests ?? _requests.filter(r => r.status === 'pending').length;
+  const approved = m.approved_requests ?? _requests.filter(r => r.status === 'approved').length;
+  const rejected = m.rejected_requests ?? _requests.filter(r => r.status === 'rejected').length;
+
+  batchSetText({
+    reqStatTotal: total,
+    reqStatPending: pending,
+    reqStatApproved: approved,
+    reqStatRejected: rejected,
+    reqCount: `${total} request${total!==1?'s':''}`,
+    statRequests: total,
+    statPending: pending,
+    statApproved: approved,
+    sidebarPendingCount: pending || '—'
+  });
 }
 
 let _reqSearchTimer = null;
 function filterRequests() {
   clearTimeout(_reqSearchTimer);
-  _reqSearchTimer = setTimeout(_filterRequestsNow, 250);
+  _reqSearchTimer = setTimeout(_filterRequestsNow, 300);
 }
 
 function _filterRequestsNow() {
-  const q      = (document.getElementById('reqSearch').value || '').toLowerCase();
-  const type   = document.getElementById('reqTypeFilter').value;
-  const status = document.getElementById('reqStatusFilter').value;
-  const plan   = document.getElementById('reqPlanFilter').value.toLowerCase();
-  const sort   = document.getElementById('reqSortFilter').value;
-
-  let filtered = _requests.filter(r => {
-    const user = r.user || {};
-    const matchQ = !q ||
-      (user.email||'').toLowerCase().includes(q) ||
-      ((user.full_name||'') + ' ' + (user.first_name||'')+' '+(user.last_name||'')).toLowerCase().includes(q) ||
-      (r.request_type||r.type||'').toLowerCase().includes(q) ||
-      String(r.id||'').includes(q);
-    const matchType   = !type   || (r.request_type||r.type||'') === type;
-    const matchStatus = !status || r.status === status;
-    const matchPlan   = !plan   || (user.plan||user.plan_name||'').toLowerCase() === plan;
-    return matchQ && matchType && matchStatus && matchPlan;
-  });
-
-  filtered.sort((a, b) => {
-    const da = new Date(a.created_at||0), db = new Date(b.created_at||0);
-    return sort === 'oldest' ? da - db : db - da;
-  });
-
-  document.getElementById('reqCount').textContent = `${filtered.length} request${filtered.length!==1?'s':''}`;
-  renderRequests(filtered);
+  loadRequests(1, false, true);
 }
 
 function renderRequests(requests) {
@@ -1194,9 +1328,8 @@ async function approveRequest(reqId) {
         body: JSON.stringify({ status: 'approved' }),
       });
       req.status = 'approved';
-      filterRequests();
       updateRequestStats();
-      renderDashboard();
+      // Skip renderDashboard() — loadRequests will trigger re-render if needed
       toast('Request approved successfully', 'success');
       loadRequests(_reqPage, true, true);
     } catch (e) {
@@ -1217,9 +1350,8 @@ async function setPendingRequest(reqId) {
       req.status = 'pending';
       req.rejection_reason = null;
       req.admin_notes = null;
-      filterRequests();
       updateRequestStats();
-      renderDashboard();
+      // Skip renderDashboard() — loadRequests will trigger re-render if needed
       toast('Request set back to pending', 'info');
       loadRequests(_reqPage, true, true);
     } catch (e) {
@@ -1254,9 +1386,8 @@ async function confirmRejectRequest() {
       req.rejection_reason = reason;
       req.admin_notes = notes;
       closeModal('rejectReqModal');
-      filterRequests();
       updateRequestStats();
-      renderDashboard();
+      // Skip renderDashboard() — loadRequests will trigger re-render if needed
       toast('Request rejected', 'info');
       loadRequests(_reqPage, true, true);
     } catch (e) {
@@ -1374,11 +1505,9 @@ async function deleteRequest(reqId) {
     await apiFetch(`/api/v1/admin/requests/${reqId}`, { method: 'DELETE' });
     _requests = _requests.filter(r => r.id !== reqId);
     closeModal('deleteReqModal');
-    filterRequests();
     updateRequestStats();
-    renderDashboard();
+    // Skip renderDashboard() — loadRequests will trigger re-render if needed
     toast('Request deleted', 'info');
-    loadStorageUsage();
     loadRequests(_reqPage, true, true);
   } catch (e) {
     toast('Failed to delete request', 'error');
@@ -1954,15 +2083,38 @@ async function loadReviews(page, silent = false, forceRefresh = false) {
   if (_revLoading) return;
   _revLoading = true;
   _revPage = page || 1;
-  const path = `/api/v1/admin/reviews?page=${_revPage}`;
+
+  const searchEl = document.getElementById('revSearch');
+  const statusEl = document.getElementById('revStatusFilter');
+  const ratingEl = document.getElementById('revRatingFilter');
+  const sortEl = document.getElementById('revSortFilter');
+
+  const q = searchEl ? searchEl.value.trim() : '';
+  const status = statusEl ? statusEl.value : '';
+  const rating = ratingEl ? ratingEl.value : '';
+  const sort = sortEl ? sortEl.value : '';
+
+  let path = `/api/v1/admin/reviews?page=${_revPage}`;
+  if (q) path += `&q=${encodeURIComponent(q)}`;
+  if (status) path += `&status=${encodeURIComponent(status)}`;
+  if (rating) path += `&rating=${encodeURIComponent(rating)}`;
+  if (sort) path += `&sort=${encodeURIComponent(sort)}`;
+
   if (!silent) setRevPaginationLoading(true);
   try {
     const didRenderCache = await swrFetch(path, forceRefresh, (data) => {
-      const rawReviews = data && Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : (data.results || data.reviews || []));
-      _reviews = rawReviews;
-      _revHasMore = data && data.has_next !== undefined ? !!data.has_next : (rawReviews.length === PAGE_LIMIT);
-      _totalReviews = data && data.metrics && data.metrics.total_reviews !== undefined ? data.metrics.total_reviews : (data && data.total !== undefined ? data.total : _reviews.length);
-      _filterReviewsNow();
+      let raw = [];
+      if (data && Array.isArray(data.items)) raw = data.items;
+      else if (Array.isArray(data)) raw = data;
+      else if (data && data.reviews && Array.isArray(data.reviews.items)) raw = data.reviews.items;
+      else if (data && Array.isArray(data.reviews)) raw = data.reviews;
+      else if (data && Array.isArray(data.results)) raw = data.results;
+
+      _reviews = raw;
+      _revHasMore = data && data.has_next !== undefined ? !!data.has_next : (raw.length === PAGE_LIMIT);
+      _revMetrics = data?.metrics || (data?.reviews?.metrics) || {};
+      _totalReviews = _revMetrics.total_reviews ?? _reviews.length;
+      renderReviews(_reviews);
       updateReviewStats();
       updateRevPagination();
     });
@@ -2002,14 +2154,22 @@ async function changeRevPage(page) {
 function updateReviewStats() {
   const displayCount = _reviews.length;
   const total    = _totalReviews !== undefined ? _totalReviews : displayCount;
-  const pending  = _reviews.filter(r => (r.status || (r.is_published ? 'accepted' : 'pending')) === 'pending').length;
-  const accepted = _reviews.filter(r => (r.status || (r.is_published ? 'accepted' : 'pending')) === 'accepted').length;
-  document.getElementById('revStatTotal').textContent    = total;
-  document.getElementById('revStatPending').textContent  = pending;
-  document.getElementById('revStatAccepted').textContent = accepted;
-  document.getElementById('revStatPage').textContent     = displayCount;
-  document.getElementById('revCount').textContent = `${total} review${total!==1?'s':''}`;
-  document.getElementById('sidebarReviewsCount').textContent = pending || '—';
+  
+  const m = _revMetrics || {};
+  const pending  = m.pending_reviews ?? _reviews.filter(r => (r.status === 'pending' || !r.status && !r.is_published)).length;
+  const accepted = m.published_reviews ?? _reviews.filter(r => (r.status === 'accepted' || r.status === 'published' || r.is_published)).length;
+
+  batchSetText({
+    revStatTotal: total,
+    revStatPending: pending,
+    revStatAccepted: accepted,
+    revStatPage: displayCount,
+    revCount: `${total} review${total!==1?'s':''}`,
+    sidebarReviewsCount: pending || '—',
+    statReviewsVal: total,
+    statReviewsPublished: accepted,
+    statReviewsPending: pending
+  });
 }
 
 function starRating(rating) {
@@ -2029,7 +2189,10 @@ function renderReviews(reviews) {
     const user       = rev.user || {};
     const name       = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '\u2014';
     const email      = user.email || '\u2014';
-    const status     = rev.status || (rev.is_published ? 'accepted' : 'pending');
+    let status       = rev.status;
+    if (status === 'published') status = 'accepted';
+    if (!status) status = rev.is_published ? 'accepted' : 'pending';
+    
     const rating     = rev.stars || rev.rating || 0;
     const reviewText = rev.review_text || rev.text || rev.comment || rev.body || '\u2014';
     const initials   = name !== '\u2014' ? name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() : (email[0]||'?').toUpperCase();
@@ -2085,34 +2248,11 @@ function renderReviews(reviews) {
 let _revSearchTimer = null;
 function filterReviews() {
   clearTimeout(_revSearchTimer);
-  _revSearchTimer = setTimeout(_filterReviewsNow, 250);
+  _revSearchTimer = setTimeout(_filterReviewsNow, 300);
 }
 
 function _filterReviewsNow() {
-  const q      = (document.getElementById('revSearch').value || '').toLowerCase();
-  const status = document.getElementById('revStatusFilter').value;
-  const rating = document.getElementById('revRatingFilter').value;
-  const sort   = document.getElementById('revSortFilter').value;
-
-  let filtered = _reviews.filter(r => {
-    const user = r.user || {};
-    const matchQ = !q ||
-      (user.email||'').toLowerCase().includes(q) ||
-      ((user.first_name||'') + ' ' + (user.last_name||'')).toLowerCase().includes(q) ||
-      (r.review_text||r.text||r.comment||r.body||'').toLowerCase().includes(q) ||
-      String(r.id||'').includes(q);
-    const matchStatus = !status || (r.status || (r.is_published ? 'accepted' : 'pending')) === status;
-    const matchRating = !rating || String(r.stars||r.rating||0) === rating;
-    return matchQ && matchStatus && matchRating;
-  });
-
-  filtered.sort((a, b) => {
-    const da = new Date(a.created_at||0), db = new Date(b.created_at||0);
-    return sort === 'oldest' ? da - db : db - da;
-  });
-
-  document.getElementById('revCount').textContent = `${filtered.length} review${filtered.length!==1?'s':''}`;
-  renderReviews(filtered);
+  loadReviews(1, false, true);
 }
 
 async function acceptReview(revId) {
@@ -2124,7 +2264,6 @@ async function acceptReview(revId) {
     const idx = _reviews.findIndex(r => r.id === revId);
     if (idx >= 0) {
       _reviews[idx] = { ..._reviews[idx], is_published: true, status: 'accepted' };
-      filterReviews();
     }
     updateReviewStats();
     toast('Review accepted and published', 'success');
@@ -2143,7 +2282,6 @@ async function pendingReview(revId) {
     const idx = _reviews.findIndex(r => r.id === revId);
     if (idx >= 0) {
       _reviews[idx] = { ..._reviews[idx], is_published: false, status: 'pending' };
-      filterReviews();
     }
     updateReviewStats();
     toast('Review set to pending', 'info');
@@ -2179,6 +2317,19 @@ async function deleteReview(revId) {
 
 // ── DASHBOARD ────────────────────────────────────────────────────
 function renderDashboard() {
+  // Performance: skip if dashboard page is not visible
+  if (_currentPage !== 'dashboard') return;
+
+  // Performance: compute a hash of the data to skip redundant renders
+  const hashInput = JSON.stringify({
+    pd: _planDistributionData.map(d => `${d.name||d.plan_name||''}:${d.count||d.total||0}`).join(','),
+    uc: _users.length,
+    rc: _requests.filter(r => r.status === 'pending').length,
+    rv: _reviews.filter(r => r.status === 'pending' || !r.is_published).length
+  });
+  if (hashInput === _lastDashboardHash) return;
+  _lastDashboardHash = hashInput;
+
   // Plan distribution — SVG Donut Chart
   let total = 0;
   const entries = _planDistributionData.map(item => {
@@ -2193,23 +2344,28 @@ function renderDashboard() {
   if (!entries.length || total === 0) {
     distEl.innerHTML = '<p style="color:var(--text-3);font-size:.82rem;padding:20px 0;text-align:center">No user data yet</p>';
   } else {
-    const DASHBOARD_COLORS = ['#A9802F', '#3F7A5C', '#7A6BAE', '#D8D2C4', '#b8862e', '#a8503f'];
-    function getColor(name) {
-      if (name.toLowerCase() === 'none' || name.toLowerCase() === 'no plan') return '#D8D2C4';
-      let hash = 0;
-      for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-      return DASHBOARD_COLORS[Math.abs(hash) % DASHBOARD_COLORS.length];
-    }
+    const DASHBOARD_COLORS = [
+      '#C5A880', // Gold
+      '#0F766E', // Deep Teal
+      '#4338CA', // Indigo Blue
+      '#EA580C', // Sunset Orange
+      '#B02A7E', // Berry Pink
+      '#15803D', // Forest Green
+      '#0369A1', // Ocean Blue
+      '#BE123C'  // Ruby Crimson
+    ];
 
     const C = 2 * Math.PI * 46; // Circumference of radius 46 ~ 289.0265
     let accumulated = 0;
     
-    const slices = entries.map(([name, count]) => {
+    const slices = entries.map(([name, count], index) => {
       const pct = Math.round(count / total * 100);
       const len = (count / total) * C;
       const offset = -accumulated;
       accumulated += len;
-      const color = getColor(name);
+      const color = (name.toLowerCase() === 'none' || name.toLowerCase() === 'no plan')
+        ? '#D8D2C4'
+        : DASHBOARD_COLORS[index % DASHBOARD_COLORS.length];
       return { name, count, pct, len, offset, color };
     });
 
@@ -2406,6 +2562,10 @@ async function handleLogout() {
 
 // ── Init ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Performance: cache page and nav-item collections once
+  _cachedPages = document.querySelectorAll('.page');
+  _cachedNavItems = document.querySelectorAll('.nav-item');
+
   document.getElementById('settingsApiBase').value = API;
 
   // Restore section from URL hash (e.g. admin.html#plans survives F5)
@@ -2413,16 +2573,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const validPages = ['dashboard','search','requests','users','plans','reviews','payments','settings'];
   const initialPage = (hash && validPages.includes(hash)) ? hash : 'dashboard';
   showPage(initialPage);
+  // showPage already triggers the load for the initial page.
+  // Only call loadAll() when showPage opened a non-dashboard page, because
+  // loadAll() fetches the consolidated dashboard data for sidebar badges.
+  if (initialPage !== 'dashboard') loadAll();
 
-  // Keyboard: Esc closes any open modal
+  // Keyboard actions: Escape, Enter, and Autocomplete navigation
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
       closeCreateConfirm();
+      ['userSearchDropdown', 'requestSearchDropdown', 'reviewSearchDropdown', 'paymentSearchDropdown', 'createSubSearchDropdown'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
     }
     // Ctrl/Cmd + Enter saves plan modal if open
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       if (document.getElementById('editPlanModal').classList.contains('open')) savePlan();
+    }
+
+    // Autocomplete key navigation
+    const activeEl = document.activeElement;
+    if (activeEl) {
+      const inputId = activeEl.id;
+      const validInputs = ['userSearch', 'reqSearch', 'revSearch', 'paySearch', 'sub-email'];
+      if (validInputs.includes(inputId)) {
+        const dropdownId = inputId === 'userSearch' ? 'userSearchDropdown' :
+                           inputId === 'reqSearch' ? 'requestSearchDropdown' :
+                           inputId === 'revSearch' ? 'reviewSearchDropdown' :
+                           inputId === 'paySearch' ? 'paymentSearchDropdown' :
+                           'createSubSearchDropdown';
+                           
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown && dropdown.style.display === 'block') {
+          const items = dropdown.querySelectorAll('.autofill-item');
+          if (items.length > 0) {
+            let selectedIndex = parseInt(dropdown.dataset.selectedIndex ?? -1);
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              selectedIndex = (selectedIndex + 1) % items.length;
+              setActiveAutofillItem(dropdown, selectedIndex);
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+              setActiveAutofillItem(dropdown, selectedIndex);
+            } else if (e.key === 'Enter') {
+              if (selectedIndex >= 0 && selectedIndex < items.length) {
+                e.preventDefault();
+                const activeItem = items[selectedIndex];
+                selectSectionEmail(activeItem.dataset.email, activeItem.dataset.type);
+              }
+            }
+          }
+        }
+      }
     }
   });
 
@@ -2490,16 +2695,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Init
-  window.addEventListener('load', () => {
-    setTimeout(loadAll, 0);
-  });
+  // Removed duplicate window.load → loadAll() that caused double API calls on page load
 });
 
 async function loadPaymentsTelemetry(silent = false, forceRefresh = false) {
   if (_payLoading) return;
   _payLoading = true;
-  const path = `/api/v1/admin/payments?page=${_payPage}`;
+
+  const searchEl = document.getElementById('paySearch');
+  const statusEl = document.getElementById('payStatusFilter');
+  const sortEl = document.getElementById('paySortFilter');
+
+  const q = searchEl ? searchEl.value.trim() : '';
+  const status = statusEl ? statusEl.value : '';
+  const sort = sortEl ? sortEl.value : '';
+
+  let path = `/api/v1/admin/payments?page=${_payPage}`;
+  if (q) path += `&q=${encodeURIComponent(q)}`;
+  if (status) path += `&status=${encodeURIComponent(status)}`;
+  if (sort) path += `&sort=${encodeURIComponent(sort)}`;
+
   if (!silent) setPayPaginationLoading(true);
   try {
     const didRenderCache = await swrFetch(path, forceRefresh, (data) => {
@@ -2770,7 +2985,7 @@ async function submitSubscription() {
     if (resultEl) resultEl.innerHTML = '';
     _selectedUserId = null;
 
-    await loadPaymentsTelemetry();
+    await loadPaymentsTelemetry(true, true);
   } catch (e) {
     toast(`Failed to create payment: ${e.message}`, 'error');
   } finally {
@@ -2887,37 +3102,11 @@ function renderPaymentsTable(items) {
 let _paySearchTimer = null;
 function filterPayments() {
   clearTimeout(_paySearchTimer);
-  _paySearchTimer = setTimeout(_filterPaymentsNow, 250);
+  _paySearchTimer = setTimeout(_filterPaymentsNow, 300);
 }
 
 function _filterPaymentsNow() {
-  const q = (document.getElementById('paySearch').value || '').toLowerCase().trim();
-  const status = document.getElementById('payStatusFilter').value;
-  const sort = document.getElementById('paySortFilter').value;
-
-  let filtered = _payments.filter(p => {
-    const u = p.user || {};
-    const plan = p.plan || {};
-    const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.company_name || '';
-    const email = u.email || '';
-    
-    const matchQ = !q ||
-      email.toLowerCase().includes(q) ||
-      name.toLowerCase().includes(q) ||
-      (plan.name || '').toLowerCase().includes(q) ||
-      String(p.id).includes(q) ||
-      String(p.plan_id).includes(q);
-      
-    const matchStatus = !status || p.status === status;
-    return matchQ && matchStatus;
-  });
-
-  filtered.sort((a, b) => {
-    const da = new Date(a.created_at || 0), db = new Date(b.created_at || 0);
-    return sort === 'oldest' ? da - db : db - da;
-  });
-
-  renderPaymentsTable(filtered);
+  loadPaymentsTelemetry(false, true);
 }
 
 async function changePaymentStatus(pid, newStatus) {
@@ -2966,7 +3155,7 @@ async function changePaymentStatus(pid, newStatus) {
         // Optimistic update
         const payment = _payments.find(p => String(p.id) === String(pid));
         if (payment) payment.status = newStatus;
-        filterPayments();
+        // Skip filterPayments() — loadPaymentsTelemetry already re-fetches and re-renders
         toast(`Payment status updated to ${statusLabels[newStatus]}`, 'success');
         loadPaymentsTelemetry(true, true);
       } catch (e) {
@@ -3126,6 +3315,28 @@ async function savePayment() {
 // ── Autocomplete and Section-Specific User Search ───────────────────
 let _sectionAutocompleteTimeout = null;
 
+function setActiveAutofillItem(dropdown, index) {
+  const items = dropdown.querySelectorAll('.autofill-item');
+  items.forEach((item, idx) => {
+    if (idx === index) {
+      item.classList.add('active');
+      item.scrollIntoView({ block: 'nearest' });
+      
+      // Auto-trigger displaying user data on hover/navigation
+      const email = item.dataset.email;
+      const type = item.dataset.type;
+      if (type === 'create-sub') {
+        lookupUserByEmail(email);
+      } else {
+        executeSectionSearch(email, type);
+      }
+    } else {
+      item.classList.remove('active');
+    }
+  });
+  dropdown.dataset.selectedIndex = index;
+}
+
 async function handleSectionAutocomplete(val, type) {
   clearTimeout(_sectionAutocompleteTimeout);
   
@@ -3141,6 +3352,7 @@ async function handleSectionAutocomplete(val, type) {
   if (!query) {
     dropdown.innerHTML = '';
     dropdown.style.display = 'none';
+    dropdown.dataset.selectedIndex = -1;
     if (type === 'user') {
       loadUsers(_userPage, false, false);
     } else if (type === 'request') {
@@ -3172,22 +3384,28 @@ async function handleSectionAutocomplete(val, type) {
       if (emails.length === 0) {
         dropdown.innerHTML = '';
         dropdown.style.display = 'none';
+        dropdown.dataset.selectedIndex = -1;
         return;
       }
 
       dropdown.innerHTML = emails.map(email => {
         return `<div class="autofill-item" data-email="${escapeHtml(email)}" data-type="${escapeHtml(type)}">${escapeHtml(email)}</div>`;
       }).join('');
-      // Bind click via addEventListener — never put email into onclick string
-      dropdown.querySelectorAll('.autofill-item').forEach(item => {
+      
+      dropdown.dataset.selectedIndex = -1; // Reset selection index
+      
+      // Bind click and hover via addEventListener
+      dropdown.querySelectorAll('.autofill-item').forEach((item, idx) => {
         item.addEventListener('click', () => selectSectionEmail(item.dataset.email, item.dataset.type));
+        item.addEventListener('mouseenter', () => setActiveAutofillItem(dropdown, idx));
       });
       dropdown.style.display = 'block';
     } catch (e) {
       console.error('Autocomplete error:', e);
       dropdown.style.display = 'none';
+      dropdown.dataset.selectedIndex = -1;
     }
-  }, 150);
+  }, 200);
 }
 
 function selectSectionEmail(email, type) {
@@ -3259,6 +3477,15 @@ async function executeSectionSearch(email, type) {
       document.getElementById('userPrevBtn').disabled = true;
       document.getElementById('userNextBtn').disabled = true;
       document.getElementById('userCount').textContent = `1 user`;
+      
+      // Update Users Page Stats Grid
+      const totalEl = document.getElementById('userStatTotal');
+      if (totalEl) {
+        totalEl.textContent = '1';
+        document.getElementById('userStatActive').textContent = data.is_active ? '1' : '0';
+        document.getElementById('userStatVerified').textContent = data.is_email_verified ? '1' : '0';
+        document.getElementById('userStatUnverified').textContent = data.is_email_verified ? '0' : '1';
+      }
     } else if (type === 'request') {
       _requests = data || [];
       _requests = _requests.map(r => ({ ...r, id: r.request_id || r.id }));

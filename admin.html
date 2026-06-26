@@ -215,7 +215,7 @@
       <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:26px;">
         <div>
           <h1 style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:32px;margin:0 0 4px;letter-spacing:.01em;color:var(--text-primary);">Good evening, Administrator</h1>
-          <div style="color:var(--text-secondary);font-size:13.5px;">Saturday, 20 June — here's where things stand</div>
+          <div style="color:var(--text-secondary);font-size:13.5px;" id="dashboardUpdateDate">Loading data...</div>
         </div>
 
       </div>
@@ -225,7 +225,7 @@
         <div class="card hero-card">
           <div class="hero-top">
             <div>
-              <div class="hero-label">Total revenue · this month</div>
+              <div class="hero-label">Total revenue</div>
               <div class="hero-number" id="statRevenueVal">— <span class="unit">KWD</span></div>
             </div>
           </div>
@@ -242,8 +242,6 @@
               <div class="mini-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.6 5.6 6.1.6-4.6 4.2 1.3 6-5.4-3.2-5.4 3.2 1.3-6L3.3 9.2l6.1-.6z"/></svg></div>
             </div>
             <div class="mini-value num" id="statActive">—</div>
-
-            <div class="mini-foot" id="statPlansSub">Loading plans…</div>
           </div>
           <div class="card mini-card">
             <div class="mini-top">
@@ -251,8 +249,6 @@
               <div class="mini-icon good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
             </div>
             <div class="mini-value num" id="statUsers">—</div>
-
-            <div class="mini-foot" id="statUsersSub">Loading users…</div>
           </div>
         </div>
       </div>
@@ -289,12 +285,29 @@
             <div class="combo-block">
               <div class="combo-head"><span>Storage used</span><b id="statStoragePct">—</b></div>
               <div class="mini-bar" style="height:7px"><span id="statStorageBar" style="width:0%"></span></div>
-              <div class="mini-foot" id="statStorageSub" style="margin-top:8px">Loading files...</div>
+              <div class="storage-details">
+                <span id="statStorageSub">Loading files...</span>
+                <span>Used: <strong id="statStorageVal">—</strong></span>
+              </div>
             </div>
             <div class="combo-block">
-              <div class="combo-head"><span>Emails — daily limit</span><b id="statEmailDayPct">—</b></div>
-              <div class="mini-bar" style="height:7px"><span id="statEmailDayBar" style="width:0%;background:#B8862E"></span></div>
-              <div class="mini-foot" id="statEmailMonthPct" style="margin-top:8px">Monthly: — sent</div>
+              <div class="combo-head"><span>Emails</span><b id="statEmailsVal" style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:700;">—</b></div>
+              <div class="email-limits-wrap">
+                <div class="email-limit-row">
+                  <div class="limit-labels">
+                    <span class="limit-name">Daily Limit</span>
+                    <span class="limit-pct" id="statEmailDayPct">—</span>
+                  </div>
+                  <div class="mini-bar" style="height:7px"><span id="statEmailDayBar" style="width:0%;background:#B8862E"></span></div>
+                </div>
+                <div class="email-limit-row">
+                  <div class="limit-labels">
+                    <span class="limit-name">Monthly Limit</span>
+                    <span class="limit-pct" id="statEmailMonthPct">—</span>
+                  </div>
+                  <div class="mini-bar" style="height:7px"><span id="statEmailMonthBar" style="width:0%;background:#8B5CF6"></span></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -421,8 +434,71 @@
             <h1>Users</h1>
             <p>Manage all registered user accounts.</p>
           </div>
+          <button class="btn btn-accent btn-sm" onclick="openCreateUserModal()">
+            <i class="fas fa-plus" style="font-size:11px;"></i>
+            New User
+          </button>
         </div>
       </div>
+
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom:18px">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-icon-box" style="background:var(--bg2);color:var(--text-3)">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-value" id="userStatTotal">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-label">Active Users</div>
+            <div class="stat-icon-box" style="background:var(--green-dim);color:var(--green)">
+              <i class="fas fa-user-check"></i>
+            </div>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-value" style="color:var(--green)" id="userStatActive">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-label">Inactive Users</div>
+            <div class="stat-icon-box" style="background:var(--red-dim);color:var(--red)">
+              <i class="fas fa-user-xmark"></i>
+            </div>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-value" style="color:var(--red)" id="userStatInactive">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-label">Verified Users</div>
+            <div class="stat-icon-box" style="background:var(--blue-dim);color:var(--blue)">
+              <i class="fas fa-user-shield"></i>
+            </div>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-value" style="color:var(--blue)" id="userStatVerified">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-label">Unverified Users</div>
+            <div class="stat-icon-box" style="background:var(--yellow-dim);color:#92710d">
+              <i class="fas fa-user-slash"></i>
+            </div>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-value" style="color:#92710d" id="userStatUnverified">—</div>
+          </div>
+        </div>
+      </div>
+
       <div class="filter-bar">
         <div class="search-box" style="flex:1;min-width:180px;position:relative;">
           <i class="fas fa-search" style="color:#a0a5b1; font-size:12px; margin-right:4px;"></i>
@@ -499,8 +575,8 @@
         </div>
         <div class="filter-divider"></div>
         <select class="filter-select" id="revStatusFilter" onchange="filterReviews()">
-          <option value="">All Statuses</option>
-          <option value="pending" selected>Pending</option>
+          <option value="" selected>All Statuses</option>
+          <option value="pending">Pending</option>
           <option value="accepted">Accepted</option>
         </select>
         <select class="filter-select" id="revRatingFilter" onchange="filterReviews()">
@@ -519,7 +595,6 @@
 
       <div class="section-header">
         <span class="section-title">Reviews</span>
-        <span class="section-count" id="revCount">—</span>
       </div>
       <div class="items-list" id="reviewsCardsGrid">
         <div class="item-row"><div class="item-row-body"><div class="empty-state"><div class="empty-state-icon"><i class="fas fa-comments" style="font-size:24px; color:var(--text-3);"></i></div><h3>Loading reviews…</h3></div></div></div>
@@ -697,7 +772,6 @@
 
       <div class="section-heading">
         <div class="section-title">Recent payments</div>
-        <span class="section-count" id="paymentsListCount">—</span>
       </div>
 
       <div class="payments-list" id="paymentsListGrid">
@@ -885,6 +959,60 @@
     <div class="confirm-footer">
       <button class="btn-cancel" onclick="closeCreateConfirm()">Go back</button>
       <button class="btn-confirm" onclick="submitSubscription()">Confirm &amp; send email</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🔵 CREATE USER MODAL 🔵 -->
+<div class="modal-backdrop" id="createUserModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon edit" style="background:var(--green-dim);color:var(--green)">
+        <i class="fas fa-user-plus" style="color:var(--green)"></i>
+      </div>
+      <div>
+        <div class="modal-title">Create User</div>
+        <div class="modal-subtitle">Add a new user account manually</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('createUserModal')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="createFirstName" type="text" placeholder="First name" data-bwignore="true">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="createLastName" type="text" placeholder="Last name" data-bwignore="true">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Company Name <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="createCompanyName" type="text" placeholder="Company Name" data-bwignore="true">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="createEmail" type="email" placeholder="user@example.com" data-bwignore="true">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="createPhone" type="tel" placeholder="+965 XXXX XXXX" data-bwignore="true">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="createPassword" type="password" placeholder="Leave blank to auto-generate" data-bwignore="true">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('createUserModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="createUser()">Create User</button>
     </div>
   </div>
 </div>
