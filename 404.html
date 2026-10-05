@@ -6,541 +6,412 @@
   <title>404 - Page Not Found | BADIA</title>
   <meta name="robots" content="noindex, follow" />
   <meta name="description" content="The page you are looking for could not be found. Return to BADIA business consulting and operational services." />
-  <link rel="icon" type="image/svg+xml" href="assets/badia-logo.svg" />
+  <link rel="icon" type="image/svg+xml" href="/assets/badia-logo.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Inter:wght@400;500;600&family=Cormorant+Garamond:wght@500;700&display=swap" rel="stylesheet" />
 
   <style>
     :root {
-      --primary: #000000;
-      --secondary: #0d0d0d;
-      --accent: #d4af37;
-      --accent-hover: #e5c158;
-      --accent-glow: rgba(212, 175, 55, 0.22);
-      --white: #ffffff;
-      --gray-50: #fafafa;
-      --gray-100: #f5f5f5;
-      --gray-200: #e0e0e0;
-      --gray-400: #9ca3af;
-      --gray-500: #6b7280;
-      --gray-800: #1a1a1a;
-      --card-bg: rgba(255, 255, 255, 0.03);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-border-hover: rgba(212, 175, 55, 0.4);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --ink: #ffffff;
+      --sand: #1a1a1a;
+      --dim: #666666;
+      --gold: #d4af37;
+      --gold-hi: #e8c75a;
+      --line: rgba(212, 175, 55, 0.2);
+      --line-soft: rgba(26, 26, 26, 0.12);
+      --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: var(--ink); color-scheme: light; }
 
     body {
       min-height: 100vh;
-      font-family: 'Inter', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: radial-gradient(circle at 50% 20%, #171717 0%, #080808 60%, #000000 100%);
-      color: var(--white);
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
-      position: relative;
+      font-family: 'Inter', 'Tajawal', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: var(--sand);
+      background: var(--ink);
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Ambient glow elements */
-    .ambient-glow {
-      position: absolute;
-      top: 15%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 550px;
-      height: 350px;
-      background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
-      filter: blur(50px);
-      pointer-events: none;
-      z-index: 0;
+    a { color: inherit; text-decoration: none; }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--gold-hi);
+      outline-offset: 3px;
+      border-radius: 4px;
     }
 
-    /* Navigation Header */
-    .top-header {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+    /* Header */
+    .site-header {
+      border-bottom: 1px solid var(--line-soft);
     }
-
-    .nav-container {
-      max-width: 1200px;
+    .bar {
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 1rem 1.5rem;
+      padding: 0.9rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-      color: var(--white);
-    }
-
-    .brand-logo img {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      transition: var(--transition);
-    }
-
-    .brand-logo:hover img {
-      transform: scale(1.05);
-      border-color: var(--accent);
-      box-shadow: 0 0 15px var(--accent-glow);
-    }
-
+    .brand { display: flex; align-items: center; gap: 0.7rem; }
+    .brand img { width: 34px; height: 34px; border-radius: 50%; }
     .brand-name {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      letter-spacing: 2px;
-      color: var(--white);
+      letter-spacing: 0.12em;
     }
-
-    .header-actions {
-      display: flex;
+    .lang {
+      display: inline-flex;
       align-items: center;
-      gap: 1rem;
-    }
-
-    .btn-lang-switch {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--white);
-      padding: 0.45rem 1rem;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 500;
+      gap: 0.5rem;
+      padding: 0.45rem 0.9rem;
+      font: 500 0.88rem/1 inherit;
       font-family: inherit;
+      color: var(--sand);
+      background: transparent;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: var(--transition);
+      transition: border-color 0.2s, color 0.2s;
     }
+    .lang:hover { border-color: var(--gold); color: var(--gold-hi); }
+    .lang svg { width: 16px; height: 16px; }
 
-    .btn-lang-switch:hover {
-      background: rgba(212, 175, 55, 0.12);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* Main Content */
-    .main-wrap {
+    /* Hero */
+    main {
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem 1.5rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    .content-box {
-      max-width: 720px;
       width: 100%;
-      text-align: center;
+      max-width: 1180px;
       margin: 0 auto;
+      padding: clamp(1.5rem, 4vw, 3.5rem) 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: clamp(2rem, 4vw, 3.5rem);
     }
 
-    /* 404 Visual */
-    .badge-404-wrap {
-      display: inline-flex;
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.4rem 1.1rem;
-      background: rgba(212, 175, 55, 0.08);
-      border: 1px solid rgba(212, 175, 55, 0.25);
-      border-radius: 100px;
-      color: var(--accent);
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 1.5rem;
+      gap: clamp(1.5rem, 4vw, 4rem);
     }
 
-    .badge-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-      animation: pulse 2s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    .error-code {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(6.5rem, 16vw, 11rem);
+    .code {
+      font-family: 'Cormorant Garamond', 'Tajawal', Georgia, serif;
       font-weight: 700;
-      line-height: 0.9;
-      letter-spacing: -2px;
-      margin-bottom: 1rem;
-      background: linear-gradient(180deg, #ffffff 30%, #d4af37 85%, #8c7322 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      user-select: none;
+      font-size: clamp(5rem, 11vw, 8.5rem);
+      line-height: 0.85;
+      color: var(--gold);
+      margin-bottom: 1.25rem;
+      font-variant-numeric: lining-nums;
     }
 
-    .error-title {
-      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    h1 {
+      font-family: 'Cormorant Garamond', 'Tajawal', Georgia, serif;
       font-weight: 700;
-      color: var(--white);
+      font-size: clamp(2rem, 4.4vw, 3.2rem);
+      line-height: 1.08;
       margin-bottom: 1rem;
-      letter-spacing: -0.5px;
     }
 
-    .error-description {
-      font-size: clamp(1rem, 2vw, 1.15rem);
-      color: var(--gray-400);
+    .lede {
+      max-width: 34rem;
+      color: var(--dim);
+      font-size: 1.05rem;
       line-height: 1.7;
-      max-width: 580px;
-      margin: 0 auto 2.5rem;
     }
 
-    /* Action Buttons */
-    .actions-grid {
+    .requested {
+      margin-top: 1.1rem;
+      font-size: 0.9rem;
+      color: var(--dim);
+    }
+    .requested bdi {
+      color: var(--sand);
+      word-break: break-all;
+      border-bottom: 1px dashed var(--line);
+    }
+    .requested[hidden] { display: none; }
+
+    .actions {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 3.5rem;
+      align-items: center;
+      gap: 0.9rem 1.5rem;
+      margin-top: 2rem;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 0.6rem;
-      padding: 0.85rem 1.8rem;
+      padding: 0.85rem 1.5rem;
+      font: 600 0.95rem/1 inherit;
+      font-family: inherit;
+      border-radius: 6px;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s var(--ease);
+    }
+    .btn svg { width: 17px; height: 17px; flex: none; }
+    .btn-solid { background: var(--gold); color: #1a1a1a; border: 1.5px solid var(--gold); }
+    .btn-solid:hover { background: var(--gold-hi); border-color: var(--gold-hi); }
+    .btn-ghost { color: var(--sand); border: 1.5px solid var(--line); }
+    .btn-ghost:hover { border-color: var(--gold); }
+    .btn:active { transform: translateY(1px); }
+
+    .wa {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--dim);
+      padding: 0.4rem 0;
+      transition: color 0.2s;
+    }
+    .wa svg { width: 18px; height: 18px; color: #25d366; }
+    .wa:hover { color: var(--sand); }
+
+    .arr { transition: transform 0.25s var(--ease); }
+    [dir="rtl"] .arr { transform: scaleX(-1); }
+    .btn:hover .arr { transform: translateX(3px); }
+    [dir="rtl"] .btn:hover .arr { transform: scaleX(-1) translateX(3px); }
+
+    /* Map */
+    .map {
+      direction: ltr;
+      position: relative;
+      aspect-ratio: 1 / 0.92;
+      -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 55%, transparent 100%);
+              mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 55%, transparent 100%);
+    }
+    .map svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    .contours path { fill: none; stroke: var(--gold); }
+    .route { fill: none; stroke: var(--gold-hi); stroke-width: 2; stroke-dasharray: 2 9; stroke-linecap: round; }
+    .lost line { stroke: var(--sand); stroke-width: 3; stroke-linecap: round; }
+    .pin-dot { fill: var(--gold); }
+    .pin-ring { fill: none; stroke: var(--gold); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; }
+    .tag { font: 600 22px 'Inter', 'Tajawal', sans-serif; fill: var(--sand); }
+    .tag.muted { fill: var(--dim); font-weight: 500; }
+    .tag.gold { fill: var(--gold-hi); }
+    .traveller { fill: var(--sand); }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .pin-ring { animation: ring 1.1s var(--ease) 2.6s 1 both; }
+      @keyframes ring {
+        from { transform: scale(0.6); opacity: 0; }
+        30% { opacity: 1; }
+        to { transform: scale(2.4); opacity: 0; }
+      }
+    }
+
+    /* Sections strip */
+    .routes h2 {
       font-size: 0.95rem;
       font-weight: 600;
-      font-family: inherit;
-      border-radius: 9px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: var(--transition);
-      white-space: nowrap;
+      color: var(--dim);
+      padding-bottom: 0.9rem;
     }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #000000;
-      border: 1.5px solid var(--accent);
-      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+    .routes ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
     }
-
-    .btn-primary:hover {
-      background: var(--accent-hover);
-      border-color: var(--accent-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.35);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--white);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
-      color: var(--white);
-      transform: translateY(-2px);
-    }
-
-    .btn-whatsapp {
-      background: rgba(37, 211, 102, 0.12);
-      color: #25d366;
-      border: 1.5px solid rgba(37, 211, 102, 0.3);
-    }
-
-    .btn-whatsapp:hover {
-      background: #25d366;
-      color: #000000;
-      border-color: #25d366;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.25);
-    }
-
-    /* Popular Links Panel */
-    .links-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 1.75rem 2rem;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
-    .links-title {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--gray-400);
-      margin-bottom: 1.25rem;
-      font-weight: 600;
-    }
-
-    .links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 0.75rem;
-    }
-
-    .link-item {
+    .routes li { flex: 1 1 11rem; border-bottom: 1px solid var(--line-soft); }
+    .routes li + li { border-inline-start: 1px solid var(--line-soft); }
+    .routes a {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.75rem 0.85rem;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-      color: var(--gray-200);
-      text-decoration: none;
-      font-size: 0.9rem;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 1.1rem 1.1rem;
       font-weight: 500;
-      transition: var(--transition);
+      transition: background 0.2s, color 0.2s;
     }
+    .routes a svg { width: 16px; height: 16px; color: var(--gold); flex: none; }
+    .routes a:hover { background: rgba(212, 175, 55, 0.07); color: var(--gold-hi); }
+    .routes a:hover .arr { transform: translateX(3px); }
+    [dir="rtl"] .routes a:hover .arr { transform: scaleX(-1) translateX(3px); }
 
-    .link-item i {
-      color: var(--accent);
-      font-size: 0.85rem;
-      transition: var(--transition);
-    }
-
-    .link-item:hover {
-      background: rgba(212, 175, 55, 0.08);
-      border-color: var(--card-border-hover);
-      color: var(--white);
-      transform: translateY(-2px);
-    }
-
-    .link-item:hover i {
-      transform: scale(1.15);
-    }
-
-    /* Footer */
-    .bottom-footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 1.5rem;
+    footer {
+      border-top: 1px solid var(--line-soft);
+      padding: 1.25rem 1.5rem;
       text-align: center;
       font-size: 0.85rem;
-      color: var(--gray-500);
-      background: rgba(0, 0, 0, 0.7);
+      color: var(--dim);
     }
 
-    /* Arabic RTL Specific Styling */
-    html[lang="ar"] {
-      direction: rtl;
-    }
+    /* Arabic */
+    html[lang="ar"] body { font-family: 'Tajawal', 'Inter', system-ui, sans-serif; }
+    html[lang="ar"] .brand-name { letter-spacing: 0; }
+    html[lang="ar"] h1 { font-weight: 800; line-height: 1.3; }
+    html[lang="ar"] .lede { line-height: 1.9; }
 
-    html[lang="ar"] .badge-404-wrap {
-      letter-spacing: 0;
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .map { order: -1; max-width: 460px; width: 100%; margin: 0 auto; aspect-ratio: 1 / 0.8; }
+      .routes li { flex-basis: 100%; }
+      .routes li + li { border-inline-start: 0; }
     }
-
-    html[lang="ar"] .links-title {
-      letter-spacing: 0;
-    }
-
-    /* Responsive */
-    @media (max-width: 640px) {
-      .actions-grid {
-        flex-direction: column;
-      }
-      .btn {
-        width: 100%;
-      }
-      .links-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-      .error-code {
-        font-size: 7.5rem;
-      }
+    @media (max-width: 520px) {
+      .btn { flex: 1 1 100%; justify-content: center; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Ambient Glow -->
-  <div class="ambient-glow"></div>
-
-  <!-- Top Header -->
-  <header class="top-header">
-    <div class="nav-container">
-      <a href="index.html" class="brand-logo" aria-label="BADIA Home">
-        <img src="assets/badia-logo.svg" alt="BADIA Logo" width="38" height="38" />
+  <header class="site-header">
+    <div class="bar">
+      <a href="/" class="brand" aria-label="BADIA Home">
+        <img src="assets/badia-logo.svg" alt="" width="34" height="34" />
         <span class="brand-name">BADIA</span>
       </a>
-
-      <div class="header-actions">
-        <button type="button" class="btn-lang-switch" id="langSwitchBtn" aria-label="Switch Language">
-          <i class="fa-solid fa-globe"></i>
-          <span id="langSwitchLabel">عربي</span>
-        </button>
-      </div>
+      <button type="button" class="lang" id="langSwitchBtn" aria-label="Switch language">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.400 5.600 12 3z"/></svg>
+        <span id="langSwitchLabel">عربي</span>
+      </button>
     </div>
   </header>
 
-  <!-- Main Content Wrap -->
-  <main class="main-wrap">
-    <div class="content-box">
-      
-      <!-- 404 Status Pill -->
-      <div class="badge-404-wrap">
-        <span class="badge-dot"></span>
-        <span data-en="Error 404 • Not Found" data-ar="خطأ 404 • الصفحة غير موجودة">Error 404 • Not Found</span>
-      </div>
+  <main>
+    <section class="hero">
+      <div class="copy">
+        <div class="code" aria-hidden="true">404</div>
+        <h1 data-en="Lost in the right direction?" data-ar="هل ضللت الطريق؟">Lost in the right direction?</h1>
+        <p class="lede" data-en="We can't find this page. It may have moved, been renamed, or the address may have a typo. Head back home or pick a section below." data-ar="لم نعثر على هذه الصفحة. قد تكون نُقلت أو تغيّر اسمها، أو ربما يوجد خطأ في العنوان. ارجع إلى الرئيسية أو اختر قسماً من الأسفل.">We can't find this page. It may have moved, been renamed, or the address may have a typo. Head back home or pick a section below.</p>
 
-      <!-- Giant 404 Code -->
-      <div class="error-code">404</div>
+        <p class="requested" id="requested" hidden>
+          <span data-en="You asked for" data-ar="الصفحة المطلوبة">You asked for</span>
+          <bdi id="requestedPath"></bdi>
+        </p>
 
-      <!-- Heading -->
-      <h1 class="error-title" data-en="Lost in the right direction?" data-ar="هل ضللت الطريق؟">
-        Lost in the right direction?
-      </h1>
-
-      <!-- Description -->
-      <p class="error-description" data-en="The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Let us guide you back." data-ar="الصفحة التي تبحث عنها قد تكون حُذفت، أو تغيّر اسمها، أو غير متاحة مؤقتاً. دعنا نرشدك إلى وجهتك الصحيحة.">
-        The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Let us guide you back.
-      </p>
-
-      <!-- Primary Action Buttons -->
-      <div class="actions-grid">
-        <a href="index.html" class="btn btn-primary">
-          <i class="fa-solid fa-arrow-left" id="homeArrowIcon"></i>
-          <span data-en="Return to Home" data-ar="العودة للرئيسية">Return to Home</span>
-        </a>
-        <a href="index.html#services" class="btn btn-secondary">
-          <i class="fa-solid fa-briefcase"></i>
-          <span data-en="Explore Services" data-ar="استعراض الخدمات">Explore Services</span>
-        </a>
-        <a href="https://wa.me/96550897501" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
-          <i class="fa-brands fa-whatsapp"></i>
-          <span data-en="WhatsApp Support" data-ar="الدعم عبر واتساب">WhatsApp Support</span>
-        </a>
-      </div>
-
-      <!-- Quick Helpful Links -->
-      <div class="links-card">
-        <div class="links-title" data-en="Quick Navigation" data-ar="روابط سريعة">Quick Navigation</div>
-        <div class="links-grid">
-          <a href="index.html#about" class="link-item">
-            <i class="fa-solid fa-users"></i>
-            <span data-en="About Us" data-ar="من نحن">About Us</span>
+        <div class="actions">
+          <a href="/" class="btn btn-solid">
+            <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span data-en="Return to home" data-ar="العودة للرئيسية">Return to home</span>
           </a>
-          <a href="index.html#service-feasibility" class="link-item">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span data-en="Feasibility Studies" data-ar="دراسات الجدوى">Feasibility Studies</span>
+          <a href="/#services" class="btn btn-ghost">
+            <span data-en="Explore services" data-ar="استعراض الخدمات">Explore services</span>
           </a>
-          <a href="index.html#service-accounting" class="link-item">
-            <i class="fa-solid fa-calculator"></i>
-            <span data-en="Accounting" data-ar="المحاسبة">Accounting</span>
-          </a>
-          <a href="index.html#web-services" class="link-item">
-            <i class="fa-solid fa-globe"></i>
-            <span data-en="Web Services" data-ar="خدمات المواقع">Web Services</span>
-          </a>
-          <a href="index.html#contact" class="link-item">
-            <i class="fa-solid fa-envelope"></i>
-            <span data-en="Contact Us" data-ar="تواصل معنا">Contact Us</span>
+          <a href="https://wa.me/96550897501" target="_blank" rel="noopener noreferrer" class="wa">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.5 14.9L2 22l5.25-1.5A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.2 15l-.3-.18-3.1.89.9-3-.2-.32A8.1 8.1 0 0 1 12.04 3.8zM8.6 7.4c-.2 0-.5.07-.75.35-.25.28-.97.95-.97 2.3s1 2.7 1.13 2.88c.14.18 1.9 3 4.7 4.1 2.3.9 2.8.72 3.3.68.5-.05 1.6-.65 1.82-1.28.23-.63.23-1.17.16-1.28-.07-.12-.25-.18-.52-.32-.27-.14-1.6-.8-1.85-.88-.25-.1-.43-.14-.6.13-.18.27-.7.88-.85 1.06-.16.18-.32.2-.6.07-.27-.14-1.15-.42-2.2-1.35-.8-.72-1.35-1.6-1.5-1.87-.16-.27-.02-.42.12-.55.12-.12.27-.32.4-.48.14-.16.18-.27.27-.45.1-.18.05-.34-.02-.48-.07-.14-.6-1.5-.85-2.05-.2-.5-.42-.5-.6-.5z"/></svg>
+            <span data-en="Chat with us on WhatsApp" data-ar="تحدث معنا عبر واتساب">Chat with us on WhatsApp</span>
           </a>
         </div>
       </div>
 
-    </div>
+      <!-- Wayfinding map: from the missing page back to BADIA -->
+      <div class="map" aria-hidden="true">
+        <svg viewBox="0 0 600 550" xmlns="http://www.w3.org/2000/svg">
+          <g class="contours" id="contours"></g>
+          <path id="route" class="route" d="M130 430 C 215 360, 250 430, 320 330 S 430 250, 470 150"/>
+          <g class="lost">
+            <line x1="116" y1="416" x2="144" y2="444"/>
+            <line x1="144" y1="416" x2="116" y2="444"/>
+          </g>
+          <text class="tag muted" x="130" y="482" text-anchor="middle" data-en="Page not found" data-ar="الصفحة غير موجودة">Page not found</text>
+          <circle class="pin-ring" cx="470" cy="150" r="12"/>
+          <circle class="pin-dot" cx="470" cy="150" r="9"/>
+          <text class="tag gold" x="470" y="112" text-anchor="middle" data-en="BADIA home" data-ar="بادية - الرئيسية">BADIA home</text>
+          <circle class="traveller" id="traveller" r="6">
+            <animateMotion dur="2.6s" begin="0.4s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.45 0 0.2 1"><mpath href="#route"/></animateMotion>
+          </circle>
+        </svg>
+      </div>
+    </section>
+
+    <nav class="routes" aria-labelledby="routesTitle">
+      <h2 id="routesTitle" data-en="Or go straight to a section" data-ar="أو انتقل مباشرة إلى قسم">Or go straight to a section</h2>
+      <ul>
+        <li><a href="/#about"><span data-en="About us" data-ar="من نحن">About us</span><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+        <li><a href="/#service-feasibility"><span data-en="Feasibility studies" data-ar="دراسات الجدوى">Feasibility studies</span><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+        <li><a href="/#service-accounting"><span data-en="Accounting" data-ar="المحاسبة">Accounting</span><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+        <li><a href="/#web-services"><span data-en="Web services" data-ar="خدمات المواقع">Web services</span><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+        <li><a href="/#contact"><span data-en="Contact us" data-ar="تواصل معنا">Contact us</span><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+      </ul>
+    </nav>
   </main>
 
-  <!-- Bottom Footer -->
-  <footer class="bottom-footer">
-    <p data-en="© 2026 BADIA. All rights reserved." data-ar="© 2026 بادية - BADIA. جميع الحقوق محفوظة.">
-      © 2026 BADIA. All rights reserved.
-    </p>
+  <footer>
+    <p data-en="© 2026 BADIA. All rights reserved." data-ar="© 2026 بادية - BADIA. جميع الحقوق محفوظة.">© 2026 BADIA. All rights reserved.</p>
   </footer>
 
-  <!-- Script for Language Toggle and Auto-Detection -->
   <script>
-    (function() {
-      const STORAGE_KEY = 'badia_lang';
+    (function () {
+      var KEY = 'badia_lang';
 
+      function stored() {
+        try { return localStorage.getItem(KEY); } catch (e) { return null; }
+      }
       function getLanguage() {
-        return localStorage.getItem(STORAGE_KEY) || 'en';
+        var s = stored();
+        if (s === 'ar' || s === 'en') return s;
+        return (navigator.language || '').toLowerCase().indexOf('ar') === 0 ? 'ar' : 'en';
       }
 
-      function updateContent(lang) {
-        document.documentElement.setAttribute('lang', lang);
-        document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-
-        // Update all data-en / data-ar elements
-        document.querySelectorAll('[data-en][data-ar]').forEach(function(el) {
-          const text = el.getAttribute('data-' + lang);
-          if (text) {
-            el.textContent = text;
-          }
+      function apply(lang) {
+        var root = document.documentElement;
+        root.setAttribute('lang', lang);
+        root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+        document.querySelectorAll('[data-en][data-ar]').forEach(function (el) {
+          var t = el.getAttribute('data-' + lang);
+          if (t) el.textContent = t;
         });
+        document.getElementById('langSwitchLabel').textContent = lang === 'en' ? 'عربي' : 'English';
+        document.title = lang === 'ar' ? '404 - الصفحة غير موجودة | بادية' : '404 - Page Not Found | BADIA';
+      }
 
-        // Update language switcher button label
-        const langLabel = document.getElementById('langSwitchLabel');
-        if (langLabel) {
-          langLabel.textContent = lang === 'en' ? 'عربي' : 'English';
-        }
-
-        // Adjust arrow icon direction
-        const arrow = document.getElementById('homeArrowIcon');
-        if (arrow) {
-          if (lang === 'ar') {
-            arrow.className = 'fa-solid fa-arrow-right';
-          } else {
-            arrow.className = 'fa-solid fa-arrow-left';
+      // Topographic contour lines (decorative)
+      function drawContours() {
+        var g = document.getElementById('contours');
+        var cx = 330, cy = 270, ns = 'http://www.w3.org/2000/svg';
+        for (var i = 0; i < 15; i++) {
+          var r = 26 + i * 21, d = '';
+          for (var k = 0; k <= 80; k++) {
+            var a = (k / 80) * Math.PI * 2;
+            var wob = 1 + 0.16 * Math.sin(3 * a + i * 0.32) + 0.09 * Math.sin(5 * a - i * 0.21 + 1.3) + 0.05 * Math.sin(8 * a + i * 0.5);
+            var x = cx + Math.cos(a) * r * 1.3 * wob;
+            var y = cy + Math.sin(a) * r * 0.95 * wob;
+            d += (k ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
           }
+          var p = document.createElementNS(ns, 'path');
+          p.setAttribute('d', d + 'Z');
+          var major = i % 4 === 0;
+          p.setAttribute('stroke-width', major ? '1.4' : '0.8');
+          p.setAttribute('stroke-opacity', major ? '0.5' : '0.22');
+          g.appendChild(p);
         }
-
-        // Update page title
-        document.title = lang === 'ar' 
-          ? '404 - الصفحة غير موجودة | بادية'
-          : '404 - Page Not Found | BADIA';
       }
 
-      function setLanguage(lang) {
-        localStorage.setItem(STORAGE_KEY, lang);
-        updateContent(lang);
-      }
+      document.addEventListener('DOMContentLoaded', function () {
+        var lang = getLanguage();
+        apply(lang);
+        drawContours();
 
-      document.addEventListener('DOMContentLoaded', function() {
-        const initialLang = getLanguage();
-        updateContent(initialLang);
-
-        const btn = document.getElementById('langSwitchBtn');
-        if (btn) {
-          btn.addEventListener('click', function() {
-            const current = getLanguage();
-            setLanguage(current === 'en' ? 'ar' : 'en');
-          });
+        // Show the address that wasn't found
+        var path = decodeURIComponent(location.pathname || '');
+        if (path && path !== '/' && !/404\.html$/.test(path)) {
+          document.getElementById('requestedPath').textContent = path;
+          document.getElementById('requested').hidden = false;
         }
+
+        // Reduced motion: skip the travelling dot
+        if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          var t = document.getElementById('traveller');
+          if (t) t.remove();
+        }
+
+        document.getElementById('langSwitchBtn').addEventListener('click', function () {
+          lang = lang === 'en' ? 'ar' : 'en';
+          try { localStorage.setItem(KEY, lang); } catch (e) {}
+          apply(lang);
+        });
       });
     })();
   </script>
