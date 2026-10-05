@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 - Page Not Found | BADIA</title>
+  <meta name="robots" content="noindex, follow" />
+  <meta name="description" content="The page you are looking for could not be found. Return to BADIA business consulting and operational services." />
+  <link rel="icon" type="image/svg+xml" href="assets/badia-logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root {
+      --primary: #000000;
+      --secondary: #0d0d0d;
+      --accent: #d4af37;
+      --accent-hover: #e5c158;
+      --accent-glow: rgba(212, 175, 55, 0.22);
+      --white: #ffffff;
+      --gray-50: #fafafa;
+      --gray-100: #f5f5f5;
+      --gray-200: #e0e0e0;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-800: #1a1a1a;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-hover: rgba(212, 175, 55, 0.4);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at 50% 20%, #171717 0%, #080808 60%, #000000 100%);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient glow elements */
+    .ambient-glow {
+      position: absolute;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 550px;
+      height: 350px;
+      background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Navigation Header */
+    .top-header {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--white);
+    }
+
+    .brand-logo img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      transition: var(--transition);
+    }
+
+    .brand-logo:hover img {
+      transform: scale(1.05);
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .brand-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--white);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-lang-switch {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--white);
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .btn-lang-switch:hover {
+      background: rgba(212, 175, 55, 0.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Main Content */
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .content-box {
+      max-width: 720px;
+      width: 100%;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    /* 404 Visual */
+    .badge-404-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1.1rem;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 100px;
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .error-code {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(6.5rem, 16vw, 11rem);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -2px;
+      margin-bottom: 1rem;
+      background: linear-gradient(180deg, #ffffff 30%, #d4af37 85%, #8c7322 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      user-select: none;
+    }
+
+    .error-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 1rem;
+      letter-spacing: -0.5px;
+    }
+
+    .error-description {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--gray-400);
+      line-height: 1.7;
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* Action Buttons */
+    .actions-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.8rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 9px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000000;
+      border: 1.5px solid var(--accent);
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.35);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--white);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+
+    .btn-whatsapp {
+      background: rgba(37, 211, 102, 0.12);
+      color: #25d366;
+      border: 1.5px solid rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-whatsapp:hover {
+      background: #25d366;
+      color: #000000;
+      border-color: #25d366;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.25);
+    }
+
+    /* Popular Links Panel */
+    .links-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.75rem 2rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .links-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gray-400);
+      margin-bottom: 1.25rem;
+      font-weight: 600;
+    }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 0.85rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      color: var(--gray-200);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .link-item i {
+      color: var(--accent);
+      font-size: 0.85rem;
+      transition: var(--transition);
+    }
+
+    .link-item:hover {
+      background: rgba(212, 175, 55, 0.08);
+      border-color: var(--card-border-hover);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+
+    .link-item:hover i {
+      transform: scale(1.15);
+    }
+
+    /* Footer */
+    .bottom-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--gray-500);
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    /* Arabic RTL Specific Styling */
+    html[lang="ar"] {
+      direction: rtl;
+    }
+
+    html[lang="ar"] .badge-404-wrap {
+      letter-spacing: 0;
+    }
+
+    html[lang="ar"] .links-title {
+      letter-spacing: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .actions-grid {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+      .links-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .error-code {
+        font-size: 7.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow -->
+  <div class="ambient-glow"></div>
+
+  <!-- Top Header -->
+  <header class="top-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-logo" aria-label="BADIA Home">
+        <img src="assets/badia-logo.svg" alt="BADIA Logo" width="38" height="38" />
+        <span class="brand-name">BADIA</span>
+      </a>
+
+      <div class="header-actions">
+        <button type="button" class="btn-lang-switch" id="langSwitchBtn" aria-label="Switch Language">
+          <i class="fa-solid fa-globe"></i>
+          <span id="langSwitchLabel">عربي</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Wrap -->
+  <main class="main-wrap">
+    <div class="content-box">
+      
+      <!-- 404 Status Pill -->
+      <div class="badge-404-wrap">
+        <span class="badge-dot"></span>
+        <span data-en="Error 404 • Not Found" data-ar="خطأ 404 • الصفحة غير موجودة">Error 404 • Not Found</span>
+      </div>
+
+      <!-- Giant 404 Code -->
+      <div class="error-code">404</div>
+
+      <!-- Heading -->
+      <h1 class="error-title" data-en="Lost in the right direction?" data-ar="هل ضللت الطريق؟">
+        Lost in the right direction?
+      </h1>
+
+      <!-- Description -->
+      <p class="error-description" data-en="The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Let us guide you back." data-ar="الصفحة التي تبحث عنها قد تكون حُذفت، أو تغيّر اسمها، أو غير متاحة مؤقتاً. دعنا نرشدك إلى وجهتك الصحيحة.">
+        The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Let us guide you back.
+      </p>
+
+      <!-- Primary Action Buttons -->
+      <div class="actions-grid">
+        <a href="index.html" class="btn btn-primary">
+          <i class="fa-solid fa-arrow-left" id="homeArrowIcon"></i>
+          <span data-en="Return to Home" data-ar="العودة للرئيسية">Return to Home</span>
+        </a>
+        <a href="index.html#services" class="btn btn-secondary">
+          <i class="fa-solid fa-briefcase"></i>
+          <span data-en="Explore Services" data-ar="استعراض الخدمات">Explore Services</span>
+        </a>
+        <a href="https://wa.me/96550897501" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span data-en="WhatsApp Support" data-ar="الدعم عبر واتساب">WhatsApp Support</span>
+        </a>
+      </div>
+
+      <!-- Quick Helpful Links -->
+      <div class="links-card">
+        <div class="links-title" data-en="Quick Navigation" data-ar="روابط سريعة">Quick Navigation</div>
+        <div class="links-grid">
+          <a href="index.html#about" class="link-item">
+            <i class="fa-solid fa-users"></i>
+            <span data-en="About Us" data-ar="من نحن">About Us</span>
+          </a>
+          <a href="index.html#service-feasibility" class="link-item">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span data-en="Feasibility Studies" data-ar="دراسات الجدوى">Feasibility Studies</span>
+          </a>
+          <a href="index.html#service-accounting" class="link-item">
+            <i class="fa-solid fa-calculator"></i>
+            <span data-en="Accounting" data-ar="المحاسبة">Accounting</span>
+          </a>
+          <a href="index.html#web-services" class="link-item">
+            <i class="fa-solid fa-globe"></i>
+            <span data-en="Web Services" data-ar="خدمات المواقع">Web Services</span>
+          </a>
+          <a href="index.html#contact" class="link-item">
+            <i class="fa-solid fa-envelope"></i>
+            <span data-en="Contact Us" data-ar="تواصل معنا">Contact Us</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Footer -->
+  <footer class="bottom-footer">
+    <p data-en="© 2026 BADIA. All rights reserved." data-ar="© 2026 بادية - BADIA. جميع الحقوق محفوظة.">
+      © 2026 BADIA. All rights reserved.
+    </p>
+  </footer>
+
+  <!-- Script for Language Toggle and Auto-Detection -->
+  <script>
+    (function() {
+      const STORAGE_KEY = 'badia_lang';
+
+      function getLanguage() {
+        return localStorage.getItem(STORAGE_KEY) || 'en';
+      }
+
+      function updateContent(lang) {
+        document.documentElement.setAttribute('lang', lang);
+        document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+        // Update all data-en / data-ar elements
+        document.querySelectorAll('[data-en][data-ar]').forEach(function(el) {
+          const text = el.getAttribute('data-' + lang);
+          if (text) {
+            el.textContent = text;
+          }
+        });
+
+        // Update language switcher button label
+        const langLabel = document.getElementById('langSwitchLabel');
+        if (langLabel) {
+          langLabel.textContent = lang === 'en' ? 'عربي' : 'English';
+        }
+
+        // Adjust arrow icon direction
+        const arrow = document.getElementById('homeArrowIcon');
+        if (arrow) {
+          if (lang === 'ar') {
+            arrow.className = 'fa-solid fa-arrow-right';
+          } else {
+            arrow.className = 'fa-solid fa-arrow-left';
+          }
+        }
+
+        // Update page title
+        document.title = lang === 'ar' 
+          ? '404 - الصفحة غير موجودة | بادية'
+          : '404 - Page Not Found | BADIA';
+      }
+
+      function setLanguage(lang) {
+        localStorage.setItem(STORAGE_KEY, lang);
+        updateContent(lang);
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const initialLang = getLanguage();
+        updateContent(initialLang);
+
+        const btn = document.getElementById('langSwitchBtn');
+        if (btn) {
+          btn.addEventListener('click', function() {
+            const current = getLanguage();
+            setLanguage(current === 'en' ? 'ar' : 'en');
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
