@@ -19,10 +19,13 @@ function handleSuccessfulAuth(role) {
     } else if (window._authIntent === 'feasibility') {
         window.location.href = 'account.html#feasibility';
     } else if (window._authIntent === 'payment') {
-        window.open('https://upayto.me/badia', '_blank');
-        if (typeof updateNavAuthLink === 'function') {
-            updateNavAuthLink();
+        const planId = window._pendingPaymentPlanId || '';
+        const billingCycle = window._pendingPaymentBillingCycle || 'monthly';
+        window._authIntent = null;
+        if (typeof window.openPaymentModal === 'function') {
+            window.openPaymentModal(planId, billingCycle);
         }
+        if (typeof updateNavAuthLink === 'function') updateNavAuthLink();
     } else if (role === 'admin') {
         window.location.href = 'admin.html';
     } else {
@@ -532,7 +535,70 @@ function handleSuccessfulAuth(role) {
         // Init
         initAuthForm();
         // ===== Nav Auth & Service Gates (Moved from script.js) =====
-        window.handlePaymentClick = function(url) { if (isLoggedIn()) { window.open(url, '_blank'); } else { if(typeof openAuthModal === 'function') { openAuthModal('login', 'payment'); } } };
+        window.confirmPlanChange = function() {
+            const lang = document.documentElement.getAttribute('lang') || 'en';
+            const isArabic = lang === 'ar';
+            const overlay = document.createElement('div');
+            overlay.className = 'payment-modal-overlay plan-change-overlay';
+            overlay.innerHTML = `
+                <section class="payment-modal plan-change-modal" role="alertdialog" aria-modal="true" aria-labelledby="planChangeTitle" aria-describedby="planChangeMessage" dir="${isArabic ? 'rtl' : 'ltr'}">
+                    <h2 id="planChangeTitle">${isArabic ? 'تأكيد تغيير الباقة' : 'Confirm plan change'}</h2>
+                    <p class="payment-modal-copy" id="planChangeMessage">${isArabic ? 'لديك اشتراك حالي. سيؤدي تغيير الباقة إلى إلغاء باقتك الحالية. هل تريد المتابعة؟' : 'You have a current subscription. Changing plans will void your current plan. Do you want to continue?'}</p>
+                    <div class="plan-change-actions">
+                        <button class="btn btn-outline" type="button" data-plan-change="cancel">${isArabic ? 'لا، إلغاء' : 'No, cancel'}</button>
+                        <button class="btn btn-primary" type="button" data-plan-change="confirm">${isArabic ? 'نعم، متابعة' : 'Yes, continue'}</button>
+                    </div>
+                </section>`;
+            document.body.appendChild(overlay);
+            document.body.classList.add('modal-open');
+
+            return new Promise(resolve => {
+                const finish = confirmed => {
+                    overlay.remove();
+                    document.body.classList.remove('modal-open');
+                    document.removeEventListener('keydown', onKeyDown);
+                    resolve(confirmed);
+                };
+                const onKeyDown = event => {
+                    if (event.key === 'Escape') finish(false);
+                };
+                overlay.querySelector('[data-plan-change="confirm"]').addEventListener('click', () => finish(true));
+                overlay.querySelector('[data-plan-change="cancel"]').addEventListener('click', () => finish(false));
+                overlay.addEventListener('click', event => {
+                    if (event.target === overlay) finish(false);
+                });
+                document.addEventListener('keydown', onKeyDown);
+                overlay.querySelector('[data-plan-change="cancel"]').focus();
+            });
+        };
+
+        window.handlePaymentClick = async function(planId) {
+            window._pendingPaymentPlanId = planId || '';
+            window._pendingPaymentBillingCycle = typeof _currentBilling !== 'undefined' && _currentBilling === 'yearly' ? 'yearly' : 'monthly';
+            if (isLoggedIn()) {
+                let user = null;
+                try {
+                    const userRes = await fetch(`${API_BASE}/api/v1/users/me`, { credentials: 'include' });
+                    if (userRes.ok) {
+                        const userData = await userRes.json();
+                        user = userData.user_info || null;
+                        if (user && typeof setCachedUser === 'function') setCachedUser(user);
+                    }
+                } catch (err) {
+                    // Use the last known profile when the network is unavailable.
+                }
+                if (!user && typeof getCachedUser === 'function') user = getCachedUser();
+
+                const subscription = user?.current_subscription;
+                const currentPlanId = subscription?.plan?.id;
+                if (subscription && (currentPlanId == null || String(currentPlanId) !== String(planId))) {
+                    if (!await window.confirmPlanChange()) return;
+                }
+                if (typeof window.openPaymentModal === 'function') window.openPaymentModal(window._pendingPaymentPlanId, window._pendingPaymentBillingCycle);
+            } else if (typeof openAuthModal === 'function') {
+                openAuthModal('login', 'payment');
+            }
+        };
 
         window.handleServiceRequest = function(serviceType) {
             if (isLoggedIn()) {
@@ -661,16 +727,16 @@ function handleSuccessfulAuth(role) {
             window.updateNavAuthLink();
         }
 
-        // Verify session validity with backend on index page load using the minimal endpoint
+        // Verify session validity with backend on index page load using the full profile endpoint
         const isLandingPage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '' || window.location.pathname.endsWith('/');
         if (isLandingPage) {
             async function checkSession() {
                 try {
-                    let res = await fetch(`${API_BASE}/api/v1/users/me?minimal=true`, { credentials: 'include' });
+                    let res = await fetch(`${API_BASE}/api/v1/users/me`, { credentials: 'include' });
                     if (res.status === 401 && typeof tryRefreshToken === 'function') {
                         const refreshed = await tryRefreshToken();
                         if (refreshed) {
-                            res = await fetch(`${API_BASE}/api/v1/users/me?minimal=true`, { credentials: 'include' });
+                            res = await fetch(`${API_BASE}/api/v1/users/me`, { credentials: 'include' });
                         }
                     }
                     if (res.ok) {
@@ -702,3 +768,4 @@ function handleSuccessfulAuth(role) {
             }
             checkSession();
         }
+

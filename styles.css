@@ -230,8 +230,8 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 .about-content h2{color:var(--primary)}
 .about-icon{font-size:2.5rem;margin-bottom:1rem}
 .about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;margin-top:2rem}
-.about-card{background:var(--white);padding:2rem;border-radius:8px;box-shadow:var(--shadow);transition:var(--transition);border-left:4px solid var(--accent);text-align:center}
-.about-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.about-card{background:var(--white);padding:2rem;border-radius:8px;box-shadow:var(--shadow);transition:var(--transition);text-align:center}
+
 .about-card h3{font-size:1.3rem;margin-bottom:.5rem}
 .about-card p{font-size:.95rem}
 
@@ -240,7 +240,7 @@ p{font-size:1.1rem;line-height:1.8;color:var(--gray-500)}
 .usp-section>h3{font-size:1.8rem;margin-bottom:2rem;color:var(--primary)}
 .usp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem}
 .usp-item{padding:2rem;border:1px solid var(--gray-200);border-radius:8px;transition:var(--transition)}
-.usp-item:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+
 .usp-number{font-size:2.5rem;font-weight:800;color:var(--accent);margin-bottom:.5rem}
 .usp-item h4{font-size:1.2rem;margin-bottom:.5rem;color:var(--primary)}
 .usp-item p{font-size:.95rem}
@@ -1100,6 +1100,49 @@ body.modal-open{overflow:hidden}
 
 
 /* Auth Modal */
+.payment-modal-overlay{position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(10,16,28,.62);backdrop-filter:blur(5px);animation:modalFadeIn .18s ease}
+.payment-modal{position:relative;width:min(100%,480px);max-height:92vh;overflow:auto;padding:2.2rem;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:22px;box-shadow:0 28px 80px rgba(0,0,0,.28);animation:modalSlideUp .22s ease}
+.payment-modal .plan-modal-close{top:1.1rem;right:1.1rem}
+.payment-modal-kicker{margin-bottom:.55rem;color:var(--accent);font-size:.72rem;font-weight:800;letter-spacing:1.6px}
+.payment-modal h2{margin:0;padding:0;text-align:left;font-size:1.65rem;line-height:1.25;color:var(--primary)}
+.payment-modal h2::after{display:none}
+.payment-modal-copy{margin:.55rem 0 1.4rem;color:var(--gray-500);font-size:.94rem}
+.plan-change-modal h2{text-align:start}
+.plan-change-modal .payment-modal-copy{margin:1rem 0 1.5rem;line-height:1.6}
+.plan-change-actions{display:flex;justify-content:flex-end;gap:.7rem;flex-wrap:wrap}
+.plan-change-actions .btn{min-width:130px}
+.payment-method-list{display:flex;flex-direction:column;gap:.7rem}
+.payment-method-option{position:relative;display:flex;align-items:center;gap:.85rem;width:100%;min-height:76px;padding:.85rem 1rem;text-align:left;background:#fff;border:1.5px solid var(--gray-200);border-radius:13px;cursor:pointer;transition:border-color .18s,background .18s,box-shadow .18s}
+.payment-method-option:hover{border-color:#c7b16a;background:#fffdf7}
+.payment-method-option:disabled{cursor:not-allowed;opacity:.55;background:#f8f8f8}
+.payment-method-option:disabled:hover{border-color:var(--gray-200);background:#f8f8f8}
+.payment-method-option--gateway{cursor:default}
+.payment-method-option--gateway:hover{border-color:var(--accent);background:#fff}
+.payment-method-option.is-selected{border-color:var(--accent);background:#fff;box-shadow:0 0 0 1px var(--accent)}
+.payment-method-logo{display:flex;align-items:center;justify-content:center;flex:0 0 48px;width:48px;height:42px;padding:5px;background:#fff;border:1px solid var(--gray-100);border-radius:9px}
+.payment-method-logo img{display:block;max-width:100%;max-height:100%;object-fit:contain}
+.payment-method-option[data-payment-method="apple"] .payment-method-logo img{width:25px;height:28px}
+.payment-method-option[data-payment-method="google"] .payment-method-logo img{width:29px;height:29px}
+.payment-method-text{display:flex;flex:1;flex-direction:column;gap:.18rem;color:var(--primary)}
+.payment-method-text strong{font-size:.98rem;font-weight:700}
+.payment-method-text small{color:var(--gray-500);font-size:.79rem}
+.payment-method-radio{width:18px;height:18px;border:1.5px solid var(--gray-300);border-radius:50%;flex-shrink:0}
+.is-selected .payment-method-radio{border:5px solid var(--accent)}
+.payment-primary-badge{position:absolute;top:-8px;right:12px;padding:.16rem .48rem;background:var(--primary);color:#fff;border-radius:20px;font-size:.62rem;font-weight:700}
+.payment-continue-btn{display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%;margin-top:1.3rem;padding:.92rem 1rem;border-radius:11px;font-size:1rem}
+.payment-secure-note{display:flex;justify-content:center;align-items:center;gap:.4rem;margin:1rem 0 0;color:var(--gray-500);font-size:.76rem;text-align:center}
+.payment-secure-note i{color:#198754}
+.payment-gateway-notice{margin:.75rem 0 0;padding:.7rem .8rem;border-radius:8px;background:#f8f6ef;color:var(--primary);font-size:.84rem;text-align:center}
+@media(max-width:520px){.payment-modal{padding:1.7rem 1.2rem;border-radius:18px}.payment-modal h2{font-size:1.42rem}.payment-method-option{padding:.75rem .7rem}.payment-primary-badge{right:8px}.plan-change-actions{flex-direction:column-reverse}.plan-change-actions .btn{width:100%}}
+
+.cookie-notice{position:fixed;z-index:8800;left:1.25rem;right:1.25rem;bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;max-width:900px;margin:0 auto;padding:1rem 1.15rem;background:#fff;border:1px solid var(--gray-200);border-radius:12px;box-shadow:0 12px 38px rgba(0,0,0,.16)}
+.cookie-notice-copy strong{display:block;margin-bottom:.2rem;color:var(--primary);font-size:.92rem}
+.cookie-notice-copy p{margin:0;color:var(--gray-600);font-size:.8rem;line-height:1.55}
+.cookie-notice-copy a{margin-left:.25rem;color:var(--primary);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.cookie-notice-dismiss{flex-shrink:0;padding:.65rem 1rem;background:var(--primary);border:1px solid var(--primary);border-radius:8px;color:#fff;font:inherit;font-size:.84rem;font-weight:700;cursor:pointer}
+.cookie-notice-dismiss:hover{background:#fff;color:var(--primary)}
+@media(max-width:600px){.cookie-notice{left:.65rem;right:.65rem;bottom:.65rem;align-items:flex-start;gap:.8rem;padding:.85rem}.cookie-notice-copy p{font-size:.75rem}.cookie-notice-dismiss{padding:.55rem .7rem}}
+
 .auth-modal-overlay {
     position: fixed;
     top: 0;

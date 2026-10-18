@@ -67,6 +67,159 @@ function getCurrentLang() {
     return document.documentElement.getAttribute('lang') || 'en';
 }
 
+// ===== Hesabe checkout =====
+function openPaymentModal(planId = '', billingCycle = _currentBilling) {
+    const lang = getCurrentLang();
+    const isArabic = lang === 'ar';
+    const modalHTML = `
+    <div class="payment-modal-overlay" id="paymentModalOverlay" onclick="closePaymentModalOnBackdrop(event)">
+        <section class="payment-modal" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle">
+            <button class="plan-modal-close" type="button" onclick="closePaymentModal()" aria-label="${isArabic ? 'إغلاق' : 'Close'}"><i class="fa-solid fa-xmark"></i></button>
+            <div class="payment-modal-kicker">${isArabic ? 'دفع آمن' : 'SECURE CHECKOUT'}</div>
+            <h2 id="paymentModalTitle">${isArabic ? 'المتابعة إلى الدفع' : 'Continue with Hesabe'}</h2>
+            <p class="payment-modal-copy">${isArabic ? 'اختر طريقة الدفع المفضلة. سيتم تأكيد الاشتراك بعد التحقق من الدفع.' : 'Choose your preferred payment method. Your subscription is confirmed after the payment is verified.'}</p>
+            <div class="payment-method-list">
+                <button class="payment-method-option is-selected" type="button" data-payment-method="knet" aria-pressed="true" onclick="selectPaymentMethod('knet')">
+                    <span class="payment-method-logo"><img src="assets/knet.svg" alt=""></span>
+                    <span class="payment-method-text"><strong>KNET</strong><small>${isArabic ? 'الدفع عبر كي نت' : 'Pay securely with KNET'}</small></span>
+                    <span class="payment-primary-badge">${isArabic ? 'الأولوية' : 'Preferred'}</span><span class="payment-method-radio"></span>
+                </button>
+                <button class="payment-method-option" type="button" data-payment-method="google" aria-pressed="false" onclick="selectPaymentMethod('google')">
+                    <span class="payment-method-logo"><img src="assets/google-color-svgrepo-com.svg" alt=""></span>
+                    <span class="payment-method-text"><strong>Google Pay</strong><small>${isArabic ? 'الدفع باستخدام Google Pay' : 'Pay with Google Pay'}</small></span><span class="payment-method-radio"></span>
+                </button>
+                <button class="payment-method-option" type="button" data-payment-method="apple" aria-pressed="false" onclick="selectPaymentMethod('apple')">
+                    <span class="payment-method-logo"><img src="assets/apple-173-svgrepo-com.svg" alt=""></span>
+                    <span class="payment-method-text"><strong>Apple Pay</strong><small>${isArabic ? 'ادفع باستخدام Apple Pay' : 'Pay with Apple Pay'}</small></span><span class="payment-method-radio"></span>
+                </button>
+            </div>
+            <button class="btn btn-primary payment-continue-btn" type="button" onclick="continuePayment()">${isArabic ? 'المتابعة إلى الدفع' : 'Continue to payment'} <i class="fa-solid fa-arrow-right"></i></button>
+            <p id="paymentGatewayNotice" class="payment-gateway-notice" role="status" aria-live="polite"></p>
+            <p class="payment-secure-note"><i class="fa-solid fa-lock"></i> ${isArabic ? 'لن يتم تفعيل الاشتراك إلا بعد تأكيد الدفع من Hesabe.' : 'Your subscription activates only after Hesabe confirms the payment.'}</p>
+        </section>
+    </div>`;
+    document.getElementById('paymentModalOverlay')?.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.classList.add('modal-open');
+    document.addEventListener('keydown', handlePaymentModalKeydown);
+    window._pendingPaymentPlanId = planId;
+    window._pendingPaymentBillingCycle = billingCycle === 'yearly' ? 'yearly' : 'monthly';
+    window._pendingPaymentType = 1;
+}
+
+function selectPaymentMethod(method) {
+    const paymentTypes = { knet: 1, google: 16, apple: 9 };
+    if (!Object.prototype.hasOwnProperty.call(paymentTypes, method)) return;
+    window._pendingPaymentType = paymentTypes[method];
+    document.querySelectorAll('.payment-method-option').forEach(option => {
+        const selected = option.dataset.paymentMethod === method;
+        option.classList.toggle('is-selected', selected);
+        option.setAttribute('aria-pressed', String(selected));
+    });
+}
+
+async function continuePayment() {
+    if (window._checkoutInProgress) return;
+    const lang = getCurrentLang();
+    const button = document.querySelector('.payment-continue-btn');
+    const notice = document.getElementById('paymentGatewayNotice');
+    const planId = Number(window._pendingPaymentPlanId);
+    const billingCycle = window._pendingPaymentBillingCycle;
+    const paymentType = window._pendingPaymentType;
+    if (!Number.isInteger(planId) || planId <= 0) {
+        if (notice) notice.textContent = lang === 'ar' ? 'تعذر تحديد الباقة. يرجى إغلاق النافذة والمحاولة مجدداً.' : 'Could not identify this plan. Close this window and try again.';
+        return;
+    }
+    if (!['monthly', 'yearly'].includes(billingCycle)) {
+        if (notice) notice.textContent = lang === 'ar' ? 'يرجى اختيار دورة فوترة صالحة.' : 'Please select a valid billing cycle.';
+        return;
+    }
+    if (!paymentType) {
+        if (notice) notice.textContent = lang === 'ar' ? 'يرجى اختيار طريقة دفع متاحة.' : 'Please select an available payment method.';
+        return;
+    }
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> ${lang === 'ar' ? 'جارٍ إنشاء عملية الدفع…' : 'Starting secure checkout…'}`;
+    }
+    if (notice) notice.textContent = '';
+    window._checkoutInProgress = true;
+
+    try {
+        const headers = { 'Accept': 'application/json' };
+        if (typeof csrfHeaders === 'function') Object.assign(headers, csrfHeaders());
+        const response = await fetch(`${API_BASE}/api/v1/payment/checkout`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan_id: planId, billing_cycle: billingCycle, paymentType })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            if (response.status === 401) {
+                closePaymentModal();
+                if (typeof openAuthModal === 'function') openAuthModal('login', 'payment');
+                return;
+            }
+            throw new Error(result.detail || (lang === 'ar' ? 'تعذر بدء الدفع.' : 'Could not start payment.'));
+        }
+        const paymentUrl = typeof result.payment_url === 'string' ? result.payment_url.trim() : '';
+        let checkoutUrl;
+        try { checkoutUrl = new URL(paymentUrl); } catch (_) { checkoutUrl = null; }
+        if (!checkoutUrl || checkoutUrl.protocol !== 'https:' || !(checkoutUrl.hostname === 'hesabe.com' || checkoutUrl.hostname.endsWith('.hesabe.com'))) {
+            throw new Error(lang === 'ar' ? 'استجابة بوابة الدفع غير صالحة.' : 'The payment gateway returned an invalid checkout URL.');
+        }
+        window.location.assign(checkoutUrl.href);
+    } catch (error) {
+        const message = typeof error?.message === 'string' ? error.message : '';
+        if (notice) notice.textContent = message || (lang === 'ar' ? 'حدث خطأ أثناء الاتصال ببوابة الدفع.' : 'There was a problem connecting to the payment gateway.');
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = `${lang === 'ar' ? 'إعادة المحاولة' : 'Try again'} <i class="fa-solid fa-arrow-right"></i>`;
+        }
+    } finally {
+        window._checkoutInProgress = false;
+    }
+}
+
+function closePaymentModal() {
+    document.getElementById('paymentModalOverlay')?.remove();
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', handlePaymentModalKeydown);
+}
+
+function closePaymentModalOnBackdrop(event) {
+    if (event.target.id === 'paymentModalOverlay') closePaymentModal();
+}
+
+function handlePaymentModalKeydown(event) {
+    if (event.key === 'Escape') closePaymentModal();
+}
+
+function initCookieNotice() {
+    if (localStorage.getItem('badia_cookie_notice_dismissed') === '1') return;
+    const lang = getCurrentLang();
+    const isArabic = lang === 'ar';
+    const banner = document.createElement('aside');
+    banner.className = 'cookie-notice';
+    banner.id = 'cookieNotice';
+    banner.setAttribute('aria-label', isArabic ? 'إشعار ملفات تعريف الارتباط' : 'Cookie notice');
+    banner.innerHTML = `
+      <div class="cookie-notice-copy">
+        <strong>${isArabic ? 'ملفات تعريف الارتباط والتخزين المحلي' : 'Cookies and local storage'}</strong>
+        <p>${isArabic ? 'نستخدم ملفات تعريف ارتباط ضرورية لتسجيل الدخول، والتخزين المحلي لتذكر اللغة وتحسين الأداء. لا نستخدم ملفات إعلانية.' : 'We use essential cookies for sign-in and local storage for your language preference and page performance. We do not use advertising cookies.'}
+          <a href="privacy_terms.html">${isArabic ? 'اقرأ الشروط والخصوصية' : 'Read our terms and privacy notice'}</a>
+        </p>
+      </div>
+      <button type="button" class="cookie-notice-dismiss" onclick="dismissCookieNotice()">${isArabic ? 'حسناً' : 'Got it'}</button>`;
+    document.body.appendChild(banner);
+}
+
+function dismissCookieNotice() {
+    localStorage.setItem('badia_cookie_notice_dismissed', '1');
+    document.getElementById('cookieNotice')?.remove();
+}
+
 // Wire lang toggle
 document.addEventListener('DOMContentLoaded', () => {
     const langToggle = document.getElementById('langToggle');
@@ -85,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     initLanguage();
+    initCookieNotice();
 
     // Init animations
     document.querySelectorAll('.service-block, .about-card, .portfolio-item, .testimonial-card, .blog-card, .usp-item, .web-service-card, .plan-card').forEach(card => {
@@ -717,7 +871,7 @@ function renderPlans(plans, billing) {
             <ul class="plan-features">${featureHTML}</ul>
             <div class="plan-card-actions">
                 <button class="btn btn-ghost-small" onclick="openPlanModal(${idx})">${detailsText}</button>
-                <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="handlePaymentClick('')">${subscribeText}</button>
+                <button class="btn ${isFeatured ? 'btn-primary' : 'btn-outline'}" onclick="handlePaymentClick(${Number(plan.id)})">${subscribeText}</button>
             </div>
         </div>`;
     }).join('');
